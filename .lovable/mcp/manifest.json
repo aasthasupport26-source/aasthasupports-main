@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "sdk_version": "0.22.2",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "aastha-support-mcp",
+      "version": "0.1.0",
+      "title": "Aastha Support MCP"
+    },
+    "tools": [
+      {
+        "name": "list_categories",
+        "title": "List categories",
+        "description": "List active product categories on Aastha Support (rudraksha, malas, bracelets, gemstones, yantras, online pooja).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_products",
+        "title": "List products",
+        "description": "List active products in the Aastha Support catalog. Optionally filter by category slug, featured flag, or search text; results are paginated.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "category_slug": {
+              "description": "Filter by category slug (e.g. 'rudraksha', 'mala').",
+              "type": "string"
+            },
+            "featured": {
+              "description": "If true, only return featured products.",
+              "type": "boolean"
+            },
+            "search": {
+              "description": "Case-insensitive substring match on product name.",
+              "type": "string"
+            },
+            "limit": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "offset": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_product",
+        "title": "Get product details",
+        "description": "Fetch full details for a single active product by its slug, including description, benefits, gallery, price, and stock.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Product slug (URL identifier)."
+            }
+          },
+          "required": [
+            "slug"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

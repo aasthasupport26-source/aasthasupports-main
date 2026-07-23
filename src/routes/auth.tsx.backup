@@ -1,0 +1,129 @@
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Layout } from "@/components/Layout";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { ShieldCheck, Loader2 } from "lucide-react";
+
+export const Route = createFileRoute("/auth")({
+  head: () => ({
+    meta: [
+      { title: "Sign In / Sign Up — Aastha Support" },
+      { name: "description", content: "Access your Aastha Support account." },
+    ],
+  }),
+  component: AuthPage,
+});
+
+function AuthPage() {
+  const navigate = useNavigate();
+  const { user, isAdminOrStaff, loading } = useAuth();
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate({ to: isAdminOrStaff ? "/admin" : "/", replace: true });
+    }
+  }, [user, isAdminOrStaff, loading, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      if (mode === "signup") {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: { full_name: fullName, phone },
+          },
+        });
+        if (error) throw error;
+        toast.success("Account created! Check your email to verify, then sign in.");
+        setMode("login");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast.success("Welcome back!");
+      }
+    } catch (err: any) {
+      toast.error(err.message ?? "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Layout>
+      <section className="py-16 bg-cream min-h-[80vh]">
+        <div className="container mx-auto px-4 max-w-md">
+          <div className="bg-white rounded-2xl p-8 shadow-royal border border-gold/20">
+            <div className="text-center">
+              <p className="text-gold tracking-[0.3em] text-xs">|| स्वागत ||</p>
+              <h1 className="font-display text-3xl text-maroon-deep mt-2">
+                {mode === "login" ? "Sign In" : "Create Account"}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-2">
+                {mode === "login" ? "Welcome back to your spiritual journey." : "Join the Aastha Support family."}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              {mode === "signup" && (
+                <>
+                  <div>
+                    <label className="text-xs tracking-widest uppercase text-maroon-deep">Full Name</label>
+                    <input required value={fullName} onChange={(e) => setFullName(e.target.value)}
+                      className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs tracking-widest uppercase text-maroon-deep">Phone</label>
+                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
+                      className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none" />
+                  </div>
+                </>
+              )}
+              <div>
+                <label className="text-xs tracking-widest uppercase text-maroon-deep">Email</label>
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                  className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs tracking-widest uppercase text-maroon-deep">Password</label>
+                <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
+                  className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none" />
+              </div>
+              <button type="submit" disabled={submitting}
+                className="w-full bg-royal text-cream px-6 py-3.5 rounded-md font-medium tracking-widest text-xs uppercase hover:opacity-90 transition shadow-royal disabled:opacity-50 flex items-center justify-center gap-2">
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {mode === "login" ? "Sign In" : "Create Account"}
+              </button>
+            </form>
+
+            <p className="text-xs text-center text-muted-foreground mt-5 flex items-center justify-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-gold" /> Secured with end-to-end encryption
+            </p>
+
+            <p className="text-sm text-center mt-5 text-foreground/70">
+              {mode === "login" ? "New here?" : "Already have an account?"}{" "}
+              <button onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                className="text-maroon font-medium hover:text-gold">
+                {mode === "login" ? "Create an account" : "Sign in"}
+              </button>
+            </p>
+            <p className="text-xs text-center mt-3 text-muted-foreground">
+              <Link to="/" className="hover:text-maroon">← Back to home</Link>
+            </p>
+          </div>
+        </div>
+      </section>
+    </Layout>
+  );
+}
