@@ -204,62 +204,6 @@ function HomePage() {
 
       <VedicTrust />
 
-      {/* Featured rudraksha */}
-      <section className="py-20 bg-cream">
-        <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
-            <div>
-              <p className="text-gold tracking-[0.3em] text-xs">FEATURED</p>
-              <h2 className="font-display text-4xl text-maroon-deep mt-2">
-                Most Loved Rudraksha
-              </h2>
-            </div>
-            <Link
-              to="/category/$slug"
-              params={{ slug: "rudraksha" }}
-              className="text-sm tracking-widest uppercase text-maroon hover:text-gold transition flex items-center gap-1"
-            >
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {categories.find((c) => c.slug === "rudraksha")!.sections[1].items.slice(0, 4).map((item) => (
-              <Link
-                key={item.slug}
-                to="/product/$slug"
-                params={{ slug: item.slug }}
-                className="group bg-white rounded-xl overflow-hidden shadow-soft hover:shadow-royal transition border border-gold/20"
-              >
-                <div className="aspect-square overflow-hidden bg-cream">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    loading="lazy"
-                    width={400}
-                    height={400}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-0.5 text-gold mb-1.5">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-current" />)}
-                  </div>
-                  <h3 className="font-display text-lg text-maroon-deep group-hover:text-maroon">{item.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{item.desc}</p>
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
-                    <span className="font-numeric text-maroon font-semibold">₹2,499</span>
-                    <span className="text-[10px] tracking-widest uppercase text-gold flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" /> Energised
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials */}
       <section className="py-20 bg-gradient-to-b from-cream to-secondary">
         <div className="container mx-auto px-4">
