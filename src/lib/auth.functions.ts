@@ -8,6 +8,11 @@ import {
   syncShopifyCustomerToSupabase,
   supabaseAdmin,
 } from './auth/shopify-customer';
+import {
+  buildAuthorizeUrl,
+  exchangeCodeForTokens,
+  fetchCustomerAccountData,
+} from './shopify-oauth';
 
 // Schema for registration
 const RegisterSchema = z.object({
@@ -205,3 +210,74 @@ export const getUserByEmail = createServerFn({ method: 'POST' })
 
     return user;
   });
+
+/**
+ * Initiate Shopify Customer Account API OAuth flow
+ * Returns authorizeUrl and PKCE verifier to client/session
+ */
+export const getShopifyOAuthUrl = createServerFn({ method: 'POST' })
+  .validator(z.object({ redirectUri: z.string().url() }))
+  .handler(async ({ data }) => {
+    try {
+      const authData = await buildAuthorizeUrl(data.redirectUri);
+      return {
+        success: true,
+        ...authData,
+      };
+    } catch (error: any) {
+      console.error('Error generating Shopify OAuth URL:', error);
+      throw new Error(error.message || 'Failed to initialize Shopify OAuth');
+    }
+  });
+
+/**
+ * Exchange authorization code for Customer Account API access token
+ */
+export const exchangeOAuthCode = createServerFn({ method: 'POST' })
+  .validator(
+    z.object({
+      code: z.string(),
+      verifier: z.string(),
+      redirectUri: z.string().url(),
+    })
+  )
+  .handler(async ({ data }) => {
+    try {
+      const tokens = await exchangeCodeForTokens(data.code, data.verifier, data.redirectUri);
+      const customerData = await fetchCustomerAccountData(tokens.access_token);
+      
+      const customerNode = customerData.data?.customer;
+      const email = customerNode?.emailAddress?.emailAddress;
+      const firstName = customerNode?.firstName || '';
+      const lastName = customerNode?.lastName || '';
+      const phone = customerNode?.phoneNumber?.phoneNumber || null;
+
+      const customer = {
+        id: customerNode?.id || 'shopify-customer',
+        email: email || '',
+        firstName,
+        lastName,
+        phone,
+        displayName: `${firstName} ${lastName}`.trim() || email || 'Customer',
+      };
+
+      // Sync customer to Supabase DB if email present
+      if (email) {
+        await syncShopifyCustomerToSupabase(customer);
+      }
+
+      return {
+        success: true,
+        accessToken: tokens.access_token,
+        idToken: tokens.id_token,
+        refreshToken: tokens.refresh_token,
+        expiresIn: tokens.expires_in,
+        customer,
+        orders: customerNode?.orders?.nodes || [],
+      };
+    } catch (error: any) {
+      console.error('OAuth code exchange error:', error);
+      throw new Error(error.message || 'Failed to complete OAuth authentication');
+    }
+  });
+

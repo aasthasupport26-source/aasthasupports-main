@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Layout } from '@/components/Layout';
-import { loginUser } from '@/lib/auth.functions';
+import { loginUser, getShopifyOAuthUrl } from '@/lib/auth.functions';
 import { useServerFn } from '@tanstack/react-start';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ export const Route = createFileRoute('/auth')({
 function AuthPage() {
   const navigate = useNavigate();
   const login = useServerFn(loginUser);
+  const getOAuthUrl = useServerFn(getShopifyOAuthUrl);
   const { login: setAuthLogin } = useAuth();
   const search = Route.useSearch();
 
@@ -35,9 +36,24 @@ function AuthPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleGoogleLogin = () => {
-    // Redirect to your Shopify store's login page where Google OAuth is enabled
-    window.location.href = 'https://08axwa-1x.myshopify.com/account/login';
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      const redirectUri = `${window.location.origin}/auth-callback`;
+      const res = await getOAuthUrl({ data: { redirectUri } });
+
+      if (res?.authorizeUrl) {
+        sessionStorage.setItem('shopify_pkce_verifier', res.verifier);
+        sessionStorage.setItem('shopify_oauth_state', res.state);
+        window.location.href = res.authorizeUrl;
+      } else {
+        throw new Error('Failed to obtain authorization URL');
+      }
+    } catch (err: any) {
+      console.error('Google login error:', err);
+      toast.error(err?.message || 'Failed to start Google login');
+      setLoading(false);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {

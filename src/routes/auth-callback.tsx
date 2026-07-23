@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
+import { exchangeOAuthCode } from '@/lib/auth.functions';
+import { useServerFn } from '@tanstack/react-start';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -11,40 +13,69 @@ export const Route = createFileRoute('/auth-callback')({
 
 /**
  * OAuth callback handler for Google/Shopify authentication
- * After user logs in via Shopify, they're redirected here with multipass token
+ * Exchanges authorization code for tokens and redirects to /profile
  */
 function AuthCallback() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login: setAuthLogin } = useAuth();
+  const exchangeCode = useServerFn(exchangeOAuthCode);
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get multipass token from URL
         const params = new URLSearchParams(window.location.search);
-        const multipassToken = params.get('token');
-        const email = params.get('email');
+        const code = params.get('code');
+        const state = params.get('state');
 
-        if (!email) {
-          throw new Error('No email provided in callback');
+        if (!code) {
+          throw new Error('No authorization code provided in URL');
         }
 
-        // For now, just show success and let user login normally
-        // Full multipass implementation requires Shopify Plus
+        const savedState = sessionStorage.getItem('shopify_oauth_state');
+        const verifier = sessionStorage.getItem('shopify_pkce_verifier');
+
+        if (savedState && state && savedState !== state) {
+          throw new Error('State mismatch detected. Authentication aborted.');
+        }
+
+        if (!verifier) {
+          throw new Error('PKCE verifier missing from session.');
+        }
+
+        const redirectUri = `${window.location.origin}/auth-callback`;
+        const res = await exchangeCode({
+          data: {
+            code,
+            verifier,
+            redirectUri,
+          },
+        });
+
+        sessionStorage.removeItem('shopify_pkce_verifier');
+        sessionStorage.removeItem('shopify_oauth_state');
+
+        const expiresAt = new Date(Date.now() + (res.expiresIn || 3600) * 1000).toISOString();
+        const isAdmin = await setAuthLogin(res.customer, res.accessToken, expiresAt);
+
         setStatus('success');
-        toast.info('Google account linked! Please enter your password to sign in.', { duration: 6000 });
-        navigate({ to: '/auth', search: { email } });
+        toast.success(isAdmin ? 'Welcome, Admin!' : 'Successfully signed in!');
+        
+        setTimeout(() => {
+          navigate({ to: isAdmin ? '/admin' : '/profile' });
+        }, 1000);
       } catch (error: any) {
         console.error('Auth callback error:', error);
         setStatus('error');
-        toast.error('Authentication failed. Please try again.');
-        navigate({ to: '/auth' });
+        toast.error(error?.message || 'Authentication failed. Please try again.');
+        setTimeout(() => {
+          navigate({ to: '/auth' });
+        }, 2000);
       }
     };
 
     handleCallback();
-  }, [navigate, login]);
+  }, [navigate, setAuthLogin, exchangeCode]);
 
   return (
     <Layout>
