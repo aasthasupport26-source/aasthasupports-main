@@ -26,9 +26,15 @@ export function generatePKCE() {
   return { verifier, challenge };
 }
 
+const STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || '08axwa-1x.myshopify.com';
+
 export async function getOidcConfig(): Promise<OidcConfig> {
-  const url = `https://shopify.com/${SHOP_ID}/account/.well-known/openid-configuration`;
-  const res = await fetch(url);
+  const url = `https://${STORE_DOMAIN}/.well-known/openid-configuration`;
+  const res = await fetch(url, {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
   if (!res.ok) {
     throw new Error(`Failed to fetch OpenID configuration from ${url}: ${res.statusText}`);
   }
