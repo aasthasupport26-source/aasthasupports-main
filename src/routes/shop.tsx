@@ -11,7 +11,7 @@ export const Route = createFileRoute('/shop')({
   head: () => {
     const title = 'Shop All — Rudraksha, Mala, Gemstones | Aastha Support';
     const desc = 'Browse all certified rudraksha, malas, bracelets, gemstones & yantras. Energised by Vedic pandits.';
-    const url = 'https://aasthasupportscom.lovable.app/shop';
+    const url = 'https://aasthasupport.com/shop';
     return {
       meta: [
         { title },

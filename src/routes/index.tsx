@@ -12,11 +12,11 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Shop certified rudraksha, malas, bracelets, gemstones & yantras. Book online poojas performed live by Vedic pandits from Kashi, Ujjain & Haridwar." },
       { property: "og:title", content: "Aastha Support — Rudraksha, Gems & Online Pooja" },
       { property: "og:description", content: "Certified rudraksha, gems, malas, bracelets, yantras and live Vedic poojas — energised by learned pandits." },
-      { property: "og:url", content: "https://aasthasupportscom.lovable.app/" },
-      { property: "og:image", content: "https://aasthasupportscom.lovable.app/og-image.jpg" },
+      { property: "og:url", content: "https://aasthasupport.com/" },
+      { property: "og:image", content: "https://aasthasupport.com/og-image.jpg" },
     ],
     links: [
-      { rel: "canonical", href: "https://aasthasupportscom.lovable.app/" },
+      { rel: "canonical", href: "https://aasthasupport.com/" },
     ],
     scripts: [
       {
@@ -25,10 +25,10 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Aastha Support",
-          url: "https://aasthasupportscom.lovable.app",
+          url: "https://aasthasupport.com",
           potentialAction: {
             "@type": "SearchAction",
-            target: "https://aasthasupportscom.lovable.app/category/{search_term_string}",
+            target: "https://aasthasupport.com/category/{search_term_string}",
             "query-input": "required name=search_term_string",
           },
         }),

@@ -10,9 +10,9 @@ export const Route = createFileRoute("/contact")({
       { name: "description", content: "Speak to our Vedic astrologers and customer care team — phone, WhatsApp, email or visit our Haridwar ashram." },
       { property: "og:title", content: "Contact — Aastha Support" },
       { property: "og:description", content: "Speak to our Vedic astrologers and customer care team." },
-      { property: "og:url", content: "https://aasthasupportscom.lovable.app/contact" },
+      { property: "og:url", content: "https://aasthasupport.com/contact" },
     ],
-    links: [{ rel: "canonical", href: "https://aasthasupportscom.lovable.app/contact" }],
+    links: [{ rel: "canonical", href: "https://aasthasupport.com/contact" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -20,8 +20,8 @@ export const Route = createFileRoute("/contact")({
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
           name: "Aastha Support",
-          image: "https://aasthasupportscom.lovable.app/og-image.jpg",
-          url: "https://aasthasupportscom.lovable.app/contact",
+          image: "https://aasthasupport.com/og-image.jpg",
+          url: "https://aasthasupport.com/contact",
           telephone: "+91-99999-99999",
           email: "care@aasthasupport.com",
           address: {

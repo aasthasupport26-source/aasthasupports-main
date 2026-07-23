@@ -96,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "Aastha Support",
-          url: "https://aasthasupportscom.lovable.app",
+          url: "https://aasthasupport.com",
           description: "Authentic, certified, Vedic-energised rudraksha, gemstones, malas, bracelets, yantras and live online poojas.",
           address: {
             "@type": "PostalAddress",

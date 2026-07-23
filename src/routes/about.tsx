@@ -10,9 +10,9 @@ export const Route = createFileRoute("/about")({
       { name: "description", content: "Our story, our pandits, and our commitment to authentic Sanatan tradition — sourcing rudraksha and gemstones from origin." },
       { property: "og:title", content: "About Us — Aastha Support" },
       { property: "og:description", content: "Our story, pandits, and commitment to authentic Sanatan tradition." },
-      { property: "og:url", content: "https://aasthasupportscom.lovable.app/about" },
+      { property: "og:url", content: "https://aasthasupport.com/about" },
     ],
-    links: [{ rel: "canonical", href: "https://aasthasupportscom.lovable.app/about" }],
+    links: [{ rel: "canonical", href: "https://aasthasupport.com/about" }],
   }),
   component: AboutPage,
 });

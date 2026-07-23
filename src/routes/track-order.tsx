@@ -8,7 +8,7 @@ export const Route = createFileRoute("/track-order")({
   head: () => {
     const title = "Track Your Order — Aastha Support";
     const desc = "Track your Aastha Support order with your order number and registered phone.";
-    const url = "https://aasthasupportscom.lovable.app/track-order";
+    const url = "https://aasthasupport.com/track-order";
     return {
       meta: [
         { title },

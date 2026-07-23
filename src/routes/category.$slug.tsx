@@ -19,7 +19,7 @@ export const Route = createFileRoute("/category/$slug")({
   head: ({ params, loaderData }) => {
     const title = `${loaderData?.cat.name ?? "Category"} — Aastha Support`;
     const desc = loaderData?.cat.tagline ?? "";
-    const url = `https://aasthasupportscom.lovable.app/category/${params.slug}`;
+    const url = `https://aasthasupport.com/category/${params.slug}`;
     return {
       meta: [
         { title },

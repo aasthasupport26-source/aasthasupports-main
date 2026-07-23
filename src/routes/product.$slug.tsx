@@ -14,7 +14,7 @@ export const Route = createFileRoute("/product/$slug")({
   },
   head: ({ loaderData }) => {
     const title = `Product — Aastha Support`;
-    const url = `https://aasthasupportscom.lovable.app/product/${loaderData?.slug}`;
+    const url = `https://aasthasupport.com/product/${loaderData?.slug}`;
     return {
       meta: [
         { title },

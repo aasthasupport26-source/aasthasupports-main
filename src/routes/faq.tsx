@@ -10,9 +10,9 @@ export const Route = createFileRoute("/faq")({
       { name: "description", content: "Find answers to frequently asked questions about rudraksha, gemstones, online pooja, shipping, returns and Vedic certification at Aastha Support." },
       { property: "og:title", content: "FAQ — Aastha Support" },
       { property: "og:description", content: "Answers on rudraksha, gemstones, online pooja, shipping, returns and Vedic certification." },
-      { property: "og:url", content: "https://aasthasupportscom.lovable.app/faq" },
+      { property: "og:url", content: "https://aasthasupport.com/faq" },
     ],
-    links: [{ rel: "canonical", href: "https://aasthasupportscom.lovable.app/faq" }],
+    links: [{ rel: "canonical", href: "https://aasthasupport.com/faq" }],
     scripts: [
       {
         type: "application/ld+json",

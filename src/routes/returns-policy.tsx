@@ -9,9 +9,9 @@ export const Route = createFileRoute("/returns-policy")({
       { name: "description", content: "Read Aastha Support's returns, shipping, cancellation, privacy policy and terms of service. 7-day easy returns. Free shipping above ₹999." },
       { property: "og:title", content: "Returns, Shipping & Policies — Aastha Support" },
       { property: "og:description", content: "7-day easy returns. Free shipping above ₹999. Read our complete policies." },
-      { property: "og:url", content: "https://aasthasupportscom.lovable.app/returns-policy" },
+      { property: "og:url", content: "https://aasthasupport.com/returns-policy" },
     ],
-    links: [{ rel: "canonical", href: "https://aasthasupportscom.lovable.app/returns-policy" }],
+    links: [{ rel: "canonical", href: "https://aasthasupport.com/returns-policy" }],
   }),
   component: ReturnsPolicyPage,
 });
