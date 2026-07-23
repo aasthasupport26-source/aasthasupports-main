@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(sips -g pixelWidth -g pixelHeight src/assets/*.jpg src/assets/*.png)"
-    ]
-  }
-}
