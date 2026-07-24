@@ -21,7 +21,6 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as BookPoojaRouteImport } from './routes/book-pooja'
-import { Route as AuthCallbackRouteImport } from './routes/auth-callback'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
@@ -105,11 +104,6 @@ const CartRoute = CartRouteImport.update({
 const BookPoojaRoute = BookPoojaRouteImport.update({
   id: '/book-pooja',
   path: '/book-pooja',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/auth-callback',
-  path: '/auth-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -242,7 +236,6 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/auth-callback': typeof AuthCallbackRoute
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
@@ -280,7 +273,6 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/auth': typeof AuthRouteWithChildren
-  '/auth-callback': typeof AuthCallbackRoute
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
@@ -320,7 +312,6 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/auth-callback': typeof AuthCallbackRoute
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
@@ -361,7 +352,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
-    | '/auth-callback'
     | '/book-pooja'
     | '/cart'
     | '/checkout'
@@ -399,7 +389,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/auth'
-    | '/auth-callback'
     | '/book-pooja'
     | '/cart'
     | '/checkout'
@@ -438,7 +427,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
-    | '/auth-callback'
     | '/book-pooja'
     | '/cart'
     | '/checkout'
@@ -478,7 +466,6 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
-  AuthCallbackRoute: typeof AuthCallbackRoute
   BookPoojaRoute: typeof BookPoojaRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
@@ -583,13 +570,6 @@ declare module '@tanstack/react-router' {
       path: '/book-pooja'
       fullPath: '/book-pooja'
       preLoaderRoute: typeof BookPoojaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth-callback': {
-      id: '/auth-callback'
-      path: '/auth-callback'
-      fullPath: '/auth-callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -811,7 +791,6 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
-  AuthCallbackRoute: AuthCallbackRoute,
   BookPoojaRoute: BookPoojaRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
