@@ -31,6 +31,8 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as OrderSuccessOrderNumberRouteImport } from './routes/order-success.$orderNumber'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTemplesRouteImport } from './routes/admin.temples'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
@@ -155,6 +157,16 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -229,7 +241,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/auth-callback': typeof AuthCallbackRoute
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
@@ -255,6 +267,8 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/temples': typeof AdminTemplesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderNumber': typeof OrderSuccessOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -265,7 +279,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/auth-callback': typeof AuthCallbackRoute
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
@@ -291,6 +305,8 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/temples': typeof AdminTemplesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderNumber': typeof OrderSuccessOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -303,7 +319,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/auth-callback': typeof AuthCallbackRoute
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
@@ -329,6 +345,8 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/temples': typeof AdminTemplesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderNumber': typeof OrderSuccessOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -368,6 +386,8 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/temples'
     | '/admin/users'
+    | '/auth/callback'
+    | '/auth/login'
     | '/category/$slug'
     | '/order-success/$orderNumber'
     | '/product/$slug'
@@ -404,6 +424,8 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/temples'
     | '/admin/users'
+    | '/auth/callback'
+    | '/auth/login'
     | '/category/$slug'
     | '/order-success/$orderNumber'
     | '/product/$slug'
@@ -441,6 +463,8 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/temples'
     | '/admin/users'
+    | '/auth/callback'
+    | '/auth/login'
     | '/category/$slug'
     | '/order-success/$orderNumber'
     | '/product/$slug'
@@ -453,7 +477,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   AuthCallbackRoute: typeof AuthCallbackRoute
   BookPoojaRoute: typeof BookPoojaRoute
   CartRoute: typeof CartRoute
@@ -631,6 +655,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -755,12 +793,24 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+  AuthLoginRoute: AuthLoginRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   AuthCallbackRoute: AuthCallbackRoute,
   BookPoojaRoute: BookPoojaRoute,
   CartRoute: CartRoute,

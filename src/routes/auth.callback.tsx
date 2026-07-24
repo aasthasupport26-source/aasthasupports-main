@@ -7,15 +7,11 @@ import { useServerFn } from '@tanstack/react-start';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-export const Route = createFileRoute('/auth-callback')({
-  component: AuthCallback,
+export const Route = createFileRoute('/auth/callback')({
+  component: AuthCallbackPage,
 });
 
-/**
- * OAuth callback handler for Google/Shopify authentication
- * Exchanges authorization code for tokens and redirects to /profile
- */
-function AuthCallback() {
+function AuthCallbackPage() {
   const navigate = useNavigate();
   const { login: setAuthLogin } = useAuth();
   const exchangeCode = useServerFn(exchangeOAuthCode);
@@ -60,7 +56,7 @@ function AuthCallback() {
 
         setStatus('success');
         toast.success(isAdmin ? 'Welcome, Admin!' : 'Successfully signed in!');
-        
+
         setTimeout(() => {
           navigate({ to: isAdmin ? '/admin' : '/profile' });
         }, 1000);
@@ -84,12 +80,8 @@ function AuthCallback() {
           {status === 'processing' && (
             <>
               <Loader2 className="h-12 w-12 animate-spin text-maroon mx-auto mb-4" />
-              <h1 className="font-display text-2xl text-maroon-deep mb-2">
-                Completing sign in...
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Please wait while we verify your account
-              </p>
+              <h1 className="font-display text-2xl text-maroon-deep mb-2">Completing sign in...</h1>
+              <p className="text-sm text-muted-foreground">Verifying your account with Shopify</p>
             </>
           )}
 
@@ -100,12 +92,8 @@ function AuthCallback() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h1 className="font-display text-2xl text-maroon-deep mb-2">
-                Authentication successful!
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Redirecting you to sign in...
-              </p>
+              <h1 className="font-display text-2xl text-maroon-deep mb-2">Authentication successful!</h1>
+              <p className="text-sm text-muted-foreground">Redirecting to your account...</p>
             </>
           )}
 
@@ -116,12 +104,8 @@ function AuthCallback() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>
-              <h1 className="font-display text-2xl text-maroon-deep mb-2">
-                Something went wrong
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Redirecting you back to login...
-              </p>
+              <h1 className="font-display text-2xl text-maroon-deep mb-2">Authentication failed</h1>
+              <p className="text-sm text-muted-foreground">Redirecting back to login...</p>
             </>
           )}
         </div>
