@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { shopifyClient } from './shopify/client';
-import { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY, GET_CUSTOMER_ORDERS_QUERY } from './shopify/queries';
+import { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY } from './shopify/queries';
 import { z } from 'zod';
 
 // In-memory cache (5 minutes TTL)
