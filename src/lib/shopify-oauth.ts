@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
 
-const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID || '101228675360';
-const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID || '4caef13f826fd893d8d476ef416cae51';
-const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET || 'y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';
+const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID;
+const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
+const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
 
 export interface OidcConfig {
   authorization_endpoint: string;
@@ -29,7 +29,7 @@ export function generatePKCE() {
 const STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || '08axwa-1x.myshopify.com';
 
 export async function getOidcConfig(): Promise<OidcConfig> {
-  const url = `https://${STORE_DOMAIN}/.well-known/openid-configuration`;
+  const url = `https://shopify.com/authentication/${SHOP_ID}/.well-known/openid-configuration`;
   const res = await fetch(url, {
     headers: {
       Accept: 'application/json',
@@ -70,14 +70,19 @@ export async function buildAuthorizeUrl(redirectUri: string) {
 
 export async function exchangeCodeForTokens(code: string, verifier: string, redirectUri: string) {
   const oidc = await getOidcConfig();
-  const params = new URLSearchParams({
+  const bodyParams: Record<string, string> = {
     grant_type: 'authorization_code',
-    client_id: CLIENT_ID,
-    client_secret: CLIENT_SECRET,
+    client_id: CLIENT_ID!,
     code,
     redirect_uri: redirectUri,
     code_verifier: verifier,
-  });
+  };
+
+  if (CLIENT_SECRET) {
+    bodyParams.client_secret = CLIENT_SECRET;
+  }
+
+  const params = new URLSearchParams(bodyParams);
 
   const res = await fetch(oidc.token_endpoint, {
     method: 'POST',

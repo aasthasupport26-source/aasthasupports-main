@@ -14,6 +14,10 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    server: {
+      port: 8082,
+      strictPort: true,
+    },
     plugins: [mcpPlugin()],
     build: {
       rollupOptions: {
