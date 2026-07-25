@@ -39,7 +39,7 @@ function AuthCallbackPage() {
           throw new Error('PKCE verifier missing from session.');
         }
 
-        const redirectUri = `${window.location.origin}${window.location.pathname}`;
+        const redirectUri = import.meta.env.VITE_SHOPIFY_REDIRECT_URI || `${window.location.origin}${window.location.pathname}`;
         const res = await exchangeCode({
           data: {
             code,
