@@ -171,37 +171,97 @@ export const getCustomerOrders = createServerFn({ method: 'GET' })
   }))
   .handler(async ({ data }) => {
     try {
-      const response: any = await shopifyClient.request(GET_CUSTOMER_ORDERS_QUERY, {
-        customerAccessToken: data.customerAccessToken,
-        first: data.limit,
+      const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID;
+      const url = `https://shopify.com/${SHOP_ID}/account/customer/api/2024-07/graphql`;
+
+      const query = `
+        query GetCustomerOrders($first: Int!) {
+          customer {
+            orders(first: $first) {
+              nodes {
+                id
+                name
+                processedAt
+                financialStatus
+                fulfillmentStatus
+                totalPrice {
+                  amount
+                  currencyCode
+                }
+                lineItems(first: 10) {
+                  nodes {
+                    title
+                    quantity
+                    price {
+                      amount
+                    }
+                    variant {
+                      image {
+                        url
+                      }
+                    }
+                  }
+                }
+                fulfillments(first: 1) {
+                  nodes {
+                    trackingInfo(first: 1) {
+                      number
+                      url
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${data.customerAccessToken}`,
+        },
+        body: JSON.stringify({
+          query,
+          variables: {
+            first: data.limit,
+          },
+        }),
       });
 
-      if (!response.customer) {
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Shopify Customer Account API error: ${res.status} ${errorText}`);
+      }
+
+      const response: any = await res.json();
+      const customerNode = response.data?.customer;
+
+      if (!customerNode) {
         return { orders: [] };
       }
 
-      const orders = response.customer.orders.edges.map((edge: any) => {
-        const node = edge.node;
-        const tracking = node.successfulFulfillments?.[0];
+      const orders = customerNode.orders.nodes.map((node: any) => {
+        const fulfillment = node.fulfillments?.nodes?.[0];
+        const tracking = fulfillment?.trackingInfo?.[0];
         return {
           id: node.id,
           name: node.name,
-          orderNumber: node.orderNumber,
           processedAt: node.processedAt,
           financialStatus: node.financialStatus,
           fulfillmentStatus: node.fulfillmentStatus,
-          total: parseFloat(node.totalPriceV2.amount),
-          currency: node.totalPriceV2.currencyCode,
-          lineItems: node.lineItems.edges.map((le: any) => ({
-            title: le.node.title,
-            quantity: le.node.quantity,
-            price: parseFloat(le.node.originalTotalPrice.amount),
-            image: le.node.variant?.image?.url || null,
+          total: parseFloat(node.totalPrice.amount),
+          currency: node.totalPrice.currencyCode,
+          lineItems: node.lineItems.nodes.map((le: any) => ({
+            title: le.title,
+            quantity: le.quantity,
+            price: parseFloat(le.price?.amount || '0'),
+            image: le.variant?.image?.url || null,
           })),
           tracking: tracking ? {
-            company: tracking.trackingCompany,
-            number: tracking.trackingInfo?.[0]?.number || null,
-            url: tracking.trackingInfo?.[0]?.url || null,
+            number: tracking.number || null,
+            url: tracking.url || null,
           } : null,
         };
       });
