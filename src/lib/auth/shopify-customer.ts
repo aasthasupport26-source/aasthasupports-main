@@ -162,6 +162,55 @@ export async function loginShopifyCustomer(
  * Get customer details using access token
  */
 export async function getShopifyCustomer(accessToken: string): Promise<ShopifyCustomer> {
+  if (accessToken.startsWith('shcat_')) {
+    const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID;
+    const url = `https://shopify.com/${SHOP_ID}/account/customer/api/2024-07/graphql`;
+    const query = `
+      query getCustomerInfo {
+        customer {
+          id
+          firstName
+          lastName
+          emailAddress {
+            emailAddress
+          }
+          phoneNumber {
+            phoneNumber
+          }
+        }
+      }
+    `;
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Shopify Customer Account API error: ${res.status} ${errorText}`);
+    }
+
+    const json = await res.json();
+    const customerNode = json.data?.customer;
+    if (!customerNode) {
+      throw new Error('Customer not found or token expired');
+    }
+
+    return {
+      id: customerNode.id || 'shopify-customer',
+      email: customerNode.emailAddress?.emailAddress || '',
+      firstName: customerNode.firstName || null,
+      lastName: customerNode.lastName || null,
+      phone: customerNode.phoneNumber?.phoneNumber || null,
+      displayName: `${customerNode.firstName || ''} ${customerNode.lastName || ''}`.trim() || customerNode.emailAddress?.emailAddress || 'Customer',
+    };
+  }
+
   const query = `
     query getCustomer($customerAccessToken: String!) {
       customer(customerAccessToken: $customerAccessToken) {
