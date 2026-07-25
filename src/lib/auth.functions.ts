@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
+import { setCookie, getCookie, deleteCookie } from '@tanstack/react-start/server';
 import { z } from 'zod';
 import {
   createShopifyCustomer,
@@ -221,12 +222,10 @@ export const getShopifyOAuthUrl = createServerFn({ method: 'POST' })
     try {
       const authData = await buildAuthorizeUrl(data.redirectUri);
       
-      const { getEvent, setCookie } = await eval("import('vinxi/http')");
-      const event = getEvent();
       const isProd = process.env.NODE_ENV === 'production';
       
       // Set HttpOnly secure cookies for PKCE verification
-      setCookie(event, 'shopify_pkce_verifier', authData.verifier, {
+      setCookie('shopify_pkce_verifier', authData.verifier, {
         httpOnly: true,
         secure: isProd,
         sameSite: 'lax',
@@ -234,7 +233,7 @@ export const getShopifyOAuthUrl = createServerFn({ method: 'POST' })
         path: '/',
       });
       
-      setCookie(event, 'shopify_oauth_state', authData.state, {
+      setCookie('shopify_oauth_state', authData.state, {
         httpOnly: true,
         secure: isProd,
         sameSite: 'lax',
@@ -265,10 +264,8 @@ export const exchangeOAuthCode = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     try {
-      const { getEvent, getCookie, deleteCookie } = await eval("import('vinxi/http')");
-      const event = getEvent();
-      const verifier = getCookie(event, 'shopify_pkce_verifier');
-      const savedState = getCookie(event, 'shopify_oauth_state');
+      const verifier = getCookie('shopify_pkce_verifier');
+      const savedState = getCookie('shopify_oauth_state');
 
       if (!verifier) {
         throw new Error('PKCE verifier missing from server session cookies.');
@@ -279,8 +276,8 @@ export const exchangeOAuthCode = createServerFn({ method: 'POST' })
       }
 
       // Delete cookies after use (single use)
-      deleteCookie(event, 'shopify_pkce_verifier');
-      deleteCookie(event, 'shopify_oauth_state');
+      deleteCookie('shopify_pkce_verifier');
+      deleteCookie('shopify_oauth_state');
 
       const tokens = await exchangeCodeForTokens(data.code, verifier, data.redirectUri);
       const customerData = await fetchCustomerAccountData(tokens.access_token);
