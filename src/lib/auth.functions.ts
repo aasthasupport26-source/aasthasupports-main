@@ -220,9 +220,31 @@ export const getShopifyOAuthUrl = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     try {
       const authData = await buildAuthorizeUrl(data.redirectUri);
+      
+      const { getEvent, setCookie } = await eval("import('vinxi/http')");
+      const event = getEvent();
+      const isProd = process.env.NODE_ENV === 'production';
+      
+      // Set HttpOnly secure cookies for PKCE verification
+      setCookie(event, 'shopify_pkce_verifier', authData.verifier, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        maxAge: 600, // 10 minutes
+        path: '/',
+      });
+      
+      setCookie(event, 'shopify_oauth_state', authData.state, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        maxAge: 600, // 10 minutes
+        path: '/',
+      });
+
       return {
         success: true,
-        ...authData,
+        authorizeUrl: authData.authorizeUrl,
       };
     } catch (error: any) {
       console.error('Error generating Shopify OAuth URL:', error);
@@ -237,13 +259,30 @@ export const exchangeOAuthCode = createServerFn({ method: 'POST' })
   .validator(
     z.object({
       code: z.string(),
-      verifier: z.string(),
+      state: z.string(),
       redirectUri: z.string().url(),
     })
   )
   .handler(async ({ data }) => {
     try {
-      const tokens = await exchangeCodeForTokens(data.code, data.verifier, data.redirectUri);
+      const { getEvent, getCookie, deleteCookie } = await eval("import('vinxi/http')");
+      const event = getEvent();
+      const verifier = getCookie(event, 'shopify_pkce_verifier');
+      const savedState = getCookie(event, 'shopify_oauth_state');
+
+      if (!verifier) {
+        throw new Error('PKCE verifier missing from server session cookies.');
+      }
+
+      if (savedState && data.state && savedState !== data.state) {
+        throw new Error('State mismatch detected. Authentication aborted.');
+      }
+
+      // Delete cookies after use (single use)
+      deleteCookie(event, 'shopify_pkce_verifier');
+      deleteCookie(event, 'shopify_oauth_state');
+
+      const tokens = await exchangeCodeForTokens(data.code, verifier, data.redirectUri);
       const customerData = await fetchCustomerAccountData(tokens.access_token);
       
       const customerNode = customerData.data?.customer;

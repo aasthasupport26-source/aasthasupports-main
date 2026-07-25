@@ -28,28 +28,14 @@ function AuthCallbackPage() {
           throw new Error('No authorization code provided in URL');
         }
 
-        const savedState = sessionStorage.getItem('shopify_oauth_state');
-        const verifier = sessionStorage.getItem('shopify_pkce_verifier');
-
-        if (savedState && state && savedState !== state) {
-          throw new Error('State mismatch detected. Authentication aborted.');
-        }
-
-        if (!verifier) {
-          throw new Error('PKCE verifier missing from session.');
-        }
-
         const redirectUri = import.meta.env.VITE_SHOPIFY_REDIRECT_URI || `${window.location.origin}${window.location.pathname}`;
         const res = await exchangeCode({
           data: {
             code,
-            verifier,
+            state: state || '',
             redirectUri,
           },
         });
-
-        sessionStorage.removeItem('shopify_pkce_verifier');
-        sessionStorage.removeItem('shopify_oauth_state');
 
         const expiresAt = new Date(Date.now() + (res.expiresIn || 3600) * 1000).toISOString();
         const isAdmin = await setAuthLogin(res.customer, res.accessToken, expiresAt);

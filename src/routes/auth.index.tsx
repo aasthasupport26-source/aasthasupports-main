@@ -43,8 +43,6 @@ function AuthPage() {
       const res = await getOAuthUrl({ data: { redirectUri } });
 
       if (res?.authorizeUrl) {
-        sessionStorage.setItem('shopify_pkce_verifier', res.verifier);
-        sessionStorage.setItem('shopify_oauth_state', res.state);
         window.location.href = res.authorizeUrl;
       } else {
         throw new Error('Failed to obtain authorization URL');
