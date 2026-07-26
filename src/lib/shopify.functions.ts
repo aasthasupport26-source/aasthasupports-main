@@ -169,8 +169,11 @@ export const createShopifyCheckout = createServerFn({ method: 'POST' })
 
       let checkoutUrl = cartCreate.cart.checkoutUrl;
       if (checkoutUrl) {
-        const storeDomain = process.env.SHOPIFY_STORE_DOMAIN || '08axwa-1x.myshopify.com';
-        checkoutUrl = checkoutUrl.replace(/^https:\/\/(www\.)?aasthasupports\.com/i, `https://${storeDomain}`);
+        // Shopify returns our custom domain (aasthasupports.com) in checkout URLs.
+        // Always rewrite to the actual myshopify.com checkout domain so it works.
+        checkoutUrl = checkoutUrl
+          .replace(/^https:\/\/(www\.)?aasthasupports\.com/i, 'https://08axwa-1x.myshopify.com')
+          .replace(/^http:\/\/(www\.)?aasthasupports\.com/i, 'https://08axwa-1x.myshopify.com');
       }
 
       return {
