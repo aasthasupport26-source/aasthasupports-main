@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Layout } from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { exchangeOAuthCode } from '@/lib/auth.functions';
@@ -16,8 +16,12 @@ function AuthCallbackPage() {
   const { login: setAuthLogin } = useAuth();
   const exchangeCode = useServerFn(exchangeOAuthCode);
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
+  const called = useRef(false);
 
   useEffect(() => {
+    if (called.current) return;
+    called.current = true;
+
     const handleCallback = async () => {
       try {
         const params = new URLSearchParams(window.location.search);

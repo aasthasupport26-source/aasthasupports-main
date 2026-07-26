@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getShopifyOAuthUrl } from '@/lib/auth.functions';
 import { useServerFn } from '@tanstack/react-start';
 import { Loader2 } from 'lucide-react';
@@ -12,8 +12,12 @@ export const Route = createFileRoute('/auth/login')({
 function AuthLoginPage() {
   const getOAuthUrl = useServerFn(getShopifyOAuthUrl);
   const [error, setError] = useState<string | null>(null);
+  const called = useRef(false);
 
   useEffect(() => {
+    if (called.current) return;
+    called.current = true;
+
     const initOAuth = async () => {
       try {
         const redirectUri = import.meta.env.VITE_SHOPIFY_REDIRECT_URI || `${window.location.origin}/auth/callback`;
