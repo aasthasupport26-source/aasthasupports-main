@@ -23,7 +23,7 @@ export const Route = createFileRoute("/cart/")({
 
 function CartPage() {
   const { items, update, remove, subtotal, count, clear } = useCart();
-  const search = useSearch({ from: '/cart' }) as any;
+  const search = Route.useSearch() as any;
 
   const shipping = subtotal > 0 && subtotal < 1500 ? 99 : 0;
   const total = subtotal + shipping;
