@@ -68,8 +68,11 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState('');
 
-  // Prasad
-  const [needPrasad, setNeedPrasad] = useState(pkg.prasad);
+  // Media & Delivery Toggles
+  const [wantPhoto, setWantPhoto] = useState(pkg.photo ?? true);
+  const [wantVideo, setWantVideo] = useState(pkg.video ?? false);
+  const [wantLiveCall, setWantLiveCall] = useState(pkg.live_call ?? false);
+  const [needPrasad, setNeedPrasad] = useState(pkg.prasad ?? false);
   const [prasadAddress, setPrasadAddress] = useState('');
 
   // UI state
@@ -132,9 +135,9 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
           bookingDate: format(selectedDate, 'yyyy-MM-dd'),
           timeSlot: selectedTime,
           specialWish,
-          videoRequired: pkg.video,
-          photoRequired: pkg.photo,
-          liveRequired: pkg.live_call,
+          videoRequired: wantVideo,
+          photoRequired: wantPhoto,
+          liveRequired: wantLiveCall,
           prasadRequired: needPrasad,
           prasadAddress: needPrasad ? prasadAddress : undefined,
           members: members.filter(m => m.name.trim()),
@@ -453,32 +456,59 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
           </div>
         </section>
 
-        {/* 4. Prasad (conditional) */}
-        {pkg.prasad && (
-          <section>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-6 h-6 rounded-full bg-[#6b1a1a] text-white text-xs flex items-center justify-center font-bold">4</div>
-              <h3 className="font-display text-lg text-[#6b1a1a] font-semibold">Prasad Delivery</h3>
+        {/* 4. Media & Delivery Options (फोटो, वीडियो, लाइव कॉल व प्रसाद) */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-6 h-6 rounded-full bg-[#6b1a1a] text-white text-xs flex items-center justify-center font-bold">4</div>
+            <h3 className="font-display text-lg text-[#6b1a1a] font-semibold">Media &amp; Delivery Options <span className="text-sm text-stone-400 font-normal">(मीडिया व प्रसाद)</span></h3>
+          </div>
+
+          <div className="p-5 rounded-2xl border border-[#f0e4d4] bg-[#fdfaf6] space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="flex items-center space-x-3 p-3 rounded-xl border border-[#e8d5c0]/60 bg-white">
+                <Checkbox id="wantPhoto" checked={wantPhoto} onCheckedChange={val => setWantPhoto(!!val)}
+                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]" />
+                <Label htmlFor="wantPhoto" className="cursor-pointer text-xs font-semibold text-[#3d1a0a]">
+                  📸 फोटो चाहिए? (Photos)
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-3 p-3 rounded-xl border border-[#e8d5c0]/60 bg-white">
+                <Checkbox id="wantVideo" checked={wantVideo} onCheckedChange={val => setWantVideo(!!val)}
+                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]" />
+                <Label htmlFor="wantVideo" className="cursor-pointer text-xs font-semibold text-[#3d1a0a]">
+                  🎥 रिकॉर्डेड वीडियो चाहिए?
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-3 p-3 rounded-xl border border-[#e8d5c0]/60 bg-white">
+                <Checkbox id="wantLiveCall" checked={wantLiveCall} onCheckedChange={val => setWantLiveCall(!!val)}
+                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]" />
+                <Label htmlFor="wantLiveCall" className="cursor-pointer text-xs font-semibold text-[#3d1a0a]">
+                  📹 लाइव वीडियो कॉल चाहिए?
+                </Label>
+              </div>
             </div>
-            <div className="p-4 rounded-2xl border border-[#f0e4d4] bg-[#fdfaf6] space-y-4">
-              <div className="flex items-center space-x-3">
+
+            <div className="pt-2 border-t border-[#f0e4d4]">
+              <div className="flex items-center space-x-3 p-3 rounded-xl border border-[#e8d5c0]/60 bg-white">
                 <Checkbox id="needPrasad" checked={needPrasad} onCheckedChange={val => setNeedPrasad(!!val)}
                   className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]" />
-                <Label htmlFor="needPrasad" className="cursor-pointer text-sm font-medium text-[#3d1a0a]">
-                  I want Prasad delivered to my home (प्रसाद चाहिए)
+                <Label htmlFor="needPrasad" className="cursor-pointer text-xs font-semibold text-[#3d1a0a]">
+                  📦 प्रसाद चाहिए? (Prasad Delivery)
                 </Label>
               </div>
               {needPrasad && (
-                <div>
-                  <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">Prasad Delivery Address *</Label>
+                <div className="mt-3">
+                  <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">Prasad Delivery Address * (प्रसाद का पता)</Label>
                   <Textarea value={prasadAddress} onChange={e => setPrasadAddress(e.target.value)} required={needPrasad}
-                    placeholder="Complete address with PIN code for prasad delivery" rows={2}
-                    className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl resize-none" />
+                    placeholder="पूरा पता, लैंडमार्क एवं पिन कोड सहित दर्ज़ करें" rows={2}
+                    className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl resize-none text-sm" />
                 </div>
               )}
             </div>
-          </section>
-        )}
+          </div>
+        </section>
 
         {/* Payment summary & submit */}
         <div className="border-t border-[#f0e4d4] pt-6">
