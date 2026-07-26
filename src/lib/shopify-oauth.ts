@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
 
-const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID;
-const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
-const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
+const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID || '';
+const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID || '';
+const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET || '';
 
 export interface OidcConfig {
   authorization_endpoint: string;

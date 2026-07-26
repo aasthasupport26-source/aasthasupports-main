@@ -224,16 +224,10 @@ export const getShopifyOAuthUrl = createServerFn({ method: 'POST' })
       
       const isProd = process.env.NODE_ENV === 'production';
       
-      // Set HttpOnly secure cookies for PKCE verification
-      setCookie('shopify_pkce_verifier', authData.verifier, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: 'lax',
-        maxAge: 600, // 10 minutes
-        path: '/',
-      });
+      // Combine into a single cookie to avoid Vercel multiple Set-Cookie header overwrite bug
+      const oauthSession = JSON.stringify({ verifier: authData.verifier, state: authData.state });
       
-      setCookie('shopify_oauth_state', authData.state, {
+      setCookie('shopify_oauth_session', oauthSession, {
         httpOnly: true,
         secure: isProd,
         sameSite: 'lax',
@@ -264,8 +258,22 @@ export const exchangeOAuthCode = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     try {
-      const verifier = getCookie('shopify_pkce_verifier');
-      const savedState = getCookie('shopify_oauth_state');
+      const sessionStr = getCookie('shopify_oauth_session');
+      let verifier = '';
+      let savedState = '';
+
+      if (sessionStr) {
+        try {
+          const session = JSON.parse(sessionStr);
+          verifier = session.verifier;
+          savedState = session.state;
+        } catch (e) {
+          console.error('Failed to parse oauth session cookie');
+        }
+      }
+
+      console.log('CODE:', data.code);
+      console.log('VERIFIER:', verifier);
 
       if (!verifier) {
         throw new Error('PKCE verifier missing from server session cookies.');
@@ -275,9 +283,8 @@ export const exchangeOAuthCode = createServerFn({ method: 'POST' })
         throw new Error('State mismatch detected. Authentication aborted.');
       }
 
-      // Delete cookies after use (single use)
-      deleteCookie('shopify_pkce_verifier');
-      deleteCookie('shopify_oauth_state');
+      // Delete cookie after use (single use)
+      deleteCookie('shopify_oauth_session');
 
       const tokens = await exchangeCodeForTokens(data.code, verifier, data.redirectUri);
       const customerData = await fetchCustomerAccountData(tokens.access_token);
