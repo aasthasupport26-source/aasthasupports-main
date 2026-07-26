@@ -158,7 +158,13 @@ export const createShopifyCheckout = createServerFn({ method: 'POST' })
       let checkoutUrl = cartCreate.cart.checkoutUrl;
       if (checkoutUrl) {
         const storeDomain = process.env.SHOPIFY_STORE_DOMAIN || '08axwa-1x.myshopify.com';
-        checkoutUrl = checkoutUrl.replace(/^https:\/\/(www\.)?aasthasupports\.com/i, `https://${storeDomain}`);
+        try {
+          const parsed = new URL(checkoutUrl);
+          parsed.hostname = storeDomain;
+          checkoutUrl = parsed.toString();
+        } catch (e) {
+          checkoutUrl = checkoutUrl.replace(/^https:\/\/[^\/]+/, `https://${storeDomain}`);
+        }
       }
 
       return {
