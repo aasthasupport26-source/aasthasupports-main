@@ -41,18 +41,29 @@ function CartPage() {
     if (items.length === 0) return;
     setLoading(true);
     try {
-      const payload = items.map(i => ({
-        variantId: i.variantId,
-        quantity: i.quantity
-      }));
-      const res = await checkout({ data: { items: payload } });
-      if (res.checkoutUrl) {
-        // Clear cart immediately before leaving to Shopify
-        clear();
-        window.location.href = res.checkoutUrl;
-      } else {
-        throw new Error("No checkout URL returned");
+      const physicalItems = items.filter(i => i.variantId && i.variantId.trim().length > 0 && i.categoryName !== 'Online Pooja');
+      const poojaItems = items.filter(i => !i.variantId || i.categoryName === 'Online Pooja');
+
+      if (physicalItems.length > 0) {
+        const payload = physicalItems.map(i => ({
+          variantId: i.variantId,
+          quantity: i.quantity
+        }));
+        const res = await checkout({ data: { items: payload } });
+        if (res.checkoutUrl) {
+          clear();
+          window.location.href = res.checkoutUrl;
+          return;
+        }
       }
+
+      if (poojaItems.length > 0) {
+        toast.info("Navigating to Pooja Booking form...");
+        window.location.href = "/book-pooja";
+        return;
+      }
+
+      throw new Error("Could not process cart items for checkout");
     } catch (err: any) {
       toast.error(err.message || "Failed to initialize checkout");
       setLoading(false);
