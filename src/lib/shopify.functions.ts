@@ -130,7 +130,7 @@ import { CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } from './shopify/queri
 export const createShopifyCheckout = createServerFn({ method: 'POST' })
   .validator(z.object({
     items: z.array(z.object({
-      variantId: z.string().optional(),
+      variantId: z.string(),
       quantity: z.number().int().min(1),
       attributes: z.array(z.object({
         key: z.string(),
@@ -140,23 +140,11 @@ export const createShopifyCheckout = createServerFn({ method: 'POST' })
   }))
   .handler(async ({ data }) => {
     try {
-      const validItems = data.items.filter(item => item.variantId && item.variantId.trim().length > 0);
-
-      if (validItems.length === 0) {
-        throw new Error('No valid product variants found for Shopify checkout.');
-      }
-
-      const lines = validItems.map(item => {
-        let varId = item.variantId!.trim();
-        if (!varId.startsWith('gid://')) {
-          varId = `gid://shopify/ProductVariant/${varId}`;
-        }
-        return {
-          merchandiseId: varId,
-          quantity: item.quantity,
-          attributes: item.attributes || []
-        };
-      });
+      const lines = data.items.map(item => ({
+        merchandiseId: item.variantId,
+        quantity: item.quantity,
+        attributes: item.attributes || []
+      }));
 
       const response: any = await shopifyClient.request(CREATE_CART_MUTATION, {
         lines,
@@ -167,23 +155,18 @@ export const createShopifyCheckout = createServerFn({ method: 'POST' })
         throw new Error(cartCreate.userErrors[0].message);
       }
 
-      let checkoutUrl = cartCreate.cart.checkoutUrl;
-      if (checkoutUrl) {
-        // Shopify returns our custom domain (aasthasupports.com) in checkout URLs.
-        // Always rewrite to the actual myshopify.com checkout domain so it works.
-        checkoutUrl = checkoutUrl
-          .replace(/^https:\/\/(www\.)?aasthasupports\.com/i, 'https://08axwa-1x.myshopify.com')
-          .replace(/^http:\/\/(www\.)?aasthasupports\.com/i, 'https://08axwa-1x.myshopify.com');
-      }
+      // Shopify returns our custom domain in checkoutUrl — rewrite to myshopify checkout
+      let checkoutUrl: string = cartCreate.cart.checkoutUrl;
+      checkoutUrl = checkoutUrl
+        .replace(/^https?:\/\/(www\.)?aasthasupports\.com/i, 'https://08axwa-1x.myshopify.com');
 
-      return {
-        checkoutUrl
-      };
+      return { checkoutUrl };
     } catch (error: any) {
       console.error('Shopify checkout creation error:', error);
       throw new Error(error.message || 'Failed to create Shopify checkout');
     }
   });
+
 
 export const getCustomerOrders = createServerFn({ method: 'GET' })
   .validator(z.object({
