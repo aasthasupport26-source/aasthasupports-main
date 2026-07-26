@@ -130,14 +130,11 @@ export function Header() {
                             {section.title}
                           </h4>
                           <div className="grid grid-cols-2 gap-3">
-                            {section.items.map((item) => {
-                              const targetLink = cat.slug === 'online-pooja' ? '/book-pooja' : '/category/$slug';
-                              const targetParams = cat.slug === 'online-pooja' ? undefined : { slug: cat.slug };
-                              return (
+                            {section.items.map((item) =>
+                              cat.slug === 'online-pooja' ? (
                                 <Link
                                   key={item.name}
-                                  to={targetLink as any}
-                                  params={targetParams as any}
+                                  to="/book-pooja"
                                   className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
                                 >
                                   <img
@@ -151,12 +148,38 @@ export function Header() {
                                       {item.name}
                                     </p>
                                     {item.desc && (
-                                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">{item.desc}</p>
+                                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                                        {item.desc}
+                                      </p>
                                     )}
                                   </div>
                                 </Link>
-                              );
-                            })}
+                              ) : (
+                                <Link
+                                  key={item.name}
+                                  to="/category/$slug"
+                                  params={{ slug: cat.slug }}
+                                  className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
+                                >
+                                  <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    loading="lazy"
+                                    className="w-12 h-12 rounded-lg object-cover border border-gold/40 group-hover:border-gold group-hover:scale-105 transition-all duration-300"
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
+                                      {item.name}
+                                    </p>
+                                    {item.desc && (
+                                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                                        {item.desc}
+                                      </p>
+                                    )}
+                                  </div>
+                                </Link>
+                              )
+                            )}
                           </div>
                         </div>
                       ))}

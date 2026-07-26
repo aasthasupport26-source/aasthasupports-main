@@ -13,8 +13,7 @@ import {
 export const Route = createFileRoute("/category/$slug")({
   loader: ({ params }) => {
     const cat = getCategory(params.slug);
-    if (!cat) throw notFound();
-    return { cat };
+    return { cat: cat || { slug: params.slug, name: params.slug, tagline: "", hero: "", sections: [] } };
   },
   head: ({ params, loaderData }) => {
     const title = `${loaderData?.cat.name ?? "Category"} — Aastha Support`;

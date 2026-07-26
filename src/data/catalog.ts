@@ -160,4 +160,44 @@ export const categories: Category[] = [
   },
 ];
 
-export const getCategory = (slug: string) => categories.find((c) => c.slug === slug);
+export const getCategory = (slug?: string) => {
+  if (!slug) return undefined;
+  const s = slug.trim().toLowerCase().replace(/\/$/, "");
+  
+  const aliasMap: Record<string, string> = {
+    "pooja": "online-pooja",
+    "puja": "online-pooja",
+    "online-puja": "online-pooja",
+    "online-poojas": "online-pooja",
+    "online-pujas": "online-pooja",
+    "pujas": "online-pooja",
+    "poojas": "online-pooja",
+    "bracelet": "bracelets",
+    "bracelets": "bracelets",
+    "gemstone": "gemstones",
+    "gemstones": "gemstones",
+    "gems": "gemstones",
+    "gem": "gemstones",
+    "yantras": "yantra",
+    "yantra": "yantra",
+    "malas": "mala",
+    "mala": "mala",
+    "rudraksh": "rudraksha",
+    "rudraksha": "rudraksha",
+    "rudrakshas": "rudraksha",
+  };
+
+  const targetSlug = aliasMap[s] || s;
+  
+  const found = categories.find((c) => c.slug === targetSlug || c.slug.toLowerCase() === s);
+  if (found) return found;
+
+  // Generic fallback category if slug is unrecognized instead of throwing 404
+  return {
+    slug: s,
+    name: s.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    tagline: "Explore our collection of authentic, energised spiritual offerings.",
+    hero: poojaImg,
+    sections: [],
+  };
+};
