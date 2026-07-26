@@ -155,8 +155,14 @@ export const createShopifyCheckout = createServerFn({ method: 'POST' })
         throw new Error(cartCreate.userErrors[0].message);
       }
 
+      let checkoutUrl = cartCreate.cart.checkoutUrl;
+      if (checkoutUrl) {
+        const storeDomain = process.env.SHOPIFY_STORE_DOMAIN || '08axwa-1x.myshopify.com';
+        checkoutUrl = checkoutUrl.replace(/^https:\/\/(www\.)?aasthasupports\.com/i, `https://${storeDomain}`);
+      }
+
       return {
-        checkoutUrl: cartCreate.cart.checkoutUrl
+        checkoutUrl
       };
     } catch (error: any) {
       console.error('Shopify checkout creation error:', error);
