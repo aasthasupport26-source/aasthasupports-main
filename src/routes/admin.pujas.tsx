@@ -43,8 +43,15 @@ function AdminPujas() {
   useEffect(() => { loadData(); }, []);
 
   const handleEdit = (puja: any) => {
+    const gallery = Array.isArray(puja.benefits?.gallery) ? puja.benefits.gallery : [];
     setEditingId(puja.id);
-    setFormData(puja);
+    setFormData({
+      ...puja,
+      image_url: puja.image_url || gallery[0] || '',
+      image_url_2: puja.image_url_2 || gallery[1] || '',
+      image_url_3: puja.image_url_3 || gallery[2] || '',
+      image_url_4: puja.image_url_4 || gallery[3] || '',
+    });
     setIsCreating(false);
   };
 
@@ -56,6 +63,9 @@ function AdminPujas() {
       temple_id: temples[0]?.id || '',
       description: '',
       image_url: '',
+      image_url_2: '',
+      image_url_3: '',
+      image_url_4: '',
       duration_minutes: 60,
       active: true,
     });
@@ -70,12 +80,35 @@ function AdminPujas() {
 
   const handleSave = async () => {
     try {
-      if (isCreating) {
-        await doCreatePuja({ data: formData });
-        toast.success('Puja created successfully');
+      const gallery = [
+        formData.image_url,
+        formData.image_url_2,
+        formData.image_url_3,
+        formData.image_url_4,
+      ].filter(Boolean);
+
+      const benefits = typeof formData.benefits === 'object' && formData.benefits !== null
+        ? { ...formData.benefits, gallery }
+        : { gallery };
+
+      const payload: any = {
+        name: formData.name,
+        slug: formData.slug,
+        temple_id: formData.temple_id,
+        description: formData.description || '',
+        image_url: formData.image_url || gallery[0] || '',
+        duration_minutes: formData.duration_minutes || 60,
+        active: Boolean(formData.active),
+        benefits,
+      };
+
+      if (!isCreating) {
+        payload.id = editingId;
+        await doUpdatePuja({ data: payload });
+        toast.success('Puja updated successfully with gallery images!');
       } else {
-        await doUpdatePuja({ data: formData });
-        toast.success('Puja updated successfully');
+        await doCreatePuja({ data: payload });
+        toast.success('Puja created successfully with gallery images!');
       }
       handleCancel();
       loadData();
@@ -210,17 +243,47 @@ function AdminPujas() {
                 <textarea className="w-full border border-gold/30 rounded-md p-2 text-sm focus:ring-1 focus:ring-gold outline-none min-h-[80px]"
                   value={formData.description || ''} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-maroon-deep mb-1">Image URL</label>
-                  <input type="text" className="w-full border border-gold/30 rounded-md p-2 text-sm focus:ring-1 focus:ring-gold outline-none"
-                    value={formData.image_url || ''} onChange={(e) => setFormData({ ...formData, image_url: e.target.value })} />
+              {/* 4 Images Upload / Gallery Section */}
+              <div className="border border-gold/30 rounded-lg p-4 bg-cream/40 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-maroon-deep">
+                    Puja Images (Minimum 4 Recommended)
+                  </label>
+                  <span className="text-[10px] text-muted-foreground">Paste image URLs</span>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-maroon-deep mb-1">Duration (minutes)</label>
-                  <input type="number" className="w-full border border-gold/30 rounded-md p-2 text-sm focus:ring-1 focus:ring-gold outline-none"
-                    value={formData.duration_minutes || ''} onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) })} />
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-maroon-deep mb-1">Image 1 (Main Banner) *</label>
+                    <input type="text" placeholder="https://..." className="w-full border border-gold/30 rounded-md p-1.5 text-xs focus:ring-1 focus:ring-gold outline-none bg-white"
+                      value={formData.image_url || ''} onChange={(e) => setFormData({ ...formData, image_url: e.target.value })} />
+                    {formData.image_url && <img src={formData.image_url} alt="Cover" className="w-full h-14 object-cover rounded mt-1 border border-gold/20" />}
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-maroon-deep mb-1">Image 2 (Gallery Photo)</label>
+                    <input type="text" placeholder="https://..." className="w-full border border-gold/30 rounded-md p-1.5 text-xs focus:ring-1 focus:ring-gold outline-none bg-white"
+                      value={formData.image_url_2 || ''} onChange={(e) => setFormData({ ...formData, image_url_2: e.target.value })} />
+                    {formData.image_url_2 && <img src={formData.image_url_2} alt="Img 2" className="w-full h-14 object-cover rounded mt-1 border border-gold/20" />}
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-maroon-deep mb-1">Image 3 (Gallery Photo)</label>
+                    <input type="text" placeholder="https://..." className="w-full border border-gold/30 rounded-md p-1.5 text-xs focus:ring-1 focus:ring-gold outline-none bg-white"
+                      value={formData.image_url_3 || ''} onChange={(e) => setFormData({ ...formData, image_url_3: e.target.value })} />
+                    {formData.image_url_3 && <img src={formData.image_url_3} alt="Img 3" className="w-full h-14 object-cover rounded mt-1 border border-gold/20" />}
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-maroon-deep mb-1">Image 4 (Gallery Photo)</label>
+                    <input type="text" placeholder="https://..." className="w-full border border-gold/30 rounded-md p-1.5 text-xs focus:ring-1 focus:ring-gold outline-none bg-white"
+                      value={formData.image_url_4 || ''} onChange={(e) => setFormData({ ...formData, image_url_4: e.target.value })} />
+                    {formData.image_url_4 && <img src={formData.image_url_4} alt="Img 4" className="w-full h-14 object-cover rounded mt-1 border border-gold/20" />}
+                  </div>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-maroon-deep mb-1">Duration (minutes)</label>
+                <input type="number" className="w-full border border-gold/30 rounded-md p-2 text-sm focus:ring-1 focus:ring-gold outline-none"
+                  value={formData.duration_minutes || ''} onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) })} />
               </div>
               <div className="flex items-center gap-2 pt-2">
                 <input type="checkbox" id="active" checked={formData.active}

@@ -1,150 +1,236 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { getShopifyProducts } from "@/lib/shopify.functions";
+import { Loader2, ExternalLink, ShieldCheck, Sparkles, Flame, RefreshCw, Search } from "lucide-react";
 
 export const Route = createFileRoute("/admin/products")({
   component: ProductsPage,
 });
 
-type Product = {
-  id?: string; slug: string; name: string; category_slug: string; subcategory?: string;
-  short_description?: string; description?: string; price: number; mrp?: number;
-  stock: number; image_url?: string; is_active: boolean; is_featured: boolean;
-};
-
-const empty: Product = { slug: "", name: "", category_slug: "rudraksha", price: 0, stock: 0, is_active: true, is_featured: false };
+const CATEGORIES = [
+  { slug: "", name: "All Categories" },
+  { slug: "rudraksha", name: "Rudraksha" },
+  { slug: "gemstones", name: "Gemstones" },
+  { slug: "mala", name: "Mala" },
+  { slug: "bracelet", name: "Bracelet" },
+  { slug: "yantra", name: "Yantra" },
+];
 
 function ProductsPage() {
-  const [items, setItems] = useState<any[]>([]);
-  const [cats, setCats] = useState<{ slug: string; name: string }[]>([]);
-  const [editing, setEditing] = useState<Product | null>(null);
+  const fetchProducts = useServerFn(getShopifyProducts);
+  const [products, setProducts] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
+  const loadProducts = async () => {
     setLoading(true);
-    const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-    setItems((data ?? []) as any[]);
-    setLoading(false);
+    try {
+      const data = await fetchProducts({
+        data: { category: selectedCategory || undefined, limit: 100 },
+      });
+      setProducts(data || []);
+    } catch (err) {
+      console.error("Failed to fetch Shopify products:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    load();
-    supabase.from("categories").select("slug,name").order("name").then(({ data }) => setCats(data ?? []));
-  }, []);
+    loadProducts();
+  }, [selectedCategory]);
 
-  const save = async () => {
-    if (!editing) return;
-    const payload = { ...editing, updated_at: new Date().toISOString() };
-    const { error } = editing.id
-      ? await supabase.from("products").update(payload).eq("id", editing.id)
-      : await supabase.from("products").insert(payload);
-    if (error) return toast.error(error.message);
-    toast.success("Saved");
-    setEditing(null);
-    load();
-  };
-
-  const remove = async (id: string) => {
-    if (!confirm("Delete this product?")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Deleted");
-    load();
-  };
+  const filteredProducts = products.filter((p) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      p.name?.toLowerCase().includes(q) ||
+      p.slug?.toLowerCase().includes(q) ||
+      p.category?.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl text-maroon-deep">Products</h1>
-          <p className="text-sm text-muted-foreground">{items.length} items</p>
+          <h1 className="font-display text-3xl text-maroon-deep">Shopify Products & Inventory</h1>
+          <p className="text-sm text-muted-foreground">
+            All physical product categories are fetched live from your Shopify inventory.
+          </p>
         </div>
-        <button onClick={() => setEditing(empty)}
-          className="bg-royal text-cream px-4 py-2.5 rounded-md text-sm flex items-center gap-2 hover:opacity-90">
-          <Plus className="w-4 h-4" /> New Product
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={loadProducts}
+            disabled={loading}
+            className="flex items-center gap-2 bg-cream text-maroon border border-gold/30 px-4 py-2 rounded-md text-sm hover:bg-gold/10 transition"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Sync Shopify
+          </button>
+          <Link
+            to="/admin/pujas"
+            className="flex items-center gap-2 bg-royal text-cream px-4 py-2 rounded-md text-sm hover:opacity-90 transition shadow-sm"
+          >
+            <Flame className="w-4 h-4 text-gold" /> Manage Online Poojas
+          </Link>
+        </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gold/20 overflow-hidden">
-        {loading ? <div className="p-6 text-sm text-muted-foreground">Loading…</div> :
-          items.length === 0 ? <div className="p-6 text-sm text-muted-foreground">No products yet. Click "New Product".</div> :
+      {/* Mode Guidance Notice */}
+      <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-5 shadow-sm space-y-3">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-amber-100 rounded-lg text-amber-800 shrink-0 mt-0.5">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-display text-lg text-amber-950">Shopify Category Selection Active</h3>
+            <p className="text-sm text-amber-800/90 mt-1 leading-relaxed">
+              Physical merchandise (<strong>Rudraksha, Gemstones, Mala, Bracelet, Yantra</strong>) is synced live with Shopify. 
+              To add or modify physical products, manage listings directly inside your 
+              <a
+                href="https://admin.shopify.com"
+                target="_blank"
+                rel="noreferrer"
+                className="underline font-medium hover:text-amber-900 ml-1 inline-flex items-center gap-1"
+              >
+                Shopify Admin Panel <ExternalLink className="w-3 h-3" />
+              </a>.
+            </p>
+            <p className="text-xs text-amber-700/80 mt-2">
+              ✦ <strong>Online Pooja Category:</strong> Online Poojas are managed via Supabase right here in 
+              <Link to="/admin/pujas" className="underline font-medium ml-1">
+                Pujas Management (supports up to 4+ high-res image uploads)
+              </Link>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter & Search Bar */}
+      <div className="bg-white p-4 rounded-xl border border-gold/20 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <span className="text-xs font-semibold uppercase tracking-wider text-maroon-deep whitespace-nowrap">
+            Category Filter:
+          </span>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="rounded-md border border-gold/30 bg-cream px-3 py-2 text-sm focus:outline-none focus:border-gold"
+          >
+            {CATEGORIES.map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="relative w-full md:w-72">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search Shopify products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 rounded-md border border-gold/30 text-sm focus:outline-none focus:border-gold bg-cream"
+          />
+        </div>
+      </div>
+
+      {/* Shopify Products Table */}
+      <div className="bg-white rounded-xl border border-gold/20 overflow-hidden shadow-sm">
+        {loading ? (
+          <div className="p-12 flex flex-col items-center justify-center text-muted-foreground space-y-3">
+            <Loader2 className="w-8 h-8 animate-spin text-maroon" />
+            <p className="text-sm">Fetching products from Shopify Storefront API...</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="p-12 text-center text-muted-foreground">
+            No products found for the selected category filter.
+          </div>
+        ) : (
           <table className="w-full text-sm">
-            <thead className="bg-cream text-xs uppercase tracking-widest text-maroon-deep">
+            <thead className="bg-cream text-xs uppercase tracking-widest text-maroon-deep border-b border-gold/20">
               <tr>
-                <th className="text-left p-3">Name</th>
-                <th className="text-left p-3">Category</th>
-                <th className="text-left p-3">Price</th>
-                <th className="text-left p-3">Stock</th>
-                <th className="text-left p-3">Status</th>
-                <th className="text-right p-3">Actions</th>
+                <th className="text-left p-4">Product</th>
+                <th className="text-left p-4">Category</th>
+                <th className="text-left p-4">Price</th>
+                <th className="text-left p-4">MRP / Compare</th>
+                <th className="text-left p-4">Stock</th>
+                <th className="text-left p-4">Badges</th>
+                <th className="text-right p-4">Shopify Handle</th>
               </tr>
             </thead>
-            <tbody>
-              {items.map((p) => (
-                <tr key={p.id} className="border-t">
-                  <td className="p-3">
-                    <div className="font-medium">{p.name}</div>
-                    <div className="text-xs text-muted-foreground">{p.slug}</div>
+            <tbody className="divide-y divide-gray-100">
+              {filteredProducts.map((p) => (
+                <tr key={p.shopifyId || p.slug} className="hover:bg-cream/50 transition">
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      {p.image ? (
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="w-12 h-12 rounded-lg object-cover border border-gold/20 shrink-0"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-400 shrink-0">
+                          No Img
+                        </div>
+                      )}
+                      <div>
+                        <div className="font-medium text-maroon-deep line-clamp-1">{p.name}</div>
+                        <div className="text-xs text-muted-foreground font-mono mt-0.5">{p.slug}</div>
+                      </div>
+                    </div>
                   </td>
-                  <td className="p-3">{p.category_slug}</td>
-                  <td className="p-3">₹{Number(p.price).toLocaleString("en-IN")}</td>
-                  <td className="p-3">{p.stock}</td>
-                  <td className="p-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${p.is_active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"}`}>
-                      {p.is_active ? "Active" : "Inactive"}
+                  <td className="p-4 uppercase text-xs font-semibold text-gold-soft">
+                    {p.category || selectedCategory || "General"}
+                  </td>
+                  <td className="p-4 font-semibold text-emerald-700">
+                    ₹{Number(p.price).toLocaleString("en-IN")}
+                  </td>
+                  <td className="p-4 text-muted-foreground">
+                    {p.mrp ? `₹${Number(p.mrp).toLocaleString("en-IN")}` : "—"}
+                  </td>
+                  <td className="p-4">
+                    <span
+                      className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                        p.available
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-rose-100 text-rose-800"
+                      }`}
+                    >
+                      {p.available ? `In Stock (${p.stock})` : "Out of Stock"}
                     </span>
                   </td>
-                  <td className="p-3 text-right">
-                    <button onClick={() => setEditing(p)} className="p-1.5 hover:bg-cream rounded"><Pencil className="w-4 h-4" /></button>
-                    <button onClick={() => remove(p.id!)} className="p-1.5 hover:bg-rose-50 text-rose-600 rounded ml-1"><Trash2 className="w-4 h-4" /></button>
+                  <td className="p-4">
+                    <div className="flex items-center gap-1.5">
+                      {p.certified && (
+                        <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3" /> Certified
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="p-4 text-right">
+                    <a
+                      href={`/product/${p.slug}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-maroon hover:underline inline-flex items-center gap-1 font-mono"
+                    >
+                      /product/{p.slug} <ExternalLink className="w-3 h-3" />
+                    </a>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        }
+        )}
       </div>
-
-      {editing && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setEditing(null)}>
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b">
-              <h2 className="font-display text-xl text-maroon-deep">{editing.id ? "Edit" : "New"} Product</h2>
-              <button onClick={() => setEditing(null)}><X className="w-5 h-5" /></button>
-            </div>
-            <div className="p-5 grid grid-cols-2 gap-4">
-              <Field label="Name *"><input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} className={inputCls} /></Field>
-              <Field label="Slug *"><input value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: e.target.value })} className={inputCls} placeholder="e.g. 5-mukhi-nepali" /></Field>
-              <Field label="Category">
-                <select value={editing.category_slug} onChange={(e) => setEditing({ ...editing, category_slug: e.target.value })} className={inputCls}>
-                  {cats.length === 0 && <option value="rudraksha">rudraksha</option>}
-                  {cats.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
-                </select>
-              </Field>
-              <Field label="Subcategory"><input value={editing.subcategory ?? ""} onChange={(e) => setEditing({ ...editing, subcategory: e.target.value })} className={inputCls} /></Field>
-              <Field label="Price (₹) *"><input type="number" value={editing.price} onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })} className={inputCls} /></Field>
-              <Field label="MRP (₹)"><input type="number" value={editing.mrp ?? ""} onChange={(e) => setEditing({ ...editing, mrp: Number(e.target.value) })} className={inputCls} /></Field>
-              <Field label="Stock"><input type="number" value={editing.stock} onChange={(e) => setEditing({ ...editing, stock: Number(e.target.value) })} className={inputCls} /></Field>
-              <Field label="Image URL"><input value={editing.image_url ?? ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} className={inputCls} /></Field>
-              <Field label="Short Description" full><input value={editing.short_description ?? ""} onChange={(e) => setEditing({ ...editing, short_description: e.target.value })} className={inputCls} /></Field>
-              <Field label="Description" full><textarea value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} rows={4} className={inputCls} /></Field>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_active} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} /> Active</label>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_featured} onChange={(e) => setEditing({ ...editing, is_featured: e.target.checked })} /> Featured</label>
-            </div>
-            <div className="p-5 border-t flex justify-end gap-2">
-              <button onClick={() => setEditing(null)} className="px-4 py-2 rounded-md border">Cancel</button>
-              <button onClick={save} className="px-4 py-2 rounded-md bg-royal text-cream">Save Product</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
-}
-
-const inputCls = "w-full rounded-md border border-gold/30 bg-cream px-3 py-2 text-sm focus:border-gold focus:outline-none";
-function Field({ label, children, full }: any) {
-  return <div className={full ? "col-span-2" : ""}><label className="text-xs uppercase tracking-widest text-maroon-deep">{label}</label><div className="mt-1">{children}</div></div>;
 }
