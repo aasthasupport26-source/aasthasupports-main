@@ -41,7 +41,7 @@ function AuthCallbackPage() {
           },
         });
 
-        const expiresAt = new Date(Date.now() + (res.expiresIn || 3600) * 1000).toISOString();
+        const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
         const isAdmin = await setAuthLogin(res.customer, res.accessToken, expiresAt);
 
         setStatus('success');

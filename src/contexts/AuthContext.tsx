@@ -33,52 +33,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('aastha_access_token');
-    const expires = localStorage.getItem('aastha_token_expires');
     const storedCustomer = localStorage.getItem('aastha_customer');
 
-    if (token && expires && storedCustomer) {
-      const expiresAt = new Date(expires);
-      if (expiresAt > new Date()) {
-        try {
-          const parsedCustomer = JSON.parse(storedCustomer);
-          setCustomer(parsedCustomer);
-          setAccessToken(token);
+    if (token && storedCustomer) {
+      try {
+        const parsedCustomer = JSON.parse(storedCustomer);
+        setCustomer(parsedCustomer);
+        setAccessToken(token);
 
-          // Check admin status and wait before setting loading to false
-          checkAdmin({ data: { email: parsedCustomer.email } })
-            .then((result) => {
-              setIsAdmin(result.isAdmin);
-              setLoading(false);
-            })
-            .catch(() => {
-              setIsAdmin(false);
-              setLoading(false);
-            });
+        // Check admin status and wait before setting loading to false
+        checkAdmin({ data: { email: parsedCustomer.email } })
+          .then((result) => {
+            setIsAdmin(result.isAdmin);
+            setLoading(false);
+          })
+          .catch(() => {
+            setIsAdmin(false);
+            setLoading(false);
+          });
 
-          // Verification in background
-          verify({ data: { accessToken: token } })
-            .then((result) => setCustomer(result.customer))
-            .catch((err) => {
-              console.log('Background token verification failed, keeping cached session:', err);
-              // Do NOT clear session or set customer to null; respect the cached credentials
-            });
-          return;
-        } catch (e) {
-          console.error('Failed to parse stored customer:', e);
-        }
+        // Verification in background (preserves local session even if offline)
+        verify({ data: { accessToken: token } })
+          .then((result) => {
+            if (result?.customer) setCustomer(result.customer);
+          })
+          .catch((err) => {
+            console.log('Background token verification notice, maintaining session:', err);
+          });
+        return;
+      } catch (e) {
+        console.error('Failed to parse stored customer:', e);
       }
     }
 
-    // No valid token
+    // No stored session
     setLoading(false);
   }, []);
 
-  const login = async (customer: ShopifyCustomer, token: string, expiresAt: string): Promise<boolean> => {
+  const login = async (customer: ShopifyCustomer, token: string, expiresAt?: string): Promise<boolean> => {
+    // Default to 1-year persistent session if expiresAt not provided
+    const farFuture = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+    const finalExpires = expiresAt || farFuture;
+
     setCustomer(customer);
     setAccessToken(token);
     localStorage.setItem('aastha_customer', JSON.stringify(customer));
     localStorage.setItem('aastha_access_token', token);
-    localStorage.setItem('aastha_token_expires', expiresAt);
+    localStorage.setItem('aastha_token_expires', finalExpires);
 
     // Check admin status
     try {
