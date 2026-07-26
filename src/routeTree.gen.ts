@@ -19,12 +19,12 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as CartRouteImport } from './routes/cart'
 import { Route as BookPoojaRouteImport } from './routes/book-pooja'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CartIndexRouteImport } from './routes/cart.index'
 import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
@@ -44,7 +44,7 @@ import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
-import { Route as CartCIdRouteImport } from './routes/cart.c.$id'
+import { Route as CartCIdRouteImport } from './routes/cart_.c.$id'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
 const TrackOrderRoute = TrackOrderRouteImport.update({
@@ -97,11 +97,6 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CartRoute = CartRouteImport.update({
-  id: '/cart',
-  path: '/cart',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const BookPoojaRoute = BookPoojaRouteImport.update({
   id: '/book-pooja',
   path: '/book-pooja',
@@ -125,6 +120,11 @@ const AboutRoute = AboutRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartIndexRoute = CartIndexRouteImport.update({
+  id: '/cart/',
+  path: '/cart/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthIndexRoute = AuthIndexRouteImport.update({
@@ -225,9 +225,9 @@ const Char91DotmcpChar93ListToolsRoute =
     getParentRoute: () => rootRouteImport,
   } as any)
 const CartCIdRoute = CartCIdRouteImport.update({
-  id: '/c/$id',
-  path: '/c/$id',
-  getParentRoute: () => CartRoute,
+  id: '/cart_/c/$id',
+  path: '/cart/c/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
@@ -242,7 +242,6 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/book-pooja': typeof BookPoojaRoute
-  '/cart': typeof CartRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
@@ -272,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/product/$slug': typeof ProductSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/auth/': typeof AuthIndexRoute
+  '/cart/': typeof CartIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/cart/c/$id': typeof CartCIdRoute
 }
@@ -280,7 +280,6 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/book-pooja': typeof BookPoojaRoute
-  '/cart': typeof CartRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
@@ -310,6 +309,7 @@ export interface FileRoutesByTo {
   '/product/$slug': typeof ProductSlugRoute
   '/admin': typeof AdminIndexRoute
   '/auth': typeof AuthIndexRoute
+  '/cart': typeof CartIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/cart/c/$id': typeof CartCIdRoute
 }
@@ -320,7 +320,6 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/book-pooja': typeof BookPoojaRoute
-  '/cart': typeof CartRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
@@ -350,8 +349,9 @@ export interface FileRoutesById {
   '/product/$slug': typeof ProductSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/auth/': typeof AuthIndexRoute
+  '/cart/': typeof CartIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
-  '/cart/c/$id': typeof CartCIdRoute
+  '/cart_/c/$id': typeof CartCIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -361,7 +361,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/book-pooja'
-    | '/cart'
     | '/checkout'
     | '/contact'
     | '/faq'
@@ -391,6 +390,7 @@ export interface FileRouteTypes {
     | '/product/$slug'
     | '/admin/'
     | '/auth/'
+    | '/cart/'
     | '/.mcp/invoke-tool/$tool'
     | '/cart/c/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -399,7 +399,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/book-pooja'
-    | '/cart'
     | '/checkout'
     | '/contact'
     | '/faq'
@@ -429,6 +428,7 @@ export interface FileRouteTypes {
     | '/product/$slug'
     | '/admin'
     | '/auth'
+    | '/cart'
     | '/.mcp/invoke-tool/$tool'
     | '/cart/c/$id'
   id:
@@ -438,7 +438,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/book-pooja'
-    | '/cart'
     | '/checkout'
     | '/contact'
     | '/faq'
@@ -468,8 +467,9 @@ export interface FileRouteTypes {
     | '/product/$slug'
     | '/admin/'
     | '/auth/'
+    | '/cart/'
     | '/.mcp/invoke-tool/$tool'
-    | '/cart/c/$id'
+    | '/cart_/c/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -478,7 +478,6 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
   BookPoojaRoute: typeof BookPoojaRoute
-  CartRoute: typeof CartRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
@@ -497,7 +496,9 @@ export interface RootRouteChildren {
   OrderSuccessOrderNumberRoute: typeof OrderSuccessOrderNumberRoute
   ProductSlugRoute: typeof ProductSlugRoute
   AuthIndexRoute: typeof AuthIndexRoute
+  CartIndexRoute: typeof CartIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  CartCIdRoute: typeof CartCIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -572,13 +573,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cart': {
-      id: '/cart'
-      path: '/cart'
-      fullPath: '/cart'
-      preLoaderRoute: typeof CartRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/book-pooja': {
       id: '/book-pooja'
       path: '/book-pooja'
@@ -612,6 +606,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart/': {
+      id: '/cart/'
+      path: '/cart'
+      fullPath: '/cart/'
+      preLoaderRoute: typeof CartIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/': {
@@ -747,12 +748,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cart/c/$id': {
-      id: '/cart/c/$id'
-      path: '/c/$id'
+    '/cart_/c/$id': {
+      id: '/cart_/c/$id'
+      path: '/cart/c/$id'
       fullPath: '/cart/c/$id'
       preLoaderRoute: typeof CartCIdRouteImport
-      parentRoute: typeof CartRoute
+      parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
@@ -794,23 +795,12 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface CartRouteChildren {
-  CartCIdRoute: typeof CartCIdRoute
-}
-
-const CartRouteChildren: CartRouteChildren = {
-  CartCIdRoute: CartCIdRoute,
-}
-
-const CartRouteWithChildren = CartRoute._addFileChildren(CartRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
   BookPoojaRoute: BookPoojaRoute,
-  CartRoute: CartRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
@@ -830,7 +820,9 @@ const rootRouteChildren: RootRouteChildren = {
   OrderSuccessOrderNumberRoute: OrderSuccessOrderNumberRoute,
   ProductSlugRoute: ProductSlugRoute,
   AuthIndexRoute: AuthIndexRoute,
+  CartIndexRoute: CartIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  CartCIdRoute: CartCIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

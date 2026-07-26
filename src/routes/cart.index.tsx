@@ -7,7 +7,7 @@ import { createShopifyCheckout } from "@/lib/shopify.functions";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/cart")({
+export const Route = createFileRoute("/cart/")({
   validateSearch: (search: Record<string, unknown>) => ({
     cleared: search.cleared === '1' ? '1' : undefined,
   }),

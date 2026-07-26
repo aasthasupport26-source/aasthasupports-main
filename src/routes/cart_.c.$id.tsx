@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Loader2 } from 'lucide-react';
 
-export const Route = createFileRoute('/cart/c/$id')({
+export const Route = createFileRoute('/cart_/c/$id')({
   component: CartCheckoutRedirect,
 });
 
