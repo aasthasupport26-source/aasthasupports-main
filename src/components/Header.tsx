@@ -93,16 +93,32 @@ export function Header() {
                 const cat = categories.find((c) => c.slug === openSlug)!;
                 return (
                   <div className="grid grid-cols-12 gap-8">
-                    <div className="col-span-3 border-r border-gold/30 pr-8">
-                      <p className="text-xs tracking-[0.3em] text-gold uppercase mb-2">Category</p>
-                      <h3 className="font-display text-3xl text-maroon-deep mb-3">{cat.name}</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                        {cat.tagline}
-                      </p>
+                    <div className="col-span-3 border-r border-gold/30 pr-8 flex flex-col justify-between">
+                      <div>
+                        <p className="text-xs tracking-[0.3em] text-gold uppercase mb-2">Category</p>
+                        <h3 className="font-display text-3xl text-maroon-deep mb-3">{cat.name}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                          {cat.tagline}
+                        </p>
+                        
+                        {/* Trust Badges */}
+                        <div className="space-y-2 mb-6 text-xs text-maroon-deep font-medium bg-white/60 p-3 rounded-xl border border-gold/20">
+                          <div className="flex items-center gap-2">
+                            <span>🛡️</span> <span>100% Certified &amp; Authentic</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span>🕉️</span> <span>Vedic Pandit Energised</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span>🚚</span> <span>Free Express Shipping</span>
+                          </div>
+                        </div>
+                      </div>
+
                       <Link
                         to="/category/$slug"
                         params={{ slug: cat.slug }}
-                        className="inline-flex items-center text-sm text-maroon hover:text-gold transition font-medium"
+                        className="inline-flex items-center justify-center gap-2 bg-maroon-deep text-cream px-5 py-2.5 rounded-lg text-xs font-semibold tracking-wider uppercase hover:bg-maroon transition shadow-md"
                       >
                         View all {cat.name} →
                       </Link>
@@ -110,33 +126,37 @@ export function Header() {
                     <div className={`col-span-9 grid gap-8 ${cat.sections.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
                       {cat.sections.map((section) => (
                         <div key={section.title}>
-                          <h4 className="text-xs tracking-[0.25em] text-gold uppercase mb-4 pb-2 border-b border-gold/20">
+                          <h4 className="text-xs tracking-[0.25em] text-gold uppercase mb-4 pb-2 border-b border-gold/20 font-bold">
                             {section.title}
                           </h4>
                           <div className="grid grid-cols-2 gap-3">
-                            {section.items.map((item) => (
-                              <Link
-                                key={item.slug}
-                                to="/product/$slug"
-                                params={{ slug: item.slug }}
-                                className="group flex items-center gap-3 p-2 rounded-md hover:bg-white transition"
-                              >
-                                <img
-                                  src={item.image}
-                                  alt={item.name}
-                                  loading="lazy"
-                                  className="w-12 h-12 rounded-md object-cover border border-gold/40 group-hover:border-gold transition"
-                                />
-                                <div className="min-w-0">
-                                  <p className="text-sm font-medium text-maroon-deep group-hover:text-maroon truncate">
-                                    {item.name}
-                                  </p>
-                                  {item.desc && (
-                                    <p className="text-[11px] text-muted-foreground truncate">{item.desc}</p>
-                                  )}
-                                </div>
-                              </Link>
-                            ))}
+                            {section.items.map((item) => {
+                              const targetLink = cat.slug === 'online-pooja' ? '/book-pooja' : '/category/$slug';
+                              const targetParams = cat.slug === 'online-pooja' ? undefined : { slug: cat.slug };
+                              return (
+                                <Link
+                                  key={item.name}
+                                  to={targetLink as any}
+                                  params={targetParams as any}
+                                  className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
+                                >
+                                  <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    loading="lazy"
+                                    className="w-12 h-12 rounded-lg object-cover border border-gold/40 group-hover:border-gold group-hover:scale-105 transition-all duration-300"
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
+                                      {item.name}
+                                    </p>
+                                    {item.desc && (
+                                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">{item.desc}</p>
+                                    )}
+                                  </div>
+                                </Link>
+                              );
+                            })}
                           </div>
                         </div>
                       ))}
