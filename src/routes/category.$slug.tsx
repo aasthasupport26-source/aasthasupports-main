@@ -185,6 +185,72 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
       {/* Hero */}
       <OnlinePoojaHero cat={cat} />
 
+      {/* Sawan Special Seva Section */}
+      <section className="py-12 bg-gradient-to-r from-maroon-deep via-maroon to-maroon-deep text-cream border-b border-gold/30">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="text-center mb-8">
+            <span className="text-gold tracking-[0.4em] text-xs font-bold uppercase">✦ पवित्र श्रावण मास विशेष ✦</span>
+            <h2 className="font-display text-3xl md:text-4xl text-gold mt-2">सावन स्पेशल सेवा (Sawan Special Seva)</h2>
+            <p className="text-cream/80 text-sm mt-1 max-w-xl mx-auto">
+              सावन के हर सोमवार आपके नाम एवं गोत्र से महाकाल एवं विश्वनाथ मंदिर में जल व बेलपत्र अर्पित किया जाएगा।
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {/* Card 1: ₹51 */}
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-gold/30 flex flex-col justify-between hover:border-gold transition shadow-xl">
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <span className="bg-gold text-maroon-deep text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full">
+                    सावन सोमवार जल सेवा
+                  </span>
+                  <span className="font-display text-3xl font-bold text-gold">₹51</span>
+                </div>
+                <h3 className="font-display text-xl text-cream mt-2">जल अभिषेक (Jal Abhishek)</h3>
+                <p className="text-xs text-cream/80 mt-2 leading-relaxed">
+                  सावन के हर सोमवार आपके नाम एवं गोत्र से भगवान शिव को पवित्र जल अर्पित किया जाएगा। संकल्प के साथ पूजा।
+                </p>
+                <ul className="mt-4 space-y-1.5 text-xs text-cream/90">
+                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> नाम एवं गोत्र से संकल्प</li>
+                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> सावन सोमवार जल अर्पण</li>
+                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> डिजिटल पूजा फोटो</li>
+                </ul>
+              </div>
+              <Link to="/book-pooja" className="mt-6 w-full text-center bg-gold text-maroon-deep font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:bg-gold-soft transition">
+                ₹51 में संकल्प लें →
+              </Link>
+            </div>
+
+            {/* Card 2: ₹101 */}
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-gold/50 flex flex-col justify-between hover:border-gold transition shadow-xl relative overflow-hidden">
+              <div className="absolute top-3 right-3 bg-amber-400 text-maroon-deep text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full">
+                लोकप्रिय
+              </div>
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <span className="bg-amber-400 text-maroon-deep text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full">
+                    बेलपत्र व जल सेवा
+                  </span>
+                  <span className="font-display text-3xl font-bold text-gold">₹101</span>
+                </div>
+                <h3 className="font-display text-xl text-cream mt-2">बेलपत्र एवं जल अभिषेक (Belpatra & Jal Abhishek)</h3>
+                <p className="text-xs text-cream/80 mt-2 leading-relaxed">
+                  सावन के हर सोमवार आपके नाम एवं गोत्र से बेलपत्र और जल दोनों अर्पित किए जाएंगे। संकल्प के साथ संपूर्ण पूजा।
+                </p>
+                <ul className="mt-4 space-y-1.5 text-xs text-cream/90">
+                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> नाम एवं गोत्र से व्यक्तिगत संकल्प</li>
+                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> 108 बेलपत्र एवं जल अभिषेक</li>
+                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> पूजा फोटो एवं वीडियो क्लिप</li>
+                </ul>
+              </div>
+              <Link to="/book-pooja" className="mt-6 w-full text-center bg-amber-400 text-maroon-deep font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:bg-amber-300 transition">
+                ₹101 में संकल्प लें →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Temple selector + Puja listing */}
       <section className="py-16 bg-cream min-h-[500px]">
         <div className="container mx-auto px-4">

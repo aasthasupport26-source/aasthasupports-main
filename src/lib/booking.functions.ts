@@ -4,44 +4,57 @@ import { supabaseAdmin } from './auth/shopify-customer';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
+import { TEMPLES_CATALOG, PUJAS_CATALOG } from '@/data/pooja-catalog';
+
 // ---------------------------------------------------------
 // FETCHERS (For Browsing Temples, Pujas, Packages)
 // ---------------------------------------------------------
 
 export const getTemples = createServerFn({ method: 'GET' })
   .handler(async () => {
-    const { data, error } = await supabaseAdmin
-      .from('temples')
-      .select('*')
-      .eq('active', true)
-      .order('name');
-    if (error) throw error;
-    return data || [];
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('temples')
+        .select('*')
+        .eq('active', true)
+        .order('name');
+      if (!error && data && data.length > 0) return data;
+    } catch (_) {}
+    return TEMPLES_CATALOG;
   });
 
 export const getPujasByTemple = createServerFn({ method: 'GET' })
-  .validator(z.object({ templeId: z.string().uuid() }))
+  .validator(z.object({ templeId: z.string() }))
   .handler(async ({ data }) => {
-    const { data: pujas, error } = await supabaseAdmin
-      .from('pujas')
-      .select('*, packages(*)')
-      .eq('temple_id', data.templeId)
-      .eq('active', true)
-      .order('name');
-    if (error) throw error;
-    return pujas || [];
+    try {
+      const { data: pujas, error } = await supabaseAdmin
+        .from('pujas')
+        .select('*, packages(*)')
+        .eq('temple_id', data.templeId)
+        .eq('active', true)
+        .order('name');
+      if (!error && pujas && pujas.length > 0) return pujas;
+    } catch (_) {}
+
+    return PUJAS_CATALOG.filter(p => p.temple_id === data.templeId);
   });
 
 export const getPujaDetails = createServerFn({ method: 'GET' })
   .validator(z.object({ slug: z.string() }))
   .handler(async ({ data }) => {
-    const { data: puja, error } = await supabaseAdmin
-      .from('pujas')
-      .select('*, temple:temples(*), packages(*)')
-      .eq('slug', data.slug)
-      .single();
-    if (error) throw error;
-    return puja;
+    try {
+      const { data: puja, error } = await supabaseAdmin
+        .from('pujas')
+        .select('*, temple:temples(*), packages(*)')
+        .eq('slug', data.slug)
+        .single();
+      if (!error && puja) return puja;
+    } catch (_) {}
+
+    const found = PUJAS_CATALOG.find(p => p.slug === data.slug);
+    if (!found) return null;
+    const temple = TEMPLES_CATALOG.find(t => t.id === found.temple_id);
+    return { ...found, temple };
   });
 
 // ---------------------------------------------------------
@@ -55,9 +68,9 @@ const SankalpMemberSchema = z.object({
 
 const CreateBookingSchema = z.object({
   userId: z.string().optional(),
-  templeId: z.string().uuid(),
-  pujaId: z.string().uuid(),
-  packageId: z.string().uuid(),
+  templeId: z.string(),
+  pujaId: z.string(),
+  packageId: z.string(),
   packageAmount: z.number().optional(), // frontend passes price as fallback
   
   customerName: z.string().min(1),
