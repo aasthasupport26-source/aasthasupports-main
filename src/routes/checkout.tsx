@@ -18,7 +18,9 @@ function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (items.length === 0) {
+    // Snapshot items at mount — do NOT add items to deps or clear() will re-trigger this
+    const snapshot = items;
+    if (snapshot.length === 0) {
       navigate({ to: "/cart", search: { cleared: undefined }, replace: true });
       return;
     }
@@ -26,7 +28,7 @@ function CheckoutPage() {
     let isMounted = true;
     const processCheckout = async () => {
       try {
-        const payload = items.map((i) => ({
+        const payload = snapshot.map((i) => ({
           variantId: i.variantId,
           quantity: i.quantity,
         }));
@@ -54,7 +56,8 @@ function CheckoutPage() {
     return () => {
       isMounted = false;
     };
-  }, [items, checkout, clear, navigate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Layout>

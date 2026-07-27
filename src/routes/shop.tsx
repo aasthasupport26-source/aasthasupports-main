@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { useServerFn } from '@tanstack/react-start';
@@ -28,6 +28,7 @@ export const Route = createFileRoute('/shop')({
 
 function ShopPage() {
   const { add } = useCart();
+  const navigate = useNavigate();
   const fetchProducts = useServerFn(getShopifyProducts);
 
   const [search, setSearch] = useState('');
@@ -75,10 +76,17 @@ function ShopPage() {
       toast.error('Product variant not available');
       return;
     }
-
-    // Redirect to Shopify checkout
-    const checkoutUrl = `https://${process.env.SHOPIFY_STORE_DOMAIN || '08axwa-1x.myshopify.com'}/cart/${product.variantId.split('/').pop()}:1`;
-    window.location.href = checkoutUrl;
+    add({
+      slug: product.slug,
+      name: product.name,
+      image: product.image,
+      price: product.price,
+      mrp: product.mrp || product.price,
+      variantId: product.variantId,
+      categoryName: product.category,
+    });
+    toast.success(`${product.name} added to cart`);
+    navigate({ to: '/cart' });
   };
 
   return (
