@@ -1,12 +1,23 @@
-import { createFileRoute, Navigate } from '@tanstack/react-router';
-import { useAuth } from '@/contexts/AuthContext';
-import { Layout } from '@/components/Layout';
-import { useState, useEffect } from 'react';
-import { getAdminBookings, updateBookingStatus } from '@/lib/admin.functions';
-import { Loader2, Calendar, Clock, User, Phone, MapPin, Hash, Sparkles, Video, Gift } from 'lucide-react';
-import { toast } from 'sonner';
+import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { useAuth } from "@/contexts/AuthContext";
+import { Layout } from "@/components/Layout";
+import { useState, useEffect } from "react";
+import { getAdminBookings, updateBookingStatus } from "@/lib/admin.functions";
+import {
+  Loader2,
+  Calendar,
+  Clock,
+  User,
+  Phone,
+  MapPin,
+  Hash,
+  Sparkles,
+  Video,
+  Gift,
+} from "lucide-react";
+import { toast } from "sonner";
 
-export const Route = createFileRoute('/admin/bookings')({
+export const Route = createFileRoute("/admin/bookings")({
   component: AdminBookings,
 });
 
@@ -21,8 +32,8 @@ function AdminBookings() {
       const data = await getAdminBookings({ data: {} });
       setBookings(data);
     } catch (err) {
-      console.error('Failed to load bookings:', err);
-      toast.error('Failed to load bookings');
+      console.error("Failed to load bookings:", err);
+      toast.error("Failed to load bookings");
     } finally {
       setIsLoading(false);
     }
@@ -34,13 +45,16 @@ function AdminBookings() {
     }
   }, [customer, isAdmin]);
 
-  const handleStatusChange = async (bookingId: string, newStatus: 'draft' | 'confirmed' | 'completed' | 'cancelled') => {
+  const handleStatusChange = async (
+    bookingId: string,
+    newStatus: "draft" | "confirmed" | "completed" | "cancelled",
+  ) => {
     try {
       await updateBookingStatus({ data: { bookingId, status: newStatus } });
-      toast.success('Booking status updated successfully');
+      toast.success("Booking status updated successfully");
       loadBookings();
     } catch (err) {
-      toast.error('Failed to update status');
+      toast.error("Failed to update status");
     }
   };
 
@@ -64,9 +78,11 @@ function AdminBookings() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="font-display text-4xl text-maroon-deep mb-2">Booking Management</h1>
-            <p className="text-muted-foreground">Monitor and manage all client scheduled Pujas and rituals</p>
+            <p className="text-muted-foreground">
+              Monitor and manage all client scheduled Pujas and rituals
+            </p>
           </div>
-          <button 
+          <button
             onClick={loadBookings}
             className="border border-gold/30 hover:border-gold px-4 py-2 rounded-lg text-sm text-maroon-deep font-medium transition"
           >
@@ -85,8 +101,8 @@ function AdminBookings() {
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {bookings.map((booking) => (
-              <div 
-                key={booking.id} 
+              <div
+                key={booking.id}
                 className="bg-white rounded-xl border border-gold/20 p-6 shadow-sm hover:shadow-md transition flex flex-col md:flex-row justify-between gap-6"
               >
                 <div className="space-y-4 flex-1">
@@ -95,14 +111,19 @@ function AdminBookings() {
                       {booking.booking_id}
                     </span>
                     <h3 className="font-display text-xl text-maroon-deep">
-                      {booking.poojas?.name || 'Sacred Pooja Ritual'}
+                      {booking.poojas?.name || "Sacred Pooja Ritual"}
                     </h3>
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full border uppercase ${
-                      booking.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
-                      booking.status === 'completed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                      booking.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
-                      'bg-yellow-50 text-yellow-700 border-yellow-200'
-                    }`}>
+                    <span
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full border uppercase ${
+                        booking.status === "confirmed"
+                          ? "bg-green-50 text-green-700 border-green-200"
+                          : booking.status === "completed"
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : booking.status === "cancelled"
+                              ? "bg-red-50 text-red-700 border-red-200"
+                              : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                      }`}
+                    >
                       {booking.status}
                     </span>
                   </div>
@@ -118,7 +139,7 @@ function AdminBookings() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-gold-soft" />
-                      <span>Gotra: {booking.gotra || 'N/A'}</span>
+                      <span>Gotra: {booking.gotra || "N/A"}</span>
                     </div>
                     <div className="flex items-center gap-2 col-span-1 sm:col-span-2">
                       <MapPin className="w-4 h-4 text-gold-soft" />
@@ -128,8 +149,12 @@ function AdminBookings() {
 
                   {booking.special_requests && (
                     <div className="bg-cream/40 rounded-lg p-3 border border-gold/10 text-xs">
-                      <span className="font-semibold text-maroon-deep block mb-1">Special Instruction / Sankalp Members:</span>
-                      <p className="text-muted-foreground whitespace-pre-wrap">{booking.special_requests}</p>
+                      <span className="font-semibold text-maroon-deep block mb-1">
+                        Special Instruction / Sankalp Members:
+                      </span>
+                      <p className="text-muted-foreground whitespace-pre-wrap">
+                        {booking.special_requests}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -137,14 +162,20 @@ function AdminBookings() {
                 <div className="flex flex-row md:flex-col justify-between md:justify-center items-end gap-4 border-t md:border-t-0 md:border-l border-gold/10 pt-4 md:pt-0 md:pl-6 min-w-[200px]">
                   <div className="text-right">
                     <span className="text-xs text-muted-foreground block">Offering Price</span>
-                    <span className="text-2xl font-bold text-maroon-deep">₹{booking.total_amount?.toLocaleString('en-IN')}</span>
+                    <span className="text-2xl font-bold text-maroon-deep">
+                      ₹{booking.total_amount?.toLocaleString("en-IN")}
+                    </span>
                   </div>
 
                   <div className="w-full">
-                    <label className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">Update Status</label>
+                    <label className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">
+                      Update Status
+                    </label>
                     <select
                       value={booking.status}
-                      onChange={(e) => handleStatusChange(booking.booking_id, e.target.value as any)}
+                      onChange={(e) =>
+                        handleStatusChange(booking.booking_id, e.target.value as any)
+                      }
                       className="border border-gold/30 rounded-lg px-3 py-1.5 text-sm bg-white text-maroon-deep w-full focus:outline-none focus:ring-1 focus:ring-gold"
                     >
                       <option value="draft">Draft</option>

@@ -15,12 +15,21 @@ export function Header() {
       {/* Announcement bar */}
       <div className="bg-maroon-deep text-gold-soft text-xs tracking-widest overflow-hidden">
         <div className="container mx-auto px-4 py-2 flex items-center justify-between gap-3">
-          <span className="hidden sm:inline truncate">✦ AUTHENTIC · CERTIFIED · ENERGISED BY VEDIC PANDITS ✦</span>
+          <span className="hidden sm:inline truncate">
+            ✦ AUTHENTIC · CERTIFIED · ENERGISED BY VEDIC PANDITS ✦
+          </span>
           <span className="sm:hidden truncate">✦ AUTHENTIC ✦</span>
           <div className="flex items-center gap-4">
-            <Link to="/track-order" className="hidden sm:inline hover:text-gold transition">Track Order</Link>
-            <Link to="/shop" className="hidden sm:inline hover:text-gold transition">Shop All</Link>
-            <a href="tel:+919999999999" className="flex items-center gap-1.5 hover:text-gold transition">
+            <Link to="/track-order" className="hidden sm:inline hover:text-gold transition">
+              Track Order
+            </Link>
+            <Link to="/shop" className="hidden sm:inline hover:text-gold transition">
+              Shop All
+            </Link>
+            <a
+              href="tel:+919999999999"
+              className="flex items-center gap-1.5 hover:text-gold transition"
+            >
               <Phone className="w-3 h-3" /> +91 99999 99999
             </a>
           </div>
@@ -36,13 +45,12 @@ export function Header() {
             </div>
 
             {/* Desktop nav - centered */}
-            <nav className="hidden lg:flex items-center gap-3" onMouseLeave={() => setOpenSlug(null)}>
+            <nav
+              className="hidden lg:flex items-center gap-3"
+              onMouseLeave={() => setOpenSlug(null)}
+            >
               {categories.map((cat) => (
-                <div
-                  key={cat.slug}
-                  className="relative"
-                  onMouseEnter={() => setOpenSlug(cat.slug)}
-                >
+                <div key={cat.slug} className="relative" onMouseEnter={() => setOpenSlug(cat.slug)}>
                   <Link
                     to="/category/$slug"
                     params={{ slug: cat.slug }}
@@ -61,10 +69,19 @@ export function Header() {
               <button className="p-2.5 text-cream hover:text-gold transition" aria-label="Search">
                 <Search className="w-5 h-5" />
               </button>
-              <Link to="/account" className="p-2.5 text-cream hover:text-gold transition" aria-label="Account">
+              <Link
+                to="/account"
+                className="p-2.5 text-cream hover:text-gold transition"
+                aria-label="Account"
+              >
                 <User className="w-5 h-5" />
               </Link>
-              <Link to="/cart" search={{ cleared: undefined }} className="p-2.5 text-cream hover:text-gold transition relative" aria-label="Cart">
+              <Link
+                to="/cart"
+                search={{ cleared: undefined }}
+                className="p-2.5 text-cream hover:text-gold transition relative"
+                aria-label="Cart"
+              >
                 <ShoppingBag className="w-5 h-5" />
                 <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-gold text-maroon-deep text-[10px] rounded-full flex items-center justify-center font-bold">
                   {count}
@@ -95,12 +112,14 @@ export function Header() {
                   <div className="grid grid-cols-12 gap-8">
                     <div className="col-span-3 border-r border-gold/30 pr-8 flex flex-col justify-between">
                       <div>
-                        <p className="text-xs tracking-[0.3em] text-gold uppercase mb-2">Category</p>
+                        <p className="text-xs tracking-[0.3em] text-gold uppercase mb-2">
+                          Category
+                        </p>
                         <h3 className="font-display text-3xl text-maroon-deep mb-3">{cat.name}</h3>
                         <p className="text-sm text-muted-foreground leading-relaxed mb-5">
                           {cat.tagline}
                         </p>
-                        
+
                         {/* Trust Badges */}
                         <div className="space-y-2 mb-6 text-xs text-maroon-deep font-medium bg-white/60 p-3 rounded-xl border border-gold/20">
                           <div className="flex items-center gap-2">
@@ -123,7 +142,9 @@ export function Header() {
                         View all {cat.name} →
                       </Link>
                     </div>
-                    <div className={`col-span-9 grid gap-8 ${cat.sections.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+                    <div
+                      className={`col-span-9 grid gap-8 ${cat.sections.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}
+                    >
                       {cat.sections.map((section) => (
                         <div key={section.title}>
                           <h4 className="text-xs tracking-[0.25em] text-gold uppercase mb-4 pb-2 border-b border-gold/20 font-bold">
@@ -131,7 +152,7 @@ export function Header() {
                           </h4>
                           <div className="grid grid-cols-2 gap-3">
                             {section.items.map((item) =>
-                              cat.slug === 'online-pooja' ? (
+                              cat.slug === "online-pooja" ? (
                                 <Link
                                   key={item.name}
                                   to="/book-pooja"
@@ -178,7 +199,7 @@ export function Header() {
                                     )}
                                   </div>
                                 </Link>
-                              )
+                              ),
                             )}
                           </div>
                         </div>

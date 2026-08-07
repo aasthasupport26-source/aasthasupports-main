@@ -9,15 +9,21 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Aastha Support — Rudraksha, Gems & Online Pooja" },
-      { name: "description", content: "Shop certified rudraksha, malas, bracelets, gemstones & yantras. Book online poojas performed live by Vedic pandits from Kashi, Ujjain & Haridwar." },
+      {
+        name: "description",
+        content:
+          "Shop certified rudraksha, malas, bracelets, gemstones & yantras. Book online poojas performed live by Vedic pandits from Kashi, Ujjain & Haridwar.",
+      },
       { property: "og:title", content: "Aastha Support — Rudraksha, Gems & Online Pooja" },
-      { property: "og:description", content: "Certified rudraksha, gems, malas, bracelets, yantras and live Vedic poojas — energised by learned pandits." },
+      {
+        property: "og:description",
+        content:
+          "Certified rudraksha, gems, malas, bracelets, yantras and live Vedic poojas — energised by learned pandits.",
+      },
       { property: "og:url", content: "https://aasthasupport.com/" },
       { property: "og:image", content: "https://aasthasupport.com/og-image.jpg" },
     ],
-    links: [
-      { rel: "canonical", href: "https://aasthasupport.com/" },
-    ],
+    links: [{ rel: "canonical", href: "https://aasthasupport.com/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -79,15 +85,14 @@ function HomePage() {
               ✦ THE DIVINE WAY ✦
             </p>
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-cream leading-[1.05]">
-              Awaken Your<br />
+              Awaken Your
+              <br />
               <span className="text-gold italic">Inner Devotion</span>
             </h1>
-            <p className="font-devanagari text-gold-soft text-2xl mt-4">
-              || असतो मा सद्गमय ||
-            </p>
+            <p className="font-devanagari text-gold-soft text-2xl mt-4">|| असतो मा सद्गमय ||</p>
             <p className="mt-6 text-cream/85 text-lg max-w-xl leading-relaxed">
-              Authentic, certified, and Vedic-energised spiritual products — rudraksha,
-              gemstones and live poojas performed by learned pandits.
+              Authentic, certified, and Vedic-energised spiritual products — rudraksha, gemstones
+              and live poojas performed by learned pandits.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -134,7 +139,8 @@ function HomePage() {
             </h2>
             <div className="divider-gold w-32 mx-auto mt-5" />
             <p className="mt-5 text-muted-foreground">
-              Each product is hand-picked, lab-certified, and energised through Vedic rituals before reaching you.
+              Each product is hand-picked, lab-certified, and energised through Vedic rituals before
+              reaching you.
             </p>
           </div>
 
@@ -161,7 +167,9 @@ function HomePage() {
                 <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
                   <p className="text-gold text-[10px] tracking-[0.35em] uppercase">Collection</p>
                   <h3 className="font-display text-2xl md:text-3xl text-cream mt-1">{cat.name}</h3>
-                  <p className="text-cream/75 text-xs md:text-sm mt-2 line-clamp-2">{cat.tagline}</p>
+                  <p className="text-cream/75 text-xs md:text-sm mt-2 line-clamp-2">
+                    {cat.tagline}
+                  </p>
                   <span className="inline-flex items-center gap-1 mt-3 text-gold text-xs tracking-widest uppercase group-hover:gap-2 transition-all">
                     Explore <ArrowRight className="w-3.5 h-3.5" />
                   </span>
@@ -180,19 +188,32 @@ function HomePage() {
         <div className="container relative mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-gold tracking-[0.3em] text-xs">OUR PROMISE</p>
-            <h2 className="font-display text-4xl md:text-5xl mt-3">
-              Why Devotees Trust Us
-            </h2>
+            <h2 className="font-display text-4xl md:text-5xl mt-3">Why Devotees Trust Us</h2>
             <div className="divider-gold w-32 mx-auto mt-5" />
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { title: "Vedic Authenticity", desc: "Every rudraksha, gemstone and yantra is sourced directly from origin — Nepal, Indonesia, Sri Lanka — and X-ray / lab certified.", num: "01" },
-              { title: "Energised by Pandits", desc: "Products are abhimantrit through traditional Vedic rituals at our Haridwar ashram before dispatch.", num: "02" },
-              { title: "Astrological Guidance", desc: "Free consultation with our in-house Vedic astrologers to find the right rudraksha or gem for your kundali.", num: "03" },
+              {
+                title: "Vedic Authenticity",
+                desc: "Every rudraksha, gemstone and yantra is sourced directly from origin — Nepal, Indonesia, Sri Lanka — and X-ray / lab certified.",
+                num: "01",
+              },
+              {
+                title: "Energised by Pandits",
+                desc: "Products are abhimantrit through traditional Vedic rituals at our Haridwar ashram before dispatch.",
+                num: "02",
+              },
+              {
+                title: "Astrological Guidance",
+                desc: "Free consultation with our in-house Vedic astrologers to find the right rudraksha or gem for your kundali.",
+                num: "03",
+              },
             ].map((item) => (
-              <div key={item.num} className="border border-gold/30 rounded-xl p-8 bg-maroon/40 backdrop-blur hover:border-gold transition">
+              <div
+                key={item.num}
+                className="border border-gold/30 rounded-xl p-8 bg-maroon/40 backdrop-blur hover:border-gold transition"
+              >
                 <p className="font-display text-5xl text-gold/40">{item.num}</p>
                 <h3 className="font-display text-2xl text-cream mt-3">{item.title}</h3>
                 <p className="text-cream/75 text-sm mt-3 leading-relaxed">{item.desc}</p>
@@ -217,10 +238,15 @@ function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t) => (
-              <div key={t.name} className="bg-white rounded-xl p-7 shadow-soft border border-gold/20 relative">
+              <div
+                key={t.name}
+                className="bg-white rounded-xl p-7 shadow-soft border border-gold/20 relative"
+              >
                 <Quote className="absolute top-5 right-5 w-10 h-10 text-gold/15" />
                 <div className="flex items-center gap-0.5 text-gold mb-3">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-current" />
+                  ))}
                 </div>
                 <p className="text-foreground/80 leading-relaxed text-sm">"{t.text}"</p>
                 <div className="mt-5 pt-5 border-t border-gold/15">
@@ -237,12 +263,10 @@ function HomePage() {
       <section className="py-20 bg-royal text-cream relative overflow-hidden">
         <div className="container mx-auto px-4 text-center max-w-2xl">
           <p className="text-gold tracking-[0.4em] text-xs">|| आरम्भ ||</p>
-          <h2 className="font-display text-4xl md:text-5xl mt-4">
-            Begin Your Spiritual Journey
-          </h2>
+          <h2 className="font-display text-4xl md:text-5xl mt-4">Begin Your Spiritual Journey</h2>
           <p className="mt-5 text-cream/80 leading-relaxed">
-            Speak to our Vedic astrologers for a personalised recommendation —
-            discover the rudraksha, gemstone or pooja meant for your soul.
+            Speak to our Vedic astrologers for a personalised recommendation — discover the
+            rudraksha, gemstone or pooja meant for your soul.
           </p>
           <div className="mt-8 flex flex-wrap gap-3 justify-center">
             <Link

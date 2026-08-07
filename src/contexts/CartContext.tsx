@@ -16,8 +16,8 @@ type CartCtx = {
   count: number;
   subtotal: number;
   add: (item: Omit<CartItem, "quantity">, qty?: number) => void;
-  update: (slug: string, qty: number) => void;
-  remove: (slug: string) => void;
+  update: (variantId: string, qty: number) => void;
+  remove: (variantId: string) => void;
   clear: () => void;
 };
 
@@ -31,7 +31,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const raw = typeof window !== "undefined" ? localStorage.getItem(KEY) : null;
       if (raw) setItems(JSON.parse(raw));
-    } catch {}
+    } catch (err) {
+      console.warn("Failed to read cart from local storage", err);
+    }
   }, []);
 
   useEffect(() => {
@@ -40,23 +42,33 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items]);
 
-  const value = useMemo<CartCtx>(() => ({
-    items,
-    count: items.reduce((s, i) => s + i.quantity, 0),
-    subtotal: items.reduce((s, i) => s + i.quantity * i.price, 0),
-    add: (item, qty = 1) =>
-      setItems((prev) => {
-        const ex = prev.find((p) => p.slug === item.slug);
-        if (ex) return prev.map((p) => (p.slug === item.slug ? { ...p, quantity: p.quantity + qty } : p));
-        return [...prev, { ...item, quantity: qty }];
-      }),
-    update: (slug, qty) =>
-      setItems((prev) =>
-        qty <= 0 ? prev.filter((p) => p.slug !== slug) : prev.map((p) => (p.slug === slug ? { ...p, quantity: qty } : p)),
-      ),
-    remove: (slug) => setItems((prev) => prev.filter((p) => p.slug !== slug)),
-    clear: () => setItems([]),
-  }), [items]);
+  const value = useMemo<CartCtx>(
+    () => ({
+      items,
+      count: items.reduce((s, i) => s + i.quantity, 0),
+      subtotal: items.reduce((s, i) => s + i.quantity * i.price, 0),
+      // Use variantId as the unique key so different variants of the same product
+      // don't merge together (which happened when keying by slug).
+      add: (item, qty = 1) =>
+        setItems((prev) => {
+          const ex = prev.find((p) => p.variantId === item.variantId);
+          if (ex)
+            return prev.map((p) =>
+              p.variantId === item.variantId ? { ...p, quantity: p.quantity + qty } : p,
+            );
+          return [...prev, { ...item, quantity: qty }];
+        }),
+      update: (variantId, qty) =>
+        setItems((prev) =>
+          qty <= 0
+            ? prev.filter((p) => p.variantId !== variantId)
+            : prev.map((p) => (p.variantId === variantId ? { ...p, quantity: qty } : p)),
+        ),
+      remove: (variantId) => setItems((prev) => prev.filter((p) => p.variantId !== variantId)),
+      clear: () => setItems([]),
+    }),
+    [items],
+  );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

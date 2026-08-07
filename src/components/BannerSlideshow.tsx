@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const banners = [
-  '/banners/banner1.jpg',
-  '/banners/banner2.jpg',
-  '/banners/banner3.jpg',
-  '/banners/banner4.jpg',
-  '/banners/banner5.jpg',
-  '/banners/banner6.jpg',
-  '/banners/banner7.jpg',
+  "/banners/banner1.jpg",
+  "/banners/banner2.jpg",
+  "/banners/banner3.jpg",
+  "/banners/banner4.jpg",
+  "/banners/banner5.jpg",
+  "/banners/banner6.jpg",
+  "/banners/banner7.jpg",
 ];
 
 export function BannerSlideshow() {
@@ -33,10 +33,11 @@ export function BannerSlideshow() {
           alt={`Banner ${i + 1}`}
           width={1920}
           height={1280}
-          fetchPriority={i === 0 ? 'high' : 'low'}
+          fetchPriority={i === 0 ? "high" : "low"}
+          loading={i === 0 ? "eager" : "lazy"}
           decoding="async"
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            i === current ? 'opacity-100' : 'opacity-0'
+            i === current ? "opacity-100" : "opacity-0"
           }`}
         />
       ))}
@@ -45,19 +46,16 @@ export function BannerSlideshow() {
 
       <div className="container relative mx-auto px-4 z-10">
         <div className="max-w-2xl animate-fade-up">
-          <p className="text-gold tracking-[0.4em] text-xs mb-5 font-medium">
-            ✦ THE DIVINE WAY ✦
-          </p>
+          <p className="text-gold tracking-[0.4em] text-xs mb-5 font-medium">✦ THE DIVINE WAY ✦</p>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-cream leading-[1.05]">
-            Awaken Your<br />
+            Awaken Your
+            <br />
             <span className="text-gold italic">Inner Devotion</span>
           </h1>
-          <p className="font-devanagari text-gold-soft text-2xl mt-4">
-            || असतो मा सद्गमय ||
-          </p>
+          <p className="font-devanagari text-gold-soft text-2xl mt-4">|| असतो मा सद्गमय ||</p>
           <p className="mt-6 text-cream/85 text-lg max-w-xl leading-relaxed">
-            Authentic, certified, and Vedic-energised spiritual products — rudraksha,
-            gemstones and live poojas performed by learned pandits.
+            Authentic, certified, and Vedic-energised spiritual products — rudraksha, gemstones and
+            live poojas performed by learned pandits.
           </p>
         </div>
       </div>
@@ -83,7 +81,7 @@ export function BannerSlideshow() {
             key={i}
             onClick={() => setCurrent(i)}
             className={`w-2 h-2 rounded-full transition ${
-              i === current ? 'bg-gold w-8' : 'bg-white/50 hover:bg-white/75'
+              i === current ? "bg-gold w-8" : "bg-white/50 hover:bg-white/75"
             }`}
             aria-label={`Go to banner ${i + 1}`}
           />

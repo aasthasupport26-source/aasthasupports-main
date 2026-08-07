@@ -1,12 +1,12 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || '08axwa-1x.myshopify.com';
-const SHOPIFY_STOREFRONT_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || '';
+const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || "08axwa-1x.myshopify.com";
+const SHOPIFY_STOREFRONT_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
 
 interface ShopifyCustomerCreateInput {
   email: string;
@@ -38,7 +38,9 @@ interface ShopifyCustomer {
  * Create a Shopify customer account
  * This creates a customer in Shopify but doesn't show Shopify branding to the user
  */
-export async function createShopifyCustomer(input: ShopifyCustomerCreateInput): Promise<ShopifyCustomer> {
+export async function createShopifyCustomer(
+  input: ShopifyCustomerCreateInput,
+): Promise<ShopifyCustomer> {
   const mutation = `
     mutation customerCreate($input: CustomerCreateInput!) {
       customerCreate(input: $input) {
@@ -63,10 +65,10 @@ export async function createShopifyCustomer(input: ShopifyCustomerCreateInput): 
   `;
 
   const response = await fetch(`https://${SHOPIFY_STORE_DOMAIN}/api/2024-10/graphql.json`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN,
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
     },
     body: JSON.stringify({
       query: mutation,
@@ -87,14 +89,16 @@ export async function createShopifyCustomer(input: ShopifyCustomerCreateInput): 
 
   if (json.data?.customerCreate?.customerUserErrors?.length > 0) {
     const error = json.data.customerCreate.customerUserErrors[0];
-    throw new Error(error.message || 'Failed to create account');
+    throw new Error(error.message || "Failed to create account");
   }
 
   const customer = json.data.customerCreate.customer;
 
   // Note: Shopify automatically sends verification email if email verification is enabled in store settings
   // Customer won't be able to login until they verify their email
-  console.log('Customer created - verification email sent to:', customer.email);
+  if (process.env.NODE_ENV !== "production") {
+    console.info("Customer created - verification email sent to:", customer.email);
+  }
 
   return customer;
 }
@@ -105,7 +109,7 @@ export async function createShopifyCustomer(input: ShopifyCustomerCreateInput): 
  */
 export async function loginShopifyCustomer(
   email: string,
-  password: string
+  password: string,
 ): Promise<{ customer: ShopifyCustomer; accessToken: ShopifyCustomerAccessToken }> {
   const mutation = `
     mutation customerAccessTokenCreate($input: CustomerAccessTokenCreateInput!) {
@@ -124,10 +128,10 @@ export async function loginShopifyCustomer(
   `;
 
   const response = await fetch(`https://${SHOPIFY_STORE_DOMAIN}/api/2024-10/graphql.json`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN,
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
     },
     body: JSON.stringify({
       query: mutation,
@@ -144,7 +148,7 @@ export async function loginShopifyCustomer(
 
   if (json.data?.customerAccessTokenCreate?.customerUserErrors?.length > 0) {
     const error = json.data.customerAccessTokenCreate.customerUserErrors[0];
-    throw new Error(error.message || 'Invalid email or password');
+    throw new Error(error.message || "Invalid email or password");
   }
 
   const accessToken = json.data.customerAccessTokenCreate.customerAccessToken;
@@ -162,9 +166,9 @@ export async function loginShopifyCustomer(
  * Get customer details using access token
  */
 export async function getShopifyCustomer(accessToken: string): Promise<ShopifyCustomer> {
-  if (accessToken.startsWith('shcat_')) {
+  if (accessToken.startsWith("shcat_")) {
     const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID;
-    const url = `https://shopify.com/${SHOP_ID}/account/customer/api/2024-07/graphql`;
+    const url = `https://shopify.com/${SHOP_ID}/account/customer/api/2025-07/graphql`;
     const query = `
       query getCustomerInfo {
         customer {
@@ -182,10 +186,10 @@ export async function getShopifyCustomer(accessToken: string): Promise<ShopifyCu
     `;
 
     const res = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ query }),
     });
@@ -198,16 +202,19 @@ export async function getShopifyCustomer(accessToken: string): Promise<ShopifyCu
     const json = await res.json();
     const customerNode = json.data?.customer;
     if (!customerNode) {
-      throw new Error('Customer not found or token expired');
+      throw new Error("Customer not found or token expired");
     }
 
     return {
-      id: customerNode.id || 'shopify-customer',
-      email: customerNode.emailAddress?.emailAddress || '',
+      id: customerNode.id || "shopify-customer",
+      email: customerNode.emailAddress?.emailAddress || "",
       firstName: customerNode.firstName || null,
       lastName: customerNode.lastName || null,
       phone: customerNode.phoneNumber?.phoneNumber || null,
-      displayName: `${customerNode.firstName || ''} ${customerNode.lastName || ''}`.trim() || customerNode.emailAddress?.emailAddress || 'Customer',
+      displayName:
+        `${customerNode.firstName || ""} ${customerNode.lastName || ""}`.trim() ||
+        customerNode.emailAddress?.emailAddress ||
+        "Customer",
     };
   }
 
@@ -225,10 +232,10 @@ export async function getShopifyCustomer(accessToken: string): Promise<ShopifyCu
   `;
 
   const response = await fetch(`https://${SHOPIFY_STORE_DOMAIN}/api/2024-10/graphql.json`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN,
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
     },
     body: JSON.stringify({
       query,
@@ -241,7 +248,7 @@ export async function getShopifyCustomer(accessToken: string): Promise<ShopifyCu
   const json = await response.json();
 
   if (!json.data?.customer) {
-    throw new Error('Customer not found or token expired');
+    throw new Error("Customer not found or token expired");
   }
 
   return json.data.customer;
@@ -265,10 +272,10 @@ export async function logoutShopifyCustomer(accessToken: string): Promise<void> 
   `;
 
   await fetch(`https://${SHOPIFY_STORE_DOMAIN}/api/2024-10/graphql.json`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN,
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
     },
     body: JSON.stringify({
       query: mutation,
@@ -284,23 +291,24 @@ export async function logoutShopifyCustomer(accessToken: string): Promise<void> 
  * This keeps our local database in sync with Shopify
  */
 export async function syncShopifyCustomerToSupabase(customer: ShopifyCustomer): Promise<void> {
-  const { error } = await supabaseAdmin.from('users').upsert(
+  const { error } = await supabaseAdmin.from("users").upsert(
     {
       email: customer.email,
-      full_name: customer.displayName || `${customer.firstName || ''} ${customer.lastName || ''}`.trim(),
+      full_name:
+        customer.displayName || `${customer.firstName || ""} ${customer.lastName || ""}`.trim(),
       phone: customer.phone,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
     {
-      onConflict: 'email',
+      onConflict: "email",
       ignoreDuplicates: false,
-    }
+    },
   );
 
   if (error) {
-    console.error('Failed to sync customer to Supabase:', error);
-    throw new Error('Failed to sync user data');
+    console.error("Failed to sync customer to Supabase:", error);
+    throw new Error("Failed to sync user data");
   }
 }
 
@@ -309,13 +317,13 @@ export async function syncShopifyCustomerToSupabase(customer: ShopifyCustomer): 
  */
 export async function getUserWithAdminStatus(email: string): Promise<{ is_admin: boolean } | null> {
   const { data, error } = await supabaseAdmin
-    .from('users')
-    .select('is_admin')
-    .eq('email', email)
+    .from("users")
+    .select("is_admin")
+    .eq("email", email)
     .single();
 
   if (error) {
-    console.error('Failed to get user admin status:', error);
+    console.error("Failed to get user admin status:", error);
     return null;
   }
 

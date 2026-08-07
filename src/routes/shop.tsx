@@ -6,21 +6,38 @@ import { getShopifyProducts } from '@/lib/shopify.functions';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { Search, Star, ShieldCheck, Sparkles, SlidersHorizontal, ShoppingBag, Loader2 } from 'lucide-react';
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import React, { useState, useEffect } from "react";
+import { Layout } from "@/components/Layout";
+import { useServerFn } from "@tanstack/react-start";
+import { getShopifyProducts } from "@/lib/shopify.functions";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
+import {
+  Search,
+  Star,
+  ShieldCheck,
+  Sparkles,
+  SlidersHorizontal,
+  ShoppingBag,
+  Loader2,
+} from "lucide-react";
 
-export const Route = createFileRoute('/shop')({
+export const Route = createFileRoute("/shop")({
   head: () => {
-    const title = 'Shop All — Rudraksha, Mala, Gemstones | Aastha Support';
-    const desc = 'Browse all certified rudraksha, malas, bracelets, gemstones & yantras. Energised by Vedic pandits.';
-    const url = 'https://aasthasupport.com/shop';
+    const title = "Shop All — Rudraksha, Mala, Gemstones | Aastha Support";
+    const desc =
+      "Browse all certified rudraksha, malas, bracelets, gemstones & yantras. Energised by Vedic pandits.";
+    const url = "https://aasthasupport.com/shop";
     return {
       meta: [
         { title },
-        { name: 'description', content: desc },
-        { property: 'og:title', content: title },
-        { property: 'og:description', content: desc },
-        { property: 'og:url', content: url },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
       ],
-      links: [{ rel: 'canonical', href: url }],
+      links: [{ rel: "canonical", href: url }],
     };
   },
   component: ShopPage,
@@ -31,11 +48,11 @@ function ShopPage() {
   const navigate = useNavigate();
   const fetchProducts = useServerFn(getShopifyProducts);
 
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Fetch products on mount
   React.useEffect(() => {
@@ -45,8 +62,8 @@ function ShopPage() {
         const data = await fetchProducts({ data: { limit: 50 } });
         setProducts(data);
       } catch (err: any) {
-        setError(err?.message || 'Failed to load products');
-        toast.error('Failed to load products from Shopify');
+        setError(err?.message || "Failed to load products");
+        toast.error("Failed to load products from Shopify");
       } finally {
         setLoading(false);
       }
@@ -55,25 +72,26 @@ function ShopPage() {
   }, []);
 
   const categories = [
-    { name: 'All Products', slug: 'all' },
-    { name: 'Rudraksha', slug: 'rudraksha' },
-    { name: 'Malas', slug: 'mala' },
-    { name: 'Bracelets', slug: 'bracelet' },
-    { name: 'Gemstones', slug: 'gemstone' },
-    { name: 'Yantras', slug: 'yantra' },
+    { name: "All Products", slug: "all" },
+    { name: "Rudraksha", slug: "rudraksha" },
+    { name: "Malas", slug: "mala" },
+    { name: "Bracelets", slug: "bracelet" },
+    { name: "Gemstones", slug: "gemstone" },
+    { name: "Yantras", slug: "yantra" },
   ];
 
   // Filter products
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase()) ||
-                         product.description?.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    const matchesSearch =
+      product.name.toLowerCase().includes(search.toLowerCase()) ||
+      product.description?.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   const handleAddToCart = (product: any) => {
     if (!product.variantId) {
-      toast.error('Product variant not available');
+      toast.error("Product variant not available");
       return;
     }
     add({
@@ -87,6 +105,7 @@ function ShopPage() {
     });
     toast.success(`${product.name} added to cart`);
     navigate({ to: '/cart' });
+    navigate({ to: "/cart", search: { cleared: undefined } });
   };
 
   return (
@@ -125,8 +144,8 @@ function ShopPage() {
                   onClick={() => setSelectedCategory(cat.slug)}
                   className={`px-6 py-2.5 rounded-full transition-all ${
                     selectedCategory === cat.slug
-                      ? 'bg-maroon-deep text-white shadow-md'
-                      : 'bg-white text-maroon-deep border border-gold/20 hover:border-gold'
+                      ? "bg-maroon-deep text-white shadow-md"
+                      : "bg-white text-maroon-deep border border-gold/20 hover:border-gold"
                   }`}
                 >
                   {cat.name}
@@ -162,22 +181,22 @@ function ShopPage() {
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-20">
                   <p className="text-muted-foreground text-lg mb-4">
-                    {search || selectedCategory !== 'all'
-                      ? 'No products match your search'
-                      : 'No products found in Shopify'}
+                    {search || selectedCategory !== "all"
+                      ? "No products match your search"
+                      : "No products found in Shopify"}
                   </p>
-                  {(search || selectedCategory !== 'all') && (
+                  {(search || selectedCategory !== "all") && (
                     <button
                       onClick={() => {
-                        setSearch('');
-                        setSelectedCategory('all');
+                        setSearch("");
+                        setSelectedCategory("all");
                       }}
                       className="text-maroon-deep hover:underline"
                     >
                       Clear filters
                     </button>
                   )}
-                  {!search && selectedCategory === 'all' && (
+                  {!search && selectedCategory === "all" && (
                     <p className="text-sm text-muted-foreground mt-4">
                       Add products in your Shopify admin with proper metafields
                     </p>
@@ -187,7 +206,8 @@ function ShopPage() {
                 <>
                   <div className="text-center mb-8">
                     <p className="text-muted-foreground">
-                      Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+                      Showing {filteredProducts.length} product
+                      {filteredProducts.length !== 1 ? "s" : ""}
                     </p>
                   </div>
 
@@ -222,7 +242,9 @@ function ShopPage() {
                           )}
                           {!product.available && (
                             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                              <span className="bg-white px-4 py-2 rounded-lg font-medium">Out of Stock</span>
+                              <span className="bg-white px-4 py-2 rounded-lg font-medium">
+                                Out of Stock
+                              </span>
                             </div>
                           )}
                         </Link>
@@ -247,15 +269,16 @@ function ShopPage() {
                           {/* Price */}
                           <div className="flex items-center gap-2 mb-4">
                             <span className="text-2xl font-bold text-maroon-deep">
-                              ₹{product.price.toLocaleString('en-IN')}
+                              ₹{product.price.toLocaleString("en-IN")}
                             </span>
                             {product.mrp && product.mrp > product.price && (
                               <>
                                 <span className="text-sm text-muted-foreground line-through">
-                                  ₹{product.mrp.toLocaleString('en-IN')}
+                                  ₹{product.mrp.toLocaleString("en-IN")}
                                 </span>
                                 <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">
-                                  {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
+                                  {Math.round(((product.mrp - product.price) / product.mrp) * 100)}%
+                                  OFF
                                 </span>
                               </>
                             )}
@@ -267,25 +290,26 @@ function ShopPage() {
                             disabled={!product.available}
                             className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
                               product.available
-                                ? 'bg-maroon-deep text-white hover:bg-maroon-darker hover:shadow-md'
-                                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                ? "bg-maroon-deep text-white hover:bg-maroon-darker hover:shadow-md"
+                                : "bg-gray-200 text-gray-400 cursor-not-allowed"
                             }`}
                           >
                             <ShoppingBag className="w-4 h-4" />
-                            {product.available ? 'Buy Now' : 'Out of Stock'}
+                            {product.available ? "Buy Now" : "Out of Stock"}
                           </button>
 
                           {/* Stock Info */}
-                          {product.available && product.stock !== undefined && product.stock < 10 && (
-                            <p className="text-xs text-orange-600 mt-2 text-center">
-                              Only {product.stock} left in stock
-                            </p>
-                          )}
+                          {product.available &&
+                            product.stock !== undefined &&
+                            product.stock < 10 && (
+                              <p className="text-xs text-orange-600 mt-2 text-center">
+                                Only {product.stock} left in stock
+                              </p>
+                            )}
                         </div>
                       </div>
                     ))}
                   </div>
-
                 </>
               )}
             </>

@@ -1,20 +1,20 @@
-import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
-import { useState } from 'react';
-import { Layout } from '@/components/Layout';
-import { loginUser, getShopifyOAuthUrl } from '@/lib/auth.functions';
-import { useServerFn } from '@tanstack/react-start';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { Layout } from "@/components/Layout";
+import { loginUser, getShopifyOAuthUrl } from "@/lib/auth.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
-export const Route = createFileRoute('/auth/')({
+export const Route = createFileRoute("/auth/")({
   head: () => ({
     meta: [
-      { title: 'Sign In — Aastha Support' },
-      { name: 'description', content: 'Sign in to access your Aastha Support account.' },
+      { title: "Sign In — Aastha Support" },
+      { name: "description", content: "Sign in to access your Aastha Support account." },
     ],
   }),
   validateSearch: (search: Record<string, unknown>): { email?: string } => {
@@ -32,24 +32,25 @@ function AuthPage() {
   const { login: setAuthLogin } = useAuth();
   const search = Route.useSearch();
 
-  const [email, setEmail] = useState(search.email || '');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(search.email || "");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-      const redirectUri = import.meta.env.VITE_SHOPIFY_REDIRECT_URI || `${window.location.origin}/auth/callback`;
+      const redirectUri =
+        import.meta.env.VITE_SHOPIFY_REDIRECT_URI || `${window.location.origin}/auth/callback`;
       const res = await getOAuthUrl({ data: { redirectUri } });
 
       if (res?.authorizeUrl) {
         window.location.href = res.authorizeUrl;
       } else {
-        throw new Error('Failed to obtain authorization URL');
+        throw new Error("Failed to obtain authorization URL");
       }
     } catch (err: any) {
-      console.error('Google login error:', err);
-      toast.error(err?.message || 'Failed to start Google login');
+      console.error("Google login error:", err);
+      toast.error(err?.message || "Failed to start Google login");
       setLoading(false);
     }
   };
@@ -58,12 +59,12 @@ function AuthPage() {
     e.preventDefault();
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.error('Enter a valid email address');
+      toast.error("Enter a valid email address");
       return;
     }
 
     if (!password || password.length === 0) {
-      toast.error('Password is required');
+      toast.error("Password is required");
       return;
     }
 
@@ -72,14 +73,14 @@ function AuthPage() {
       const result = await login({ data: { email, password } });
       const isAdminUser = await setAuthLogin(result.customer, result.accessToken, result.expiresAt);
 
-      toast.success(isAdminUser ? 'Welcome, Admin!' : 'Welcome back!');
+      toast.success(isAdminUser ? "Welcome, Admin!" : "Welcome back!");
       if (isAdminUser) {
-        navigate({ to: '/admin' });
+        navigate({ to: "/admin" });
       } else {
-        navigate({ to: '/profile' });
+        navigate({ to: "/profile" });
       }
     } catch (err: any) {
-      toast.error(err?.message || 'Invalid email or password');
+      toast.error(err?.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -89,9 +90,7 @@ function AuthPage() {
     <Layout>
       <section className="container max-w-md mx-auto py-20">
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-gold/20">
-          <h1 className="font-display text-3xl text-maroon-deep mb-2 text-center">
-            Welcome
-          </h1>
+          <h1 className="font-display text-3xl text-maroon-deep mb-2 text-center">Welcome</h1>
           <p className="text-sm text-muted-foreground mb-8 text-center">
             Sign in to book poojas and manage your orders
           </p>
@@ -132,7 +131,7 @@ function AuthPage() {
                   Signing in...
                 </>
               ) : (
-                'Sign In'
+                "Sign In"
               )}
             </Button>
           </form>
@@ -179,7 +178,8 @@ function AuthPage() {
               By continuing, you agree to our Terms of Service and Privacy Policy
             </p>
             <p className="text-xs text-maroon-deep text-center mt-2">
-              New users: Click "Google" above to create an account instantly, then return here to sign in with your email
+              New users: Click "Google" above to create an account instantly, then return here to
+              sign in with your email
             </p>
           </div>
         </div>

@@ -1,6 +1,17 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Facebook, Instagram, Youtube, Mail, MapPin, Phone, ShieldCheck, Truck, RotateCcw, Flame } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Youtube,
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  Truck,
+  RotateCcw,
+  Flame,
+} from "lucide-react";
 
 const trustItems = [
   { icon: ShieldCheck, title: "100% Authentic", desc: "Lab certified products" },
@@ -34,9 +45,9 @@ export function Footer() {
           <div className="md:col-span-4">
             <Logo />
             <p className="mt-5 text-sm leading-relaxed text-cream/80 max-w-sm">
-              Aastha Support brings you authentic, energised spiritual products and live Vedic rituals —
-              honouring the divine traditions of Sanatan Dharma. Every product is chosen, blessed and
-              delivered with shraddha.
+              Aastha Support brings you authentic, energised spiritual products and live Vedic
+              rituals — honouring the divine traditions of Sanatan Dharma. Every product is chosen,
+              blessed and delivered with shraddha.
             </p>
             <div className="flex items-center gap-3 mt-6">
               {[Facebook, Instagram, Youtube].map((Icon, i) => (
@@ -55,26 +66,98 @@ export function Footer() {
           <div className="md:col-span-2">
             <h4 className="font-display text-gold text-lg mb-4">Shop</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/category/$slug" params={{ slug: "online-pooja" }} className="hover:text-gold">Online Pooja</Link></li>
-              <li><Link to="/category/$slug" params={{ slug: "rudraksha" }} className="hover:text-gold">Rudraksha</Link></li>
-              <li><Link to="/category/$slug" params={{ slug: "mala" }} className="hover:text-gold">Mala</Link></li>
-              <li><Link to="/category/$slug" params={{ slug: "bracelets" }} className="hover:text-gold">Bracelets</Link></li>
-              <li><Link to="/category/$slug" params={{ slug: "gemstones" }} className="hover:text-gold">Gemstones</Link></li>
-              <li><Link to="/category/$slug" params={{ slug: "yantra" }} className="hover:text-gold">Yantra</Link></li>
-              <li><Link to="/shop" className="hover:text-gold">Shop All</Link></li>
-              <li><Link to="/track-order" className="hover:text-gold">Track Order</Link></li>
+              <li>
+                <Link
+                  to="/category/$slug"
+                  params={{ slug: "online-pooja" }}
+                  className="hover:text-gold"
+                >
+                  Online Pooja
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/category/$slug"
+                  params={{ slug: "rudraksha" }}
+                  className="hover:text-gold"
+                >
+                  Rudraksha
+                </Link>
+              </li>
+              <li>
+                <Link to="/category/$slug" params={{ slug: "mala" }} className="hover:text-gold">
+                  Mala
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/category/$slug"
+                  params={{ slug: "bracelets" }}
+                  className="hover:text-gold"
+                >
+                  Bracelets
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/category/$slug"
+                  params={{ slug: "gemstones" }}
+                  className="hover:text-gold"
+                >
+                  Gemstones
+                </Link>
+              </li>
+              <li>
+                <Link to="/category/$slug" params={{ slug: "yantra" }} className="hover:text-gold">
+                  Yantra
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop" className="hover:text-gold">
+                  Shop All
+                </Link>
+              </li>
+              <li>
+                <Link to="/track-order" className="hover:text-gold">
+                  Track Order
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div className="md:col-span-3">
             <h4 className="font-display text-gold text-lg mb-4">Company</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/about" className="hover:text-gold">About Us</Link></li>
-              <li><Link to="/contact" className="hover:text-gold">Contact</Link></li>
-              <li><Link to="/faq" className="hover:text-gold">FAQ</Link></li>
-              <li><Link to="/returns-policy" className="hover:text-gold">Returns & Policy</Link></li>
-              <li><Link to="/returns-policy" hash="privacy" className="hover:text-gold">Privacy Policy</Link></li>
-              <li><Link to="/returns-policy" hash="terms" className="hover:text-gold">Terms of Service</Link></li>
+              <li>
+                <Link to="/about" className="hover:text-gold">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-gold">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link to="/faq" className="hover:text-gold">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link to="/returns-policy" className="hover:text-gold">
+                  Returns & Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/returns-policy" hash="privacy" className="hover:text-gold">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/returns-policy" hash="terms" className="hover:text-gold">
+                  Terms of Service
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -87,11 +170,15 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-gold shrink-0" />
-                <a href="tel:+919999999999" className="hover:text-gold">+91 99999 99999</a>
+                <a href="tel:+919999999999" className="hover:text-gold">
+                  +91 99999 99999
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-gold shrink-0" />
-                <a href="mailto:care@aasthasupport.com" className="hover:text-gold">care@aasthasupport.com</a>
+                <a href="mailto:care@aasthasupport.com" className="hover:text-gold">
+                  care@aasthasupport.com
+                </a>
               </li>
             </ul>
           </div>

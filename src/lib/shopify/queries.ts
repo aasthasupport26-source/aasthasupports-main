@@ -1,4 +1,4 @@
-import { gql } from 'graphql-request';
+import { gql } from "graphql-request";
 
 export const GET_PRODUCTS_QUERY = gql`
   query GetProducts($first: Int!, $after: String, $query: String) {
@@ -42,11 +42,13 @@ export const GET_PRODUCTS_QUERY = gql`
               }
             }
           }
-          metafields(identifiers: [
-            {namespace: "custom", key: "category"},
-            {namespace: "custom", key: "benefits"},
-            {namespace: "custom", key: "certified"}
-          ]) {
+          metafields(
+            identifiers: [
+              { namespace: "custom", key: "category" }
+              { namespace: "custom", key: "benefits" }
+              { namespace: "custom", key: "certified" }
+            ]
+          ) {
             key
             value
           }
@@ -106,11 +108,13 @@ export const GET_PRODUCT_BY_HANDLE_QUERY = gql`
           }
         }
       }
-      metafields(identifiers: [
-        {namespace: "custom", key: "category"},
-        {namespace: "custom", key: "benefits"},
-        {namespace: "custom", key: "certified"}
-      ]) {
+      metafields(
+        identifiers: [
+          { namespace: "custom", key: "category" }
+          { namespace: "custom", key: "benefits" }
+          { namespace: "custom", key: "certified" }
+        ]
+      ) {
         key
         value
       }
@@ -205,10 +209,7 @@ export const GET_CUSTOMER_ORDERS_QUERY = gql`
 
 export const ADJUST_INVENTORY_MUTATION = gql`
   mutation AdjustInventory($inventoryItemId: ID!, $delta: Int!) {
-    inventoryAdjustQuantity(input: {
-      inventoryLevelId: $inventoryItemId
-      availableDelta: $delta
-    }) {
+    inventoryAdjustQuantity(input: { inventoryLevelId: $inventoryItemId, availableDelta: $delta }) {
       inventoryLevel {
         id
         available

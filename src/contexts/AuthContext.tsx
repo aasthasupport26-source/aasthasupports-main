@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { verifyAccessToken } from '@/lib/auth.functions';
-import { checkIsAdmin } from '@/lib/admin-auth.functions';
-import { useServerFn } from '@tanstack/react-start';
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { verifyAccessToken } from "@/lib/auth.functions";
+import { checkIsAdmin } from "@/lib/admin-auth.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 interface ShopifyCustomer {
   id: string;
@@ -32,8 +32,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAdmin = useServerFn(checkIsAdmin);
 
   useEffect(() => {
-    const token = localStorage.getItem('aastha_access_token');
-    const storedCustomer = localStorage.getItem('aastha_customer');
+    const token = localStorage.getItem("aastha_access_token");
+    const storedCustomer = localStorage.getItem("aastha_customer");
+    const storedExpiry = localStorage.getItem("aastha_token_expires");
+
+    // Check if token has expired
+    if (storedExpiry) {
+      const expiryDate = new Date(storedExpiry);
+      if (expiryDate.getTime() < Date.now()) {
+        // Token has expired — clear session
+        localStorage.removeItem("aastha_customer");
+        localStorage.removeItem("aastha_access_token");
+        localStorage.removeItem("aastha_token_expires");
+        setLoading(false);
+        return;
+      }
+    }
 
     if (token && storedCustomer) {
       try {
@@ -58,11 +72,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (result?.customer) setCustomer(result.customer);
           })
           .catch((err) => {
-            console.log('Background token verification notice, maintaining session:', err);
+            if (process.env.NODE_ENV !== "production") {
+              console.warn("Background token verification notice, maintaining session:", err);
+            }
           });
         return;
       } catch (e) {
-        console.error('Failed to parse stored customer:', e);
+        console.error("Failed to parse stored customer:", e);
       }
     }
 
@@ -70,16 +86,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  const login = async (customer: ShopifyCustomer, token: string, expiresAt?: string): Promise<boolean> => {
+  const login = async (
+    customer: ShopifyCustomer,
+    token: string,
+    expiresAt?: string,
+  ): Promise<boolean> => {
     // Default to 1-year persistent session if expiresAt not provided
     const farFuture = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
     const finalExpires = expiresAt || farFuture;
 
     setCustomer(customer);
     setAccessToken(token);
-    localStorage.setItem('aastha_customer', JSON.stringify(customer));
-    localStorage.setItem('aastha_access_token', token);
-    localStorage.setItem('aastha_token_expires', finalExpires);
+    localStorage.setItem("aastha_customer", JSON.stringify(customer));
+    localStorage.setItem("aastha_access_token", token);
+    localStorage.setItem("aastha_token_expires", finalExpires);
 
     // Check admin status
     try {
@@ -96,9 +116,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCustomer(null);
     setAccessToken(null);
     setIsAdmin(false);
-    localStorage.removeItem('aastha_customer');
-    localStorage.removeItem('aastha_access_token');
-    localStorage.removeItem('aastha_token_expires');
+    localStorage.removeItem("aastha_customer");
+    localStorage.removeItem("aastha_access_token");
+    localStorage.removeItem("aastha_token_expires");
   };
 
   return (
@@ -111,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 }

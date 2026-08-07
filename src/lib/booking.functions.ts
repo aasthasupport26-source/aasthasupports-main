@@ -1,59 +1,64 @@
-import { createServerFn } from '@tanstack/react-start';
-import { z } from 'zod';
-import { supabaseAdmin } from './auth/shopify-customer';
-import Razorpay from 'razorpay';
-import crypto from 'crypto';
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { supabaseAdmin } from "./auth/shopify-customer";
+import Razorpay from "razorpay";
+import crypto from "crypto";
 
-import { TEMPLES_CATALOG, PUJAS_CATALOG } from '@/data/pooja-catalog';
+import { TEMPLES_CATALOG, PUJAS_CATALOG } from "@/data/pooja-catalog";
 
 // ---------------------------------------------------------
 // FETCHERS (For Browsing Temples, Pujas, Packages)
 // ---------------------------------------------------------
 
-export const getTemples = createServerFn({ method: 'GET' })
-  .handler(async () => {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('temples')
-        .select('*')
-        .eq('active', true)
-        .order('name');
-      if (!error && data && data.length > 0) return data;
-    } catch (_) {}
-    return TEMPLES_CATALOG;
-  });
+export const getTemples = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("temples")
+      .select("*")
+      .eq("active", true)
+      .order("name");
+    if (!error && data && data.length > 0) return data;
+  } catch (err) {
+    console.debug("Failed to fetch temples from DB, using fallback", err);
+  }
+  return TEMPLES_CATALOG;
+});
 
-export const getPujasByTemple = createServerFn({ method: 'GET' })
+export const getPujasByTemple = createServerFn({ method: "GET" })
   .validator(z.object({ templeId: z.string() }))
   .handler(async ({ data }) => {
     try {
       const { data: pujas, error } = await supabaseAdmin
-        .from('pujas')
-        .select('*, packages(*)')
-        .eq('temple_id', data.templeId)
-        .eq('active', true)
-        .order('name');
+        .from("pujas")
+        .select("*, packages(*)")
+        .eq("temple_id", data.templeId)
+        .eq("active", true)
+        .order("name");
       if (!error && pujas && pujas.length > 0) return pujas;
-    } catch (_) {}
+    } catch (err) {
+      console.debug("Failed to fetch pujas from DB, using fallback", err);
+    }
 
-    return PUJAS_CATALOG.filter(p => p.temple_id === data.templeId);
+    return PUJAS_CATALOG.filter((p) => p.temple_id === data.templeId);
   });
 
-export const getPujaDetails = createServerFn({ method: 'GET' })
+export const getPujaDetails = createServerFn({ method: "GET" })
   .validator(z.object({ slug: z.string() }))
   .handler(async ({ data }) => {
     try {
       const { data: puja, error } = await supabaseAdmin
-        .from('pujas')
-        .select('*, temple:temples(*), packages(*)')
-        .eq('slug', data.slug)
+        .from("pujas")
+        .select("*, temple:temples(*), packages(*)")
+        .eq("slug", data.slug)
         .single();
       if (!error && puja) return puja;
-    } catch (_) {}
+    } catch (err) {
+      console.debug("Failed to fetch puja details from DB, using fallback", err);
+    }
 
-    const found = PUJAS_CATALOG.find(p => p.slug === data.slug);
+    const found = PUJAS_CATALOG.find((p) => p.slug === data.slug);
     if (!found) return null;
-    const temple = TEMPLES_CATALOG.find(t => t.id === found.temple_id);
+    const temple = TEMPLES_CATALOG.find((t) => t.id === found.temple_id);
     return { ...found, temple };
   });
 
@@ -63,7 +68,7 @@ export const getPujaDetails = createServerFn({ method: 'GET' })
 
 const SankalpMemberSchema = z.object({
   name: z.string().min(1),
-  relation: z.string().optional().or(z.literal('')),
+  relation: z.string().optional().or(z.literal("")),
 });
 
 const CreateBookingSchema = z.object({
@@ -72,24 +77,24 @@ const CreateBookingSchema = z.object({
   pujaId: z.string(),
   packageId: z.string(),
   packageAmount: z.number().optional(), // frontend passes price as fallback
-  
+
   customerName: z.string().min(1),
   phone: z.string().min(7),
   whatsapp: z.string().optional(),
-  email: z.string().email().optional().or(z.literal('')),
+  email: z.string().email().optional().or(z.literal("")),
   address: z.string().optional(),
-  
+
   gotra: z.string().optional(),
   dob: z.string().optional(), // YYYY-MM-DD
   birthTime: z.string().optional(), // HH:MM
   birthPlace: z.string().optional(),
   rashi: z.string().optional(),
   nakshatra: z.string().optional(),
-  
+
   bookingDate: z.string(),
   timeSlot: z.string().optional(),
   specialWish: z.string().optional(),
-  
+
   videoRequired: z.boolean().default(false),
   photoRequired: z.boolean().default(false),
   liveRequired: z.boolean().default(false),
@@ -99,7 +104,7 @@ const CreateBookingSchema = z.object({
   members: z.array(SankalpMemberSchema).default([]),
 });
 
-export const createPujaBooking = createServerFn({ method: 'POST' })
+export const createPujaBooking = createServerFn({ method: "POST" })
   .validator(CreateBookingSchema)
   .handler(async ({ data }) => {
     try {
@@ -107,30 +112,30 @@ export const createPujaBooking = createServerFn({ method: 'POST' })
       let baseAmount = data.packageAmount || 0;
       try {
         const { data: pkg } = await (supabaseAdmin as any)
-          .from('packages')
-          .select('price')
-          .eq('id', data.packageId)
+          .from("packages")
+          .select("price")
+          .eq("id", data.packageId)
           .single();
         if (pkg?.price) baseAmount = parseFloat(pkg.price);
       } catch (_) {
         // packages table may not exist yet; use packageAmount from frontend
       }
 
-      if (!baseAmount) throw new Error('Could not determine package price. Please try again.');
+      if (!baseAmount) throw new Error("Could not determine package price. Please try again.");
 
       // 2. Fetch processing fee (fallback 2% silently)
       let feePercent = 2.0;
       try {
         const { data: setting } = await (supabaseAdmin as any)
-          .from('settings')
-          .select('value')
-          .eq('key', 'processing_fee_percent')
+          .from("settings")
+          .select("value")
+          .eq("key", "processing_fee_percent")
           .single();
         if (setting?.value) feePercent = parseFloat(setting.value);
       } catch (_) {
         // settings table may not exist; use default 2%
       }
-      
+
       const processingFee = Math.round((baseAmount * feePercent) / 100);
       const totalAmount = baseAmount + processingFee;
 
@@ -147,11 +152,21 @@ export const createPujaBooking = createServerFn({ method: 'POST' })
         data.birthPlace ? `Birth Place: ${data.birthPlace}` : null,
         data.rashi ? `Rashi: ${data.rashi}` : null,
         data.nakshatra ? `Nakshatra: ${data.nakshatra}` : null,
-        data.members?.filter(m => m.name).map(m => `${m.name}${m.relation ? ` (${m.relation})` : ''}`).join(', '),
-      ].filter(Boolean).join(' | ');
+        data.members
+          ?.filter((m) => m.name)
+          .map((m) => `${m.name}${m.relation ? ` (${m.relation})` : ""}`)
+          .join(", "),
+      ]
+        .filter(Boolean)
+        .join(" | ");
 
-      const fullNotes = [data.specialWish, data.address, data.whatsapp ? `WhatsApp: ${data.whatsapp}` : null]
-        .filter(Boolean).join(' | ');
+      const fullNotes = [
+        data.specialWish,
+        data.address,
+        data.whatsapp ? `WhatsApp: ${data.whatsapp}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | ");
 
       // 4. Create Razorpay Order with booking details encoded in notes
       const keyId = process.env.RAZORPAY_KEY_ID;
@@ -165,17 +180,17 @@ export const createPujaBooking = createServerFn({ method: 'POST' })
         receipt: bookingNumber,
         notes: {
           bookingNumber,
-          userId: data.userId || '',
+          userId: data.userId || "",
           customerName: data.customerName,
           phone: data.phone,
-          email: data.email || '',
-          gotra: data.gotra || '',
+          email: data.email || "",
+          gotra: data.gotra || "",
           pujaId: data.pujaId,
-          bookingDate: data.bookingDate || '',
-          sankalpNotes: sankalpNotes || '',
-          fullNotes: fullNotes || '',
+          bookingDate: data.bookingDate || "",
+          sankalpNotes: sankalpNotes || "",
+          fullNotes: fullNotes || "",
           totalAmount: totalAmount.toString(),
-        }
+        },
       });
 
       // Return details needed for the frontend Razorpay Checkout
@@ -200,12 +215,91 @@ export const createPujaBooking = createServerFn({ method: 'POST' })
         currency: "INR",
         keyId,
         totalAmount,
-        processingFee
+        processingFee,
       };
-
     } catch (error: any) {
-      console.error('Booking draft creation failed:', error);
-      throw new Error(error.message || 'Failed to create booking');
+      console.error("Booking draft creation failed:", error);
+      throw new Error(error.message || "Failed to create booking");
+    }
+  });
+
+const CreateDirectBookingSchema = z.object({
+  userId: z.string().optional(),
+  sevaName: z.string(),
+  amount: z.number(),
+  customerName: z.string().min(1),
+  phone: z.string().min(7),
+  sankalpNotes: z.string().optional(),
+});
+
+export const createDirectPujaBooking = createServerFn({ method: "POST" })
+  .validator(CreateDirectBookingSchema)
+  .handler(async ({ data }) => {
+    try {
+      const baseAmount = data.amount;
+
+      // Fetch processing fee (fallback 2% silently)
+      let feePercent = 2.0;
+      try {
+        const { data: setting } = await (supabaseAdmin as any)
+          .from("settings")
+          .select("value")
+          .eq("key", "processing_fee_percent")
+          .single();
+        if (setting?.value) feePercent = parseFloat(setting.value);
+      } catch (_) {
+        // ignore fallback silently
+      }
+
+      const processingFee = Math.round((baseAmount * feePercent) / 100);
+      const totalAmount = baseAmount + processingFee;
+
+      const year = new Date().getFullYear();
+      const bookingTs = Date.now().toString().slice(-6);
+      const bookingNumber = `DIR-${year}-${bookingTs}`;
+
+      const keyId = process.env.RAZORPAY_KEY_ID;
+      const keySecret = process.env.RAZORPAY_KEY_SECRET;
+      if (!keyId || !keySecret) throw new Error("Razorpay keys not configured");
+
+      const rzp = new Razorpay({ key_id: keyId, key_secret: keySecret });
+      const order = await rzp.orders.create({
+        amount: Math.round(totalAmount * 100),
+        currency: "INR",
+        receipt: bookingNumber,
+        notes: {
+          bookingNumber,
+          userId: data.userId || "",
+          customerName: data.customerName,
+          phone: data.phone,
+          pooja_type: data.sevaName,
+          sankalpNotes: data.sankalpNotes || "",
+          totalAmount: totalAmount.toString(),
+        },
+      });
+
+      return {
+        success: true,
+        bookingPayload: {
+          booking_number: bookingNumber,
+          user_id: data.userId || null,
+          devotee_name: data.customerName,
+          phone: data.phone,
+          pooja_type: data.sevaName,
+          sankalp: data.sankalpNotes || null,
+          amount: totalAmount,
+        },
+        bookingNumber,
+        razorpayOrderId: order.id,
+        amountPaise: Math.round(totalAmount * 100),
+        currency: "INR",
+        keyId,
+        totalAmount,
+        processingFee,
+      };
+    } catch (error: any) {
+      console.error("Direct booking creation failed:", error);
+      throw new Error(error.message || "Failed to create direct booking");
     }
   });
 
@@ -232,7 +326,7 @@ const VerifyPaymentSchema = z.object({
   razorpay_signature: z.string(),
 });
 
-export const verifyPujaPayment = createServerFn({ method: 'POST' })
+export const verifyPujaPayment = createServerFn({ method: "POST" })
   .validator(VerifyPaymentSchema)
   .handler(async ({ data }) => {
     const secret = process.env.RAZORPAY_KEY_SECRET;
@@ -250,35 +344,33 @@ export const verifyPujaPayment = createServerFn({ method: 'POST' })
 
     // 2. Signature valid -> SAVE DETAILS IN SUPABASE POST-PAYMENT CONFIRMATION ONLY
     const { data: booking, error: bookingErr } = await (supabaseAdmin as any)
-      .from('pooja_bookings')
+      .from("pooja_bookings")
       .insert({
         ...data.bookingPayload,
-        status: 'Confirmed',
+        status: "Confirmed",
       })
       .select()
       .single();
 
     if (bookingErr) {
-      console.error('Error inserting confirmed booking:', bookingErr);
-      throw new Error('Payment verified, but failed to save booking record: ' + bookingErr.message);
+      console.error("Error inserting confirmed booking:", bookingErr);
+      throw new Error("Payment verified, but failed to save booking record: " + bookingErr.message);
     }
 
     // 3. Try to record payment in booking_payments table
     try {
-      await (supabaseAdmin as any)
-        .from('booking_payments')
-        .insert({
-          booking_id: booking.id,
-          amount: data.bookingPayload.amount,
-          currency: 'INR',
-          gateway: 'razorpay',
-          gateway_order_id: data.razorpay_order_id,
-          gateway_payment_id: data.razorpay_payment_id,
-          gateway_signature: data.razorpay_signature,
-          status: 'Captured',
-        });
+      await (supabaseAdmin as any).from("booking_payments").insert({
+        booking_id: booking.id,
+        amount: data.bookingPayload.amount,
+        currency: "INR",
+        gateway: "razorpay",
+        gateway_order_id: data.razorpay_order_id,
+        gateway_payment_id: data.razorpay_payment_id,
+        gateway_signature: data.razorpay_signature,
+        status: "Captured",
+      });
     } catch (_) {
-      console.warn('booking_payments record skipped');
+      console.warn("booking_payments record skipped");
     }
 
     return { success: true, bookingId: booking.id };
@@ -288,15 +380,15 @@ export const verifyPujaPayment = createServerFn({ method: 'POST' })
 // USER BOOKINGS MANAGEMENT
 // ---------------------------------------------------------
 
-export const getUserBookings = createServerFn({ method: 'GET' })
+export const getUserBookings = createServerFn({ method: "GET" })
   .validator(z.object({ userId: z.string() }))
   .handler(async ({ data }) => {
     const { data: bookings, error } = await (supabaseAdmin as any)
-      .from('pooja_bookings')
-      .select('*')
-      .eq('user_id', data.userId)
-      .order('created_at', { ascending: false });
-    
+      .from("pooja_bookings")
+      .select("*")
+      .eq("user_id", data.userId)
+      .order("created_at", { ascending: false });
+
     if (error) throw error;
     return bookings || [];
   });

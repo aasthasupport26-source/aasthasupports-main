@@ -19,10 +19,5 @@ export default defineConfig({
       strictPort: true,
     },
     plugins: [mcpPlugin()],
-    build: {
-      rollupOptions: {
-        external: ["cloudflare:workers"],
-      },
-    },
   },
 });

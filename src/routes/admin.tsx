@@ -2,13 +2,23 @@ import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tan
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  LayoutDashboard, Package, FolderTree, ShoppingCart, Flame,
-  MessageSquare, Users, Settings, LogOut, Loader2,
+  LayoutDashboard,
+  Package,
+  FolderTree,
+  ShoppingCart,
+  Flame,
+  MessageSquare,
+  Users,
+  Settings,
+  LogOut,
+  Loader2,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Aastha Support" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Admin — Aastha Support" }, { name: "robots", content: "noindex" }],
+  }),
   component: AdminLayout,
 });
 
@@ -52,7 +62,9 @@ function AdminLayout() {
             <Logo variant="light" compact />
             <div>
               <div className="font-display text-lg leading-tight text-gold">Aastha Support</div>
-              <div className="text-[10px] tracking-[0.25em] uppercase text-cream/60">Admin Panel</div>
+              <div className="text-[10px] tracking-[0.25em] uppercase text-cream/60">
+                Admin Panel
+              </div>
             </div>
           </Link>
         </div>
@@ -63,10 +75,15 @@ function AdminLayout() {
             if (item.to === "/admin/users" && !isAdmin) return null;
             if (item.to === "/admin/settings" && !isAdmin) return null;
             return (
-              <Link key={item.to} to={item.to}
+              <Link
+                key={item.to}
+                to={item.to}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition ${
-                  active ? "bg-gold text-maroon-deep font-medium" : "text-cream/80 hover:bg-maroon hover:text-cream"
-                }`}>
+                  active
+                    ? "bg-gold text-maroon-deep font-medium"
+                    : "text-cream/80 hover:bg-maroon hover:text-cream"
+                }`}
+              >
                 <Icon className="w-4 h-4" />
                 {item.label}
               </Link>
@@ -75,8 +92,13 @@ function AdminLayout() {
         </nav>
         <div className="p-3 border-t border-gold/20">
           <div className="px-3 py-2 text-xs text-cream/60 truncate">{customer.email}</div>
-          <button onClick={async () => { await logout(); navigate({ to: "/" }); }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-cream/80 hover:bg-maroon rounded-md transition">
+          <button
+            onClick={async () => {
+              await logout();
+              navigate({ to: "/" });
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-cream/80 hover:bg-maroon rounded-md transition"
+          >
             <LogOut className="w-4 h-4" /> Sign Out
           </button>
         </div>

@@ -11,14 +11,20 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
         setTimeout(() => {
-          supabase.from("user_roles").select("role").eq("user_id", s.user.id).then(({ data }) => {
-            setRoles((data ?? []).map((r) => r.role as Role));
-          });
+          supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", s.user.id)
+            .then(({ data }) => {
+              setRoles((data ?? []).map((r) => r.role as Role));
+            });
         }, 0);
       } else {
         setRoles([]);
@@ -29,10 +35,14 @@ export function useAuth() {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        supabase.from("user_roles").select("role").eq("user_id", s.user.id).then(({ data }) => {
-          setRoles((data ?? []).map((r) => r.role as Role));
-          setLoading(false);
-        });
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", s.user.id)
+          .then(({ data }) => {
+            setRoles((data ?? []).map((r) => r.role as Role));
+            setLoading(false);
+          });
       } else {
         setLoading(false);
       }

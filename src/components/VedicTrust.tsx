@@ -49,11 +49,14 @@ export function VedicTrust({ compact = false }: { compact?: boolean }) {
           </h2>
           <div className="divider-gold w-32 mx-auto mt-5" />
           <p className="mt-5 text-muted-foreground">
-            We don't just sell spiritual products — we deliver divine blessings backed by science, scripture, and transparency.
+            We don't just sell spiritual products — we deliver divine blessings backed by science,
+            scripture, and transparency.
           </p>
         </div>
 
-        <div className={`grid gap-6 ${compact ? "md:grid-cols-3" : "md:grid-cols-2 lg:grid-cols-3"}`}>
+        <div
+          className={`grid gap-6 ${compact ? "md:grid-cols-3" : "md:grid-cols-2 lg:grid-cols-3"}`}
+        >
           {certifications.map((c) => (
             <div
               key={c.title}

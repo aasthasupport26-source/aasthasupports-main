@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 
-export const Route = createFileRoute('/shopify-account')({
+export const Route = createFileRoute("/shopify-account")({
   component: ShopifyAccountRedirect,
 });
 
@@ -11,7 +11,7 @@ export const Route = createFileRoute('/shopify-account')({
  */
 function ShopifyAccountRedirect() {
   useEffect(() => {
-    window.location.href = 'https://shopify.com/101228675360/account';
+    window.location.href = "https://shopify.com/101228675360/account";
   }, []);
 
   return (

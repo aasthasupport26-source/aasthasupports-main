@@ -2,7 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, Truck, CheckCircle2, Clock, XCircle, Search, MapPin, Phone, ShieldCheck } from "lucide-react";
+import {
+  Package,
+  Truck,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Search,
+  MapPin,
+  Phone,
+  ShieldCheck,
+} from "lucide-react";
 
 export const Route = createFileRoute("/track-order")({
   head: () => {
@@ -97,7 +107,9 @@ function TrackOrderPage() {
             className="bg-white rounded-xl border border-gold/30 shadow-soft p-6 md:p-8 grid md:grid-cols-[1fr_1fr_auto] gap-3"
           >
             <div>
-              <label className="text-[11px] tracking-widest uppercase text-maroon-deep">Order Number</label>
+              <label className="text-[11px] tracking-widest uppercase text-maroon-deep">
+                Order Number
+              </label>
               <input
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
@@ -106,7 +118,9 @@ function TrackOrderPage() {
               />
             </div>
             <div>
-              <label className="text-[11px] tracking-widest uppercase text-maroon-deep">Phone</label>
+              <label className="text-[11px] tracking-widest uppercase text-maroon-deep">
+                Phone
+              </label>
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -147,8 +161,8 @@ function TrackOrderPage() {
                       isCancelled
                         ? "bg-red-50 text-red-700 border-red-200"
                         : status === "delivered"
-                        ? "bg-green-50 text-green-700 border-green-200"
-                        : "bg-cream text-maroon-deep border-gold/40"
+                          ? "bg-green-50 text-green-700 border-green-200"
+                          : "bg-cream text-maroon-deep border-gold/40"
                     }`}
                   >
                     {status}
@@ -172,7 +186,10 @@ function TrackOrderPage() {
                         const Icon = s.icon;
                         const done = i <= currentIdx;
                         return (
-                          <div key={s.key} className="relative z-10 flex flex-col items-center text-center w-24">
+                          <div
+                            key={s.key}
+                            className="relative z-10 flex flex-col items-center text-center w-24"
+                          >
                             <div
                               className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition ${
                                 done
@@ -204,20 +221,28 @@ function TrackOrderPage() {
                 </h3>
                 <div className="divide-y divide-gold/15">
                   {items.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No items recorded for this order.</p>
+                    <p className="text-sm text-muted-foreground">
+                      No items recorded for this order.
+                    </p>
                   )}
                   {items.map((i) => (
                     <div key={i.id} className="py-3 flex items-center justify-between text-sm">
                       <div>
                         <div className="text-maroon-deep font-medium">{i.product_name}</div>
-                        <div className="text-xs text-muted-foreground">Qty {i.quantity} × ₹{Number(i.unit_price).toLocaleString("en-IN")}</div>
+                        <div className="text-xs text-muted-foreground">
+                          Qty {i.quantity} × ₹{Number(i.unit_price).toLocaleString("en-IN")}
+                        </div>
                       </div>
-                      <div className="font-medium text-maroon-deep">₹{Number(i.subtotal).toLocaleString("en-IN")}</div>
+                      <div className="font-medium text-maroon-deep">
+                        ₹{Number(i.subtotal).toLocaleString("en-IN")}
+                      </div>
                     </div>
                   ))}
                 </div>
                 <div className="mt-4 pt-4 border-t border-gold/20 flex items-center justify-between">
-                  <span className="text-xs tracking-widest uppercase text-muted-foreground">Total</span>
+                  <span className="text-xs tracking-widest uppercase text-muted-foreground">
+                    Total
+                  </span>
                   <span className="font-display text-2xl text-maroon-deep">
                     ₹{Number(order.total).toLocaleString("en-IN")}
                   </span>
@@ -243,7 +268,9 @@ function TrackOrderPage() {
                     <Phone className="w-3.5 h-3.5" /> Contact
                   </p>
                   <p className="text-maroon-deep">{order.customer_phone}</p>
-                  {order.customer_email && <p className="text-muted-foreground">{order.customer_email}</p>}
+                  {order.customer_email && (
+                    <p className="text-muted-foreground">{order.customer_email}</p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-2">
                     Payment: <span className="text-maroon-deep">{order.payment_status}</span>
                     {order.payment_method && ` · ${order.payment_method}`}
@@ -252,8 +279,14 @@ function TrackOrderPage() {
               </div>
 
               <p className="text-center text-xs text-muted-foreground">
-                Need help? Call <a href="tel:+919999999999" className="text-maroon underline">+91 99999 99999</a> or email{" "}
-                <a href="mailto:info@aasthasupports.com" className="text-maroon underline">info@aasthasupports.com</a>
+                Need help? Call{" "}
+                <a href="tel:+919999999999" className="text-maroon underline">
+                  +91 99999 99999
+                </a>{" "}
+                or email{" "}
+                <a href="mailto:info@aasthasupports.com" className="text-maroon underline">
+                  info@aasthasupports.com
+                </a>
               </p>
             </div>
           )}

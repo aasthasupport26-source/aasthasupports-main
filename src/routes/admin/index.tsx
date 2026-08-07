@@ -1,8 +1,8 @@
-import { createFileRoute, Navigate, Link } from '@tanstack/react-router';
-import { useAuth } from '@/contexts/AuthContext';
-import { Users, Calendar, Package, Settings } from 'lucide-react';
+import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { useAuth } from "@/contexts/AuthContext";
+import { Users, Calendar, Package, Settings } from "lucide-react";
 
-export const Route = createFileRoute('/admin/')({
+export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
 });
 
@@ -23,32 +23,32 @@ function AdminDashboard() {
 
   const adminSections = [
     {
-      title: 'Customer Management',
-      description: 'View, search, and manage customer accounts',
+      title: "Customer Management",
+      description: "View, search, and manage customer accounts",
       icon: Users,
-      href: '/admin/customers',
-      color: 'bg-blue-50 text-blue-600',
+      href: "/admin/customers",
+      color: "bg-blue-50 text-blue-600",
     },
     {
-      title: 'Booking Management',
-      description: 'View and update booking statuses',
+      title: "Booking Management",
+      description: "View and update booking statuses",
       icon: Calendar,
-      href: '/admin/bookings',
-      color: 'bg-green-50 text-green-600',
+      href: "/admin/bookings",
+      color: "bg-green-50 text-green-600",
     },
     {
-      title: 'Pooja Management',
-      description: 'Manage pooja offerings and pricing',
+      title: "Pooja Management",
+      description: "Manage pooja offerings and pricing",
       icon: Package,
-      href: '/admin/poojas',
-      color: 'bg-purple-50 text-purple-600',
+      href: "/admin/poojas",
+      color: "bg-purple-50 text-purple-600",
     },
     {
-      title: 'Settings',
-      description: 'System configuration and preferences',
+      title: "Settings",
+      description: "System configuration and preferences",
       icon: Settings,
-      href: '/admin/settings',
-      color: 'bg-gray-50 text-gray-600',
+      href: "/admin/settings",
+      color: "bg-gray-50 text-gray-600",
     },
   ];
 
@@ -74,12 +74,8 @@ function AdminDashboard() {
                     <Icon className="h-6 w-6" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-display text-xl text-maroon-deep mb-1">
-                      {section.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {section.description}
-                    </p>
+                    <h3 className="font-display text-xl text-maroon-deep mb-1">{section.title}</h3>
+                    <p className="text-sm text-muted-foreground">{section.description}</p>
                   </div>
                 </div>
               </Link>

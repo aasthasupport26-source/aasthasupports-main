@@ -6,9 +6,16 @@ export const Route = createFileRoute("/returns-policy")({
   head: () => ({
     meta: [
       { title: "Returns, Shipping & Policies — Aastha Support" },
-      { name: "description", content: "Read Aastha Support's returns, shipping, cancellation, privacy policy and terms of service. 7-day easy returns. Free shipping above ₹999." },
+      {
+        name: "description",
+        content:
+          "Read Aastha Support's returns, shipping, cancellation, privacy policy and terms of service. 7-day easy returns. Free shipping above ₹999.",
+      },
       { property: "og:title", content: "Returns, Shipping & Policies — Aastha Support" },
-      { property: "og:description", content: "7-day easy returns. Free shipping above ₹999. Read our complete policies." },
+      {
+        property: "og:description",
+        content: "7-day easy returns. Free shipping above ₹999. Read our complete policies.",
+      },
       { property: "og:url", content: "https://aasthasupport.com/returns-policy" },
     ],
     links: [{ rel: "canonical", href: "https://aasthasupport.com/returns-policy" }],
@@ -151,7 +158,8 @@ function ReturnsPolicyPage() {
             Returns, Shipping & Policies
           </h1>
           <p className="mt-4 text-cream/75 max-w-2xl mx-auto">
-            Transparency is the foundation of trust. Read our complete policies on returns, shipping, cancellations, privacy, and terms.
+            Transparency is the foundation of trust. Read our complete policies on returns,
+            shipping, cancellations, privacy, and terms.
           </p>
         </div>
       </section>
@@ -190,7 +198,10 @@ function ReturnsPolicyPage() {
               </div>
               <div className="space-y-6">
                 {section.content.map((block, i) => (
-                  <div key={i} className="bg-white rounded-xl p-6 border border-gold/15 hover:border-gold/40 transition shadow-soft">
+                  <div
+                    key={i}
+                    className="bg-white rounded-xl p-6 border border-gold/15 hover:border-gold/40 transition shadow-soft"
+                  >
                     <h3 className="font-display text-lg text-maroon-deep mb-2">{block.heading}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{block.text}</p>
                   </div>
@@ -206,7 +217,8 @@ function ReturnsPolicyPage() {
         <div className="container mx-auto px-4 text-center max-w-2xl">
           <h2 className="font-display text-3xl">Need help with an order?</h2>
           <p className="mt-4 text-cream/80">
-            Our support team is available 24/7. Reach out via WhatsApp, email, or phone — we typically respond within minutes.
+            Our support team is available 24/7. Reach out via WhatsApp, email, or phone — we
+            typically respond within minutes.
           </p>
           <div className="mt-8 flex flex-wrap gap-3 justify-center">
             <a

@@ -42,9 +42,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-cream px-4">
       <div className="max-w-md text-center">
         <h1 className="font-display text-2xl text-maroon-deep">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Please try refreshing or return home.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">Please try refreshing or return home.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -73,7 +71,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Aastha Support — Rudraksha, Gemstones & Online Pooja" },
-      { name: "description", content: "Certified rudraksha, gemstones, malas, bracelets, yantras and live Vedic poojas — energised by learned pandits. Pan India delivery." },
+      {
+        name: "description",
+        content:
+          "Certified rudraksha, gemstones, malas, bracelets, yantras and live Vedic poojas — energised by learned pandits. Pan India delivery.",
+      },
       { name: "author", content: "Aastha Support" },
       { property: "og:site_name", content: "Aastha Support" },
       { property: "og:type", content: "website" },
@@ -97,7 +99,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "Organization",
           name: "Aastha Support",
           url: "https://aasthasupport.com",
-          description: "Authentic, certified, Vedic-energised rudraksha, gemstones, malas, bracelets, yantras and live online poojas.",
+          description:
+            "Authentic, certified, Vedic-energised rudraksha, gemstones, malas, bracelets, yantras and live online poojas.",
           address: {
             "@type": "PostalAddress",
             streetAddress: "Aastha Bhawan",

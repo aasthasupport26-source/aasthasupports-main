@@ -6,7 +6,16 @@ import { getShopifyProduct } from "@/lib/shopify.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Star, ShieldCheck, Sparkles, Truck, Award, ShoppingBag, Heart, Loader2 } from "lucide-react";
+import {
+  Star,
+  ShieldCheck,
+  Sparkles,
+  Truck,
+  Award,
+  ShoppingBag,
+  Heart,
+  Loader2,
+} from "lucide-react";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: ({ params }) => {
@@ -33,7 +42,7 @@ function ProductPage() {
   const fetchProduct = useServerFn(getShopifyProduct);
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
+
   const { add } = useCart();
   const navigate = useNavigate();
 
@@ -67,7 +76,9 @@ function ProductPage() {
       <Layout>
         <div className="container mx-auto px-4 py-32 text-center">
           <h1 className="font-display text-4xl text-maroon-deep">Product not found</h1>
-          <Link to="/" className="text-gold mt-4 inline-block">← Back home</Link>
+          <Link to="/" className="text-gold mt-4 inline-block">
+            ← Back home
+          </Link>
         </div>
       </Layout>
     );
@@ -76,26 +87,29 @@ function ProductPage() {
   const price = product.price;
   const mrp = product.mrp || price;
   const off = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
-  
+
   // Find category details if product has a category metafield
-  const cat = getCategory(product.category?.trim().toLowerCase()) || { name: product.category || 'Shop', slug: product.category || 'all' };
+  const cat = getCategory(product.category?.trim().toLowerCase()) || {
+    name: product.category || "Shop",
+    slug: product.category || "all",
+  };
 
   const addToCart = () => {
-    add({ 
-      slug: product.slug, 
-      name: product.name, 
-      image: product.images[0], 
-      price, 
-      mrp, 
+    add({
+      slug: product.slug,
+      name: product.name,
+      image: product.images[0],
+      price,
+      mrp,
       categoryName: cat.name,
-      variantId: product.variants[0]?.id
+      variantId: product.variants[0]?.id,
     });
     toast.success(`${product.name} added to cart`);
   };
 
   const buyNow = () => {
     addToCart();
-    navigate({ to: "/checkout" });
+    navigate({ to: "/cart" });
   };
 
   return (
@@ -103,11 +117,15 @@ function ProductPage() {
       <div className="container mx-auto px-4 py-10">
         {/* Breadcrumb */}
         <nav className="text-xs tracking-widest uppercase text-muted-foreground mb-8">
-          <Link to="/" className="hover:text-maroon">Home</Link>
+          <Link to="/" className="hover:text-maroon">
+            Home
+          </Link>
           <span className="mx-2 text-gold">/</span>
-          {cat.slug !== 'all' ? (
+          {cat.slug !== "all" ? (
             <>
-              <Link to="/category/$slug" params={{ slug: cat.slug }} className="hover:text-maroon">{cat.name}</Link>
+              <Link to="/category/$slug" params={{ slug: cat.slug }} className="hover:text-maroon">
+                {cat.name}
+              </Link>
               <span className="mx-2 text-gold">/</span>
             </>
           ) : null}
@@ -119,7 +137,7 @@ function ProductPage() {
           <div className="space-y-4">
             <div className="aspect-square rounded-2xl overflow-hidden bg-cream border border-gold/30 shadow-royal">
               <img
-                src={product.images[0] || ''}
+                src={product.images[0] || ""}
                 alt={product.name}
                 width={800}
                 height={800}
@@ -129,7 +147,10 @@ function ProductPage() {
             {product.images.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
                 {product.images.slice(0, 4).map((img: string, i: number) => (
-                  <div key={i} className="aspect-square rounded-lg overflow-hidden border border-gold/20 cursor-pointer hover:border-gold transition">
+                  <div
+                    key={i}
+                    className="aspect-square rounded-lg overflow-hidden border border-gold/20 cursor-pointer hover:border-gold transition"
+                  >
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </div>
                 ))}
@@ -140,11 +161,15 @@ function ProductPage() {
           {/* Details */}
           <div>
             <p className="text-gold tracking-[0.3em] text-xs">{cat.name.toUpperCase()}</p>
-            <h1 className="font-display text-4xl md:text-5xl text-maroon-deep mt-2">{product.name}</h1>
+            <h1 className="font-display text-4xl md:text-5xl text-maroon-deep mt-2">
+              {product.name}
+            </h1>
 
             <div className="flex items-center gap-3 mt-4">
               <div className="flex items-center gap-0.5 text-gold">
-                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-current" />
+                ))}
               </div>
               <span className="text-sm text-muted-foreground">4.9 · 1,284 reviews</span>
             </div>
@@ -154,9 +179,19 @@ function ProductPage() {
             )}
 
             <div className="flex items-baseline gap-3 mt-6">
-              <span className="font-numeric text-4xl text-maroon-deep">₹{price.toLocaleString("en-IN")}</span>
-              {mrp > price && <span className="text-muted-foreground line-through">₹{mrp.toLocaleString("en-IN")}</span>}
-              {off > 0 && <span className="text-xs bg-gold/20 text-maroon px-2 py-1 rounded tracking-widest uppercase">{off}% off</span>}
+              <span className="font-numeric text-4xl text-maroon-deep">
+                ₹{price.toLocaleString("en-IN")}
+              </span>
+              {mrp > price && (
+                <span className="text-muted-foreground line-through">
+                  ₹{mrp.toLocaleString("en-IN")}
+                </span>
+              )}
+              {off > 0 && (
+                <span className="text-xs bg-gold/20 text-maroon px-2 py-1 rounded tracking-widest uppercase">
+                  {off}% off
+                </span>
+              )}
             </div>
 
             {/* Trust badges */}
@@ -166,31 +201,40 @@ function ProductPage() {
                 { icon: Sparkles, label: "Vedic Energised", active: true },
                 { icon: Award, label: "Origin Verified", active: true },
                 { icon: Truck, label: "Free Shipping", active: true },
-              ].filter(b => b.active).map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-2 p-3 rounded-lg bg-cream border border-gold/20">
-                  <Icon className="w-5 h-5 text-gold shrink-0" />
-                  <span className="text-sm text-maroon-deep font-medium">{label}</span>
-                </div>
-              ))}
+              ]
+                .filter((b) => b.active)
+                .map(({ icon: Icon, label }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-2 p-3 rounded-lg bg-cream border border-gold/20"
+                  >
+                    <Icon className="w-5 h-5 text-gold shrink-0" />
+                    <span className="text-sm text-maroon-deep font-medium">{label}</span>
+                  </div>
+                ))}
             </div>
 
             {/* Actions */}
             <div className="flex gap-3 mt-7">
-              <button 
+              <button
                 onClick={addToCart}
                 disabled={!product.variants[0]?.available}
                 className="flex-1 bg-royal text-cream px-6 py-4 rounded-md font-medium tracking-widest text-xs uppercase hover:opacity-90 transition shadow-royal flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <ShoppingBag className="w-4 h-4" /> {product.variants[0]?.available ? 'Add to Cart' : 'Out of Stock'}
+                <ShoppingBag className="w-4 h-4" />{" "}
+                {product.variants[0]?.available ? "Add to Cart" : "Out of Stock"}
               </button>
-              <button 
+              <button
                 onClick={buyNow}
                 disabled={!product.variants[0]?.available}
                 className="flex-1 bg-gold text-maroon-deep px-6 py-4 rounded-md font-medium tracking-widest text-xs uppercase hover:bg-gold-soft transition shadow-gold disabled:opacity-50"
               >
                 Buy Now
               </button>
-              <button className="w-14 border border-maroon/40 rounded-md flex items-center justify-center hover:bg-maroon hover:text-cream transition" aria-label="Wishlist">
+              <button
+                className="w-14 border border-maroon/40 rounded-md flex items-center justify-center hover:bg-maroon hover:text-cream transition"
+                aria-label="Wishlist"
+              >
                 <Heart className="w-5 h-5" />
               </button>
             </div>
@@ -202,7 +246,9 @@ function ProductPage() {
                   <h3 className="font-display text-xl text-maroon-deep">Spiritual Benefits</h3>
                   <ul className="mt-3 space-y-2 text-sm text-foreground/80">
                     {product.benefits.map((benefit: string, idx: number) => (
-                      <li key={idx} className="flex gap-2"><span className="text-gold">✦</span> {benefit}</li>
+                      <li key={idx} className="flex gap-2">
+                        <span className="text-gold">✦</span> {benefit}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -210,18 +256,28 @@ function ProductPage() {
                 <div className="border-t border-gold/20 pt-5">
                   <h3 className="font-display text-xl text-maroon-deep">Spiritual Benefits</h3>
                   <ul className="mt-3 space-y-2 text-sm text-foreground/80">
-                    <li className="flex gap-2"><span className="text-gold">✦</span> Removes obstacles and negative energies</li>
-                    <li className="flex gap-2"><span className="text-gold">✦</span> Enhances concentration and meditation</li>
-                    <li className="flex gap-2"><span className="text-gold">✦</span> Bestows the wearer with peace and prosperity</li>
-                    <li className="flex gap-2"><span className="text-gold">✦</span> Aligns chakras and balances energy</li>
+                    <li className="flex gap-2">
+                      <span className="text-gold">✦</span> Removes obstacles and negative energies
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-gold">✦</span> Enhances concentration and meditation
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-gold">✦</span> Bestows the wearer with peace and
+                      prosperity
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-gold">✦</span> Aligns chakras and balances energy
+                    </li>
                   </ul>
                 </div>
               )}
-              
+
               <div className="border-t border-gold/20 pt-5">
                 <h3 className="font-display text-xl text-maroon-deep">How to Wear / Use</h3>
                 <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
-                  We provide the complete energisation and usage guide with every order. Follow the included instructions for maximum spiritual benefits.
+                  We provide the complete energisation and usage guide with every order. Follow the
+                  included instructions for maximum spiritual benefits.
                 </p>
               </div>
             </div>

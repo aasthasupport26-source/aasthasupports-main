@@ -1,11 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState, useRef } from 'react';
-import { getShopifyOAuthUrl } from '@/lib/auth.functions';
-import { useServerFn } from '@tanstack/react-start';
-import { Loader2 } from 'lucide-react';
-import { Layout } from '@/components/Layout';
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState, useRef } from "react";
+import { getShopifyOAuthUrl } from "@/lib/auth.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2 } from "lucide-react";
+import { Layout } from "@/components/Layout";
 
-export const Route = createFileRoute('/auth/login')({
+export const Route = createFileRoute("/auth/login")({
   component: AuthLoginPage,
 });
 
@@ -20,17 +20,18 @@ function AuthLoginPage() {
 
     const initOAuth = async () => {
       try {
-        const redirectUri = import.meta.env.VITE_SHOPIFY_REDIRECT_URI || `${window.location.origin}/auth/callback`;
+        const redirectUri =
+          import.meta.env.VITE_SHOPIFY_REDIRECT_URI || `${window.location.origin}/auth/callback`;
         const res = await getOAuthUrl({ data: { redirectUri } });
 
         if (res?.authorizeUrl) {
           window.location.href = res.authorizeUrl;
         } else {
-          throw new Error('Failed to obtain authorization URL');
+          throw new Error("Failed to obtain authorization URL");
         }
       } catch (err: any) {
-        console.error('OAuth Login init error:', err);
-        setError(err?.message || 'Failed to initiate login');
+        console.error("OAuth Login init error:", err);
+        setError(err?.message || "Failed to initiate login");
       }
     };
 
@@ -48,8 +49,12 @@ function AuthLoginPage() {
         ) : (
           <>
             <Loader2 className="w-10 h-10 animate-spin text-maroon mb-4" />
-            <h1 className="font-display text-2xl text-maroon-deep mb-2">Redirecting to Secure Login...</h1>
-            <p className="text-sm text-muted-foreground">Connecting with Shopify Customer Accounts</p>
+            <h1 className="font-display text-2xl text-maroon-deep mb-2">
+              Redirecting to Secure Login...
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Connecting with Shopify Customer Accounts
+            </p>
           </>
         )}
       </div>

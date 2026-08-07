@@ -1,8 +1,8 @@
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
-const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID || '';
-const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID || '';
-const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET || '';
+const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID || "";
+const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID || "";
+const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET || "";
 
 export interface OidcConfig {
   authorization_endpoint: string;
@@ -12,27 +12,27 @@ export interface OidcConfig {
 }
 
 export function generateRandomString(length: number = 32): string {
-  return crypto.randomBytes(length).toString('hex');
+  return crypto.randomBytes(length).toString("hex");
 }
 
 export function base64UrlEncode(str: Buffer): string {
-  return str.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  return str.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
 export function generatePKCE() {
   const verifier = base64UrlEncode(crypto.randomBytes(32));
-  const hash = crypto.createHash('sha256').update(verifier).digest();
+  const hash = crypto.createHash("sha256").update(verifier).digest();
   const challenge = base64UrlEncode(hash);
   return { verifier, challenge };
 }
 
-const STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || '08axwa-1x.myshopify.com';
+const STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || "08axwa-1x.myshopify.com";
 
 export async function getOidcConfig(): Promise<OidcConfig> {
   const url = `https://shopify.com/authentication/${SHOP_ID}/.well-known/openid-configuration`;
   const res = await fetch(url, {
     headers: {
-      Accept: 'application/json',
+      Accept: "application/json",
     },
   });
   if (!res.ok) {
@@ -49,13 +49,13 @@ export async function buildAuthorizeUrl(redirectUri: string) {
 
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
-    response_type: 'code',
+    response_type: "code",
     redirect_uri: redirectUri,
-    scope: 'openid email customer-account-api:full',
+    scope: "openid email customer-account-api:full",
     state,
     nonce,
     code_challenge: challenge,
-    code_challenge_method: 'S256',
+    code_challenge_method: "S256",
   });
 
   const authorizeUrl = `${oidc.authorization_endpoint}?${params.toString()}`;
@@ -71,7 +71,7 @@ export async function buildAuthorizeUrl(redirectUri: string) {
 export async function exchangeCodeForTokens(code: string, verifier: string, redirectUri: string) {
   const oidc = await getOidcConfig();
   const bodyParams: Record<string, string> = {
-    grant_type: 'authorization_code',
+    grant_type: "authorization_code",
     client_id: CLIENT_ID!,
     code,
     redirect_uri: redirectUri,
@@ -85,9 +85,9 @@ export async function exchangeCodeForTokens(code: string, verifier: string, redi
   const params = new URLSearchParams(bodyParams);
 
   const res = await fetch(oidc.token_endpoint, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      "Content-Type": "application/x-www-form-urlencoded",
     },
     body: params.toString(),
   });
@@ -134,12 +134,12 @@ export async function fetchCustomerAccountData(accessToken: string) {
     }
   `;
 
-  const url = `https://shopify.com/${SHOP_ID}/account/customer/api/2024-07/graphql`;
+  const url = `https://shopify.com/${SHOP_ID}/account/customer/api/2025-07/graphql`;
   const res = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      Authorization: accessToken,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ query }),
   });

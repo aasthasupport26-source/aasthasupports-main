@@ -1,0 +1,12 @@
+/assets/*
+  cache-control: public, max-age=31536000, immutable
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Permissions-Policy: interest-cohort=()
+
+# Note: Content-Security-Policy is intentionally omitted here to avoid breaking
+# third-party scripts until a tested policy is defined. Add a CSP after testing.

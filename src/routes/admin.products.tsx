@@ -2,7 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getShopifyProducts } from "@/lib/shopify.functions";
-import { Loader2, ExternalLink, ShieldCheck, Sparkles, Flame, RefreshCw, Search } from "lucide-react";
+import {
+  Loader2,
+  ExternalLink,
+  ShieldCheck,
+  Sparkles,
+  Flame,
+  RefreshCw,
+  Search,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin/products")({
   component: ProductsPage,
@@ -86,10 +94,13 @@ function ProductsPage() {
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-display text-lg text-amber-950">Shopify Category Selection Active</h3>
+            <h3 className="font-display text-lg text-amber-950">
+              Shopify Category Selection Active
+            </h3>
             <p className="text-sm text-amber-800/90 mt-1 leading-relaxed">
-              Physical merchandise (<strong>Rudraksha, Gemstones, Mala, Bracelet, Yantra</strong>) is synced live with Shopify. 
-              To add or modify physical products, manage listings directly inside your 
+              Physical merchandise (<strong>Rudraksha, Gemstones, Mala, Bracelet, Yantra</strong>)
+              is synced live with Shopify. To add or modify physical products, manage listings
+              directly inside your
               <a
                 href="https://admin.shopify.com"
                 target="_blank"
@@ -97,13 +108,16 @@ function ProductsPage() {
                 className="underline font-medium hover:text-amber-900 ml-1 inline-flex items-center gap-1"
               >
                 Shopify Admin Panel <ExternalLink className="w-3 h-3" />
-              </a>.
+              </a>
+              .
             </p>
             <p className="text-xs text-amber-700/80 mt-2">
-              ✦ <strong>Online Pooja Category:</strong> Online Poojas are managed via Supabase right here in 
+              ✦ <strong>Online Pooja Category:</strong> Online Poojas are managed via Supabase right
+              here in
               <Link to="/admin/pujas" className="underline font-medium ml-1">
                 Pujas Management (supports up to 4+ high-res image uploads)
-              </Link>.
+              </Link>
+              .
             </p>
           </div>
         </div>
@@ -182,7 +196,9 @@ function ProductsPage() {
                       )}
                       <div>
                         <div className="font-medium text-maroon-deep line-clamp-1">{p.name}</div>
-                        <div className="text-xs text-muted-foreground font-mono mt-0.5">{p.slug}</div>
+                        <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                          {p.slug}
+                        </div>
                       </div>
                     </div>
                   </td>

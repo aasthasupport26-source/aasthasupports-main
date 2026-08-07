@@ -6,14 +6,25 @@ import { getTemples, getPujasByTemple } from "@/lib/booking.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import {
-  Star, Sparkles, ShieldCheck, Loader2,
-  ChevronLeft, ChevronRight, Flame, Clock, Users, ArrowRight,
+  Star,
+  Sparkles,
+  ShieldCheck,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  Flame,
+  Clock,
+  Users,
+  ArrowRight,
 } from "lucide-react";
+import { DirectBookingModal } from "@/components/booking/DirectBookingModal";
 
 export const Route = createFileRoute("/category/$slug")({
   loader: ({ params }) => {
     const cat = getCategory(params.slug);
-    return { cat: cat || { slug: params.slug, name: params.slug, tagline: "", hero: "", sections: [] } };
+    return {
+      cat: cat || { slug: params.slug, name: params.slug, tagline: "", hero: "", sections: [] },
+    };
   },
   head: ({ params, loaderData }) => {
     const title = `${loaderData?.cat.name ?? "Category"} — Aastha Support`;
@@ -35,7 +46,9 @@ export const Route = createFileRoute("/category/$slug")({
     <Layout>
       <div className="container mx-auto px-4 py-32 text-center">
         <h1 className="font-display text-4xl text-maroon-deep">Category not found</h1>
-        <Link to="/" className="text-gold mt-4 inline-block">← Back home</Link>
+        <Link to="/" className="text-gold mt-4 inline-block">
+          ← Back home
+        </Link>
       </div>
     </Layout>
   ),
@@ -67,16 +80,25 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
   return (
     <Layout>
       <section className="relative h-[420px] overflow-hidden flex items-center">
-        <img src={cat.hero} alt={cat.name} width={1920} height={800}
-          className="absolute inset-0 w-full h-full object-cover" />
+        <img
+          src={cat.hero}
+          alt={cat.name}
+          width={1920}
+          height={800}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-maroon-deep/90 via-maroon-deep/60 to-maroon-deep/30" />
         <div className="container relative mx-auto px-4 z-10">
           <p className="text-gold tracking-[0.4em] text-xs">✦ COLLECTION ✦</p>
           <h1 className="font-display text-5xl md:text-6xl text-cream mt-3">{cat.name}</h1>
           <p className="text-cream/85 mt-4 max-w-xl leading-relaxed">{cat.tagline}</p>
           <div className="flex items-center gap-4 mt-5 text-xs tracking-widest uppercase text-gold-soft">
-            <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" /> Certified</span>
-            <span className="flex items-center gap-1.5"><Sparkles className="w-4 h-4" /> Energised</span>
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4" /> Certified
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4" /> Energised
+            </span>
           </div>
         </div>
       </section>
@@ -89,20 +111,48 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
         <section className="py-16 bg-cream">
           <div className="container mx-auto px-4 text-center">
             <div className="bg-white rounded-xl border border-gold/10 p-12 shadow-sm max-w-md mx-auto">
-              <p className="text-muted-foreground">No products available in this category currently.</p>
+              <p className="text-muted-foreground">
+                No products available in this category currently.
+              </p>
             </div>
           </div>
         </section>
       ) : (
         cat.sections.map((section: any) => {
-          const sectionItems = products.filter((product) =>
-            section.items.some(
+          const sectionItems = products.filter((product) => {
+            // First check if the product matches any sub-item in this section
+            const matchesSub = section.items.some(
               (sub: any) =>
                 product.slug.toLowerCase().includes(sub.slug.toLowerCase()) ||
                 product.name.toLowerCase().includes(sub.name.toLowerCase()) ||
-                sub.slug.toLowerCase().includes(product.slug.toLowerCase())
-            )
-          );
+                sub.slug.toLowerCase().includes(product.slug.toLowerCase()),
+            );
+
+            if (!matchesSub) return false;
+
+            // Strict filtering for Rudraksha sections based on Nepal/Indonesian keywords
+            const title = section.title.toLowerCase();
+            const prodName = product.name.toLowerCase();
+            const prodTags = (product.tags || []).map((t: string) => t.toLowerCase());
+
+            if (title.includes("nepali") || title.includes("nepal")) {
+              return (
+                prodName.includes("nepal") ||
+                prodTags.includes("nepal") ||
+                prodTags.includes("nepali")
+              );
+            }
+            if (title.includes("indonesian") || title.includes("indonesia")) {
+              return (
+                prodName.includes("indonesia") ||
+                prodTags.includes("indonesia") ||
+                prodTags.includes("indonesian")
+              );
+            }
+
+            return true;
+          });
+
           if (sectionItems.length === 0) return null;
           return (
             <section key={section.title} className="py-16 bg-cream odd:bg-white">
@@ -110,27 +160,51 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
                 <div className="flex items-end justify-between mb-10 flex-wrap gap-3">
                   <div>
                     <p className="text-gold tracking-[0.3em] text-xs">{cat.name.toUpperCase()}</p>
-                    <h2 className="font-display text-3xl md:text-4xl text-maroon-deep mt-2">{section.title}</h2>
+                    <h2 className="font-display text-3xl md:text-4xl text-maroon-deep mt-2">
+                      {section.title}
+                    </h2>
                   </div>
                   <div className="divider-gold flex-1 max-w-xs ml-6 mb-2" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                   {sectionItems.map((item: any) => (
-                    <Link key={item.slug} to="/product/$slug" params={{ slug: item.slug }}
-                      className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition">
+                    <Link
+                      key={item.slug}
+                      to="/product/$slug"
+                      params={{ slug: item.slug }}
+                      className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition"
+                    >
                       <div className="aspect-square overflow-hidden bg-cream">
-                        <img src={item.image} alt={item.name} loading="lazy" width={400} height={400}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          loading="lazy"
+                          width={400}
+                          height={400}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
                       </div>
                       <div className="p-4">
                         <div className="flex items-center gap-0.5 text-gold mb-1.5">
-                          {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-current" />)}
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-3 h-3 fill-current" />
+                          ))}
                         </div>
-                        <h3 className="font-display text-lg text-maroon-deep group-hover:text-maroon leading-tight">{item.name}</h3>
-                        {item.description && <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{item.description}</p>}
+                        <h3 className="font-display text-lg text-maroon-deep group-hover:text-maroon leading-tight">
+                          {item.name}
+                        </h3>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
+                            {item.description}
+                          </p>
+                        )}
                         <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
-                          <span className="text-maroon font-medium">₹{item.price.toLocaleString("en-IN")}</span>
-                          <span className="text-[10px] tracking-widest uppercase text-gold">View</span>
+                          <span className="text-maroon font-medium">
+                            ₹{item.price.toLocaleString("en-IN")}
+                          </span>
+                          <span className="text-[10px] tracking-widest uppercase text-gold">
+                            View
+                          </span>
                         </div>
                       </div>
                     </Link>
@@ -155,6 +229,12 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
   const [pujas, setPujas] = useState<any[]>([]);
   const [loadingTemples, setLoadingTemples] = useState(true);
   const [loadingPujas, setLoadingPujas] = useState(false);
+
+  const [bookingModal, setBookingModal] = useState<{
+    isOpen: boolean;
+    sevaName: string;
+    amount: number;
+  }>({ isOpen: false, sevaName: "", amount: 0 });
 
   // Load temples from Supabase
   useEffect(() => {
@@ -188,10 +268,15 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
       <section className="py-12 bg-gradient-to-r from-maroon-deep via-maroon to-maroon-deep text-cream border-b border-gold/30">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-8">
-            <span className="text-gold tracking-[0.4em] text-xs font-bold uppercase">✦ पवित्र श्रावण मास विशेष ✦</span>
-            <h2 className="font-display text-3xl md:text-4xl text-gold mt-2">सावन स्पेशल सेवा (Sawan Special Seva)</h2>
+            <span className="text-gold tracking-[0.4em] text-xs font-bold uppercase">
+              ✦ पवित्र श्रावण मास विशेष ✦
+            </span>
+            <h2 className="font-display text-3xl md:text-4xl text-gold mt-2">
+              सावन स्पेशल सेवा (Sawan Special Seva)
+            </h2>
             <p className="text-cream/80 text-sm mt-1 max-w-xl mx-auto">
-              सावन के हर सोमवार आपके नाम एवं गोत्र से महाकाल एवं विश्वनाथ मंदिर में जल व बेलपत्र अर्पित किया जाएगा।
+              सावन के हर सोमवार आपके नाम एवं गोत्र से महाकाल एवं विश्वनाथ मंदिर में जल व बेलपत्र
+              अर्पित किया जाएगा।
             </p>
           </div>
 
@@ -207,17 +292,29 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                 </div>
                 <h3 className="font-display text-xl text-cream mt-2">जल अभिषेक (Jal Abhishek)</h3>
                 <p className="text-xs text-cream/80 mt-2 leading-relaxed">
-                  सावन के हर सोमवार आपके नाम एवं गोत्र से भगवान शिव को पवित्र जल अर्पित किया जाएगा। संकल्प के साथ पूजा।
+                  सावन के हर सोमवार आपके नाम एवं गोत्र से भगवान शिव को पवित्र जल अर्पित किया जाएगा।
+                  संकल्प के साथ पूजा।
                 </p>
                 <ul className="mt-4 space-y-1.5 text-xs text-cream/90">
-                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> नाम एवं गोत्र से संकल्प</li>
-                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> सावन सोमवार जल अर्पण</li>
-                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> डिजिटल पूजा फोटो</li>
+                  <li className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> नाम एवं गोत्र से संकल्प
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> सावन सोमवार जल अर्पण
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> डिजिटल पूजा फोटो
+                  </li>
                 </ul>
               </div>
-              <Link to="/book-pooja" className="mt-6 w-full text-center bg-gold text-maroon-deep font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:bg-gold-soft transition">
+              <button
+                onClick={() =>
+                  setBookingModal({ isOpen: true, sevaName: "सावन सोमवार जल अभिषेक", amount: 51 })
+                }
+                className="mt-6 w-full text-center bg-gold text-maroon-deep font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:bg-gold-soft transition"
+              >
                 ₹51 में संकल्प लें →
-              </Link>
+              </button>
             </div>
 
             {/* Card 2: ₹101 */}
@@ -232,19 +329,40 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                   </span>
                   <span className="font-display text-3xl font-bold text-gold">₹101</span>
                 </div>
-                <h3 className="font-display text-xl text-cream mt-2">बेलपत्र एवं जल अभिषेक (Belpatra & Jal Abhishek)</h3>
+                <h3 className="font-display text-xl text-cream mt-2">
+                  बेलपत्र एवं जल अभिषेक (Belpatra & Jal Abhishek)
+                </h3>
                 <p className="text-xs text-cream/80 mt-2 leading-relaxed">
-                  सावन के हर सोमवार आपके नाम एवं गोत्र से बेलपत्र और जल दोनों अर्पित किए जाएंगे। संकल्प के साथ संपूर्ण पूजा।
+                  सावन के हर सोमवार आपके नाम एवं गोत्र से बेलपत्र और जल दोनों अर्पित किए जाएंगे।
+                  संकल्प के साथ संपूर्ण पूजा।
                 </p>
                 <ul className="mt-4 space-y-1.5 text-xs text-cream/90">
-                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> नाम एवं गोत्र से व्यक्तिगत संकल्प</li>
-                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> 108 बेलपत्र एवं जल अभिषेक</li>
-                  <li className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> पूजा फोटो एवं वीडियो क्लिप</li>
+                  <li className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> नाम एवं गोत्र से
+                    व्यक्तिगत संकल्प
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> 108 बेलपत्र एवं जल
+                    अभिषेक
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> पूजा फोटो एवं वीडियो
+                    क्लिप
+                  </li>
                 </ul>
               </div>
-              <Link to="/book-pooja" className="mt-6 w-full text-center bg-amber-400 text-maroon-deep font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:bg-amber-300 transition">
+              <button
+                onClick={() =>
+                  setBookingModal({
+                    isOpen: true,
+                    sevaName: "सावन बेलपत्र व जल अभिषेक",
+                    amount: 101,
+                  })
+                }
+                className="mt-6 w-full text-center bg-amber-400 text-maroon-deep font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:bg-amber-300 transition"
+              >
                 ₹101 में संकल्प लें →
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -260,7 +378,8 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
               Choose Your Pooja
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-              Select a temple and choose from our Vedic pandits-curated poojas, performed live at sacred sites.
+              Select a temple and choose from our Vedic pandits-curated poojas, performed live at
+              sacred sites.
             </p>
           </div>
 
@@ -275,8 +394,10 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
               <p className="text-muted-foreground text-sm mb-6">
                 Our pandit network is being set up. Sacred poojas will be listed here soon.
               </p>
-              <Link to="/book-pooja"
-                className="inline-flex items-center gap-2 bg-maroon-deep text-cream px-6 py-3 rounded-md text-xs tracking-widest uppercase hover:opacity-90 transition shadow-royal">
+              <Link
+                to="/book-pooja"
+                className="inline-flex items-center gap-2 bg-maroon-deep text-cream px-6 py-3 rounded-md text-xs tracking-widest uppercase hover:opacity-90 transition shadow-royal"
+              >
                 Book Directly <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -295,12 +416,17 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                     }`}
                   >
                     {temple.image_url && (
-                      <img src={temple.image_url} alt={temple.name}
-                        className="w-5 h-5 rounded-full object-cover" />
+                      <img
+                        src={temple.image_url}
+                        alt={temple.name}
+                        className="w-5 h-5 rounded-full object-cover"
+                      />
                     )}
                     {temple.name}
                     {temple.city && (
-                      <span className={`text-xs ${selectedTemple?.id === temple.id ? "text-gold-soft" : "text-muted-foreground"}`}>
+                      <span
+                        className={`text-xs ${selectedTemple?.id === temple.id ? "text-gold-soft" : "text-muted-foreground"}`}
+                      >
                         · {temple.city}
                       </span>
                     )}
@@ -312,20 +438,29 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
               {selectedTemple && (
                 <div className="mb-8 p-5 bg-white rounded-2xl border border-gold/20 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-4">
                   {selectedTemple.image_url && (
-                    <img src={selectedTemple.image_url} alt={selectedTemple.name}
-                      className="w-20 h-20 rounded-xl object-cover border border-gold/30 flex-shrink-0" />
+                    <img
+                      src={selectedTemple.image_url}
+                      alt={selectedTemple.name}
+                      className="w-20 h-20 rounded-xl object-cover border border-gold/30 flex-shrink-0"
+                    />
                   )}
                   <div className="flex-1">
                     <h3 className="font-display text-xl text-maroon-deep">{selectedTemple.name}</h3>
                     {selectedTemple.city && (
-                      <p className="text-xs text-muted-foreground mt-0.5 tracking-wide">{selectedTemple.city}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 tracking-wide">
+                        {selectedTemple.city}
+                      </p>
                     )}
                     {selectedTemple.description && (
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{selectedTemple.description}</p>
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                        {selectedTemple.description}
+                      </p>
                     )}
                   </div>
-                  <Link to="/book-pooja"
-                    className="flex items-center gap-2 bg-gold text-maroon-deep px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-gold-soft transition shadow-gold flex-shrink-0">
+                  <Link
+                    to="/book-pooja"
+                    className="flex items-center gap-2 bg-gold text-maroon-deep px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-gold-soft transition shadow-gold flex-shrink-0"
+                  >
                     Book Now <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -348,13 +483,18 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                       ? Math.min(...puja.packages.map((p: any) => parseFloat(p.price || 0)))
                       : null;
                     return (
-                      <div key={puja.id}
-                        className="group bg-white rounded-2xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition-all duration-300 hover:-translate-y-1 flex flex-col">
+                      <div
+                        key={puja.id}
+                        className="group bg-white rounded-2xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                      >
                         {/* Image */}
                         <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[#fdf3e3] to-[#f5e0c0]">
                           {puja.image_url ? (
-                            <img src={puja.image_url} alt={puja.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                            <img
+                              src={puja.image_url}
+                              alt={puja.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            />
                           ) : (
                             <div className="flex items-center justify-center h-full">
                               <Flame className="w-16 h-16 text-[#c49a3c]/40" />
@@ -371,7 +511,9 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                         {/* Content */}
                         <div className="p-4 flex-1 flex flex-col">
                           <div className="flex items-center gap-0.5 text-gold mb-2">
-                            {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-current" />)}
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className="w-3 h-3 fill-current" />
+                            ))}
                           </div>
                           <h3 className="font-display text-lg text-maroon-deep leading-tight line-clamp-2 group-hover:text-maroon">
                             {puja.name}
@@ -386,7 +528,8 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                           {puja.packages?.length > 0 && (
                             <div className="flex items-center gap-1 mt-2 text-[11px] text-muted-foreground">
                               <Users className="w-3 h-3" />
-                              {puja.packages.length} package{puja.packages.length !== 1 ? 's' : ''} available
+                              {puja.packages.length} package{puja.packages.length !== 1 ? "s" : ""}{" "}
+                              available
                             </div>
                           )}
 
@@ -395,17 +538,23 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                             <div>
                               {minPrice !== null ? (
                                 <>
-                                  <span className="text-[10px] text-muted-foreground">Starting at</span>
+                                  <span className="text-[10px] text-muted-foreground">
+                                    Starting at
+                                  </span>
                                   <p className="font-display text-lg text-maroon-deep leading-none">
                                     ₹{minPrice.toLocaleString("en-IN")}
                                   </p>
                                 </>
                               ) : (
-                                <span className="text-xs text-muted-foreground">Contact for price</span>
+                                <span className="text-xs text-muted-foreground">
+                                  Contact for price
+                                </span>
                               )}
                             </div>
-                            <Link to="/book-pooja"
-                              className="flex items-center gap-1.5 bg-maroon-deep text-cream text-[11px] font-semibold px-3.5 py-2 rounded-full hover:bg-maroon transition shadow-royal">
+                            <Link
+                              to="/book-pooja"
+                              className="flex items-center gap-1.5 bg-maroon-deep text-cream text-[11px] font-semibold px-3.5 py-2 rounded-full hover:bg-maroon transition shadow-royal"
+                            >
                               Book <ArrowRight className="w-3 h-3" />
                             </Link>
                           </div>
@@ -418,8 +567,10 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
 
               {/* CTA Footer */}
               <div className="mt-16 text-center">
-                <Link to="/book-pooja"
-                  className="inline-flex items-center gap-3 bg-gradient-to-r from-maroon-deep to-[#5a1515] text-cream px-10 py-4 rounded-full text-sm font-bold tracking-widest uppercase hover:opacity-90 transition shadow-royal">
+                <Link
+                  to="/book-pooja"
+                  className="inline-flex items-center gap-3 bg-gradient-to-r from-maroon-deep to-[#5a1515] text-cream px-10 py-4 rounded-full text-sm font-bold tracking-widest uppercase hover:opacity-90 transition shadow-royal"
+                >
                   <Flame className="w-5 h-5 text-gold" />
                   Book a Full Pooja
                   <ArrowRight className="w-4 h-4" />
@@ -432,6 +583,13 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
           )}
         </div>
       </section>
+
+      <DirectBookingModal
+        isOpen={bookingModal.isOpen}
+        onClose={() => setBookingModal((prev) => ({ ...prev, isOpen: false }))}
+        sevaName={bookingModal.sevaName}
+        amount={bookingModal.amount}
+      />
     </Layout>
   );
 }
@@ -462,16 +620,22 @@ function OnlinePoojaHero({ cat }: { cat: any }) {
   return (
     <section className="relative h-[480px] overflow-hidden flex items-center bg-maroon-deep">
       {poojaSlides.map((src, i) => (
-        <img key={src} src={src} alt={`Online Pooja Slide ${i + 1}`}
+        <img
+          key={src}
+          src={src}
+          alt={`Online Pooja Slide ${i + 1}`}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
             i === current ? "opacity-100" : "opacity-0"
-          }`} />
+          }`}
+        />
       ))}
       <div className="absolute inset-0 bg-gradient-to-r from-maroon-deep/95 via-maroon-deep/60 to-transparent" />
 
       <div className="container relative mx-auto px-4 z-10 flex items-center justify-between">
         <div className="max-w-2xl drop-shadow-lg">
-          <p className="text-gold tracking-[0.4em] text-xs font-semibold select-none">✦ COLLECTION ✦</p>
+          <p className="text-gold tracking-[0.4em] text-xs font-semibold select-none">
+            ✦ COLLECTION ✦
+          </p>
           <h1 className="font-display text-5xl md:text-6xl text-cream mt-3 [text-shadow:0_2px_10px_rgba(0,0,0,0.7)]">
             {cat.name}
           </h1>
@@ -479,30 +643,41 @@ function OnlinePoojaHero({ cat }: { cat: any }) {
             {cat.tagline}
           </p>
           <div className="flex items-center gap-4 mt-5 text-xs tracking-widest uppercase text-gold-soft">
-            <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" /> Certified</span>
-            <span className="flex items-center gap-1.5"><Sparkles className="w-4 h-4" /> Energised</span>
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4" /> Certified
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4" /> Energised
+            </span>
           </div>
         </div>
       </div>
 
-      <button onClick={prev}
+      <button
+        onClick={prev}
         className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-white p-2.5 rounded-full transition"
-        aria-label="Previous slide">
+        aria-label="Previous slide"
+      >
         <ChevronLeft className="w-5 h-5" />
       </button>
-      <button onClick={next}
+      <button
+        onClick={next}
         className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-white p-2.5 rounded-full transition"
-        aria-label="Next slide">
+        aria-label="Next slide"
+      >
         <ChevronRight className="w-5 h-5" />
       </button>
 
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
         {poojaSlides.map((_, i) => (
-          <button key={i} onClick={() => setCurrent(i)}
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
             className={`w-2 h-2 rounded-full transition-all ${
               i === current ? "bg-gold w-6" : "bg-white/40 hover:bg-white/70"
             }`}
-            aria-label={`Go to slide ${i + 1}`} />
+            aria-label={`Go to slide ${i + 1}`}
+          />
         ))}
       </div>
     </section>

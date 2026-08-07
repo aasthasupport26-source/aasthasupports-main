@@ -26,7 +26,11 @@ export const Route = createFileRoute("/sitemap.xml")({
           entries.push({ path: `/category/${cat.slug}`, changefreq: "weekly", priority: "0.8" });
           for (const sec of cat.sections) {
             for (const item of sec.items) {
-              entries.push({ path: `/product/${item.slug}`, changefreq: "weekly", priority: "0.6" });
+              entries.push({
+                path: `/product/${item.slug}`,
+                changefreq: "weekly",
+                priority: "0.6",
+              });
             }
           }
         }

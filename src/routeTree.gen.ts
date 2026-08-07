@@ -18,7 +18,6 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as BookPoojaRouteImport } from './routes/book-pooja'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -90,11 +89,6 @@ const FaqRoute = FaqRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -243,7 +237,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
-  '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/mcp': typeof McpRoute
@@ -281,7 +274,6 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
-  '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/mcp': typeof McpRoute
@@ -321,7 +313,6 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
-  '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/mcp': typeof McpRoute
@@ -362,7 +353,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/book-pooja'
     | '/cart'
-    | '/checkout'
     | '/contact'
     | '/faq'
     | '/mcp'
@@ -400,7 +390,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/book-pooja'
     | '/cart'
-    | '/checkout'
     | '/contact'
     | '/faq'
     | '/mcp'
@@ -439,7 +428,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/book-pooja'
     | '/cart'
-    | '/checkout'
     | '/contact'
     | '/faq'
     | '/mcp'
@@ -479,7 +467,6 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BookPoojaRoute: typeof BookPoojaRoute
   CartRoute: typeof CartRoute
-  CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
   McpRoute: typeof McpRoute
@@ -564,13 +551,6 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -802,7 +782,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BookPoojaRoute: BookPoojaRoute,
   CartRoute: CartRoute,
-  CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
   McpRoute: McpRoute,

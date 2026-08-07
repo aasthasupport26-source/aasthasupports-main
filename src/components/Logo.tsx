@@ -21,7 +21,15 @@ export function Logo({ variant = "light", compact = false }: LogoProps) {
         >
           {/* Outer mandala ring */}
           <circle cx="32" cy="32" r="30" stroke="var(--gold)" strokeWidth="1" opacity="0.7" />
-          <circle cx="32" cy="32" r="26" stroke="var(--gold)" strokeWidth="0.6" opacity="0.5" strokeDasharray="2 2" />
+          <circle
+            cx="32"
+            cy="32"
+            r="26"
+            stroke="var(--gold)"
+            strokeWidth="0.6"
+            opacity="0.5"
+            strokeDasharray="2 2"
+          />
           {/* Lotus petals */}
           {Array.from({ length: 8 }).map((_, i) => (
             <ellipse
@@ -54,9 +62,7 @@ export function Logo({ variant = "light", compact = false }: LogoProps) {
           <span className={`font-display text-2xl tracking-wider ${textColor}`} font-numeric>
             AASTHA
           </span>
-          <span className={`text-xs tracking-[0.35em] mt-0.5 ${subColor}`}>
-            SUPPORT
-          </span>
+          <span className={`text-xs tracking-[0.35em] mt-0.5 ${subColor}`}>SUPPORT</span>
         </div>
       )}
     </Link>

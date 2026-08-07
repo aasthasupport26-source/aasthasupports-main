@@ -1,18 +1,29 @@
-import { useState } from 'react';
-import { DayPicker } from 'react-day-picker';
-import { format, addDays } from 'date-fns';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from 'sonner';
-import { useServerFn } from '@tanstack/react-start';
-import { createPujaBooking, verifyPujaPayment } from '@/lib/booking.functions';
-import 'react-day-picker/dist/style.css';
-import { Loader2, CheckCircle2, Flame, Calendar, Clock, User, Phone, Mail, MapPin, Star } from 'lucide-react';
+import { useState } from "react";
+import { DayPicker } from "react-day-picker";
+import { format, addDays } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { createPujaBooking, verifyPujaPayment } from "@/lib/booking.functions";
+import "react-day-picker/dist/style.css";
+import {
+  Loader2,
+  CheckCircle2,
+  Flame,
+  Calendar,
+  Clock,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Star,
+} from "lucide-react";
 
-const TIME_SLOTS = ['09:00', '11:00', '14:00', '16:00', '18:00'];
+const TIME_SLOTS = ["09:00", "11:00", "14:00", "16:00", "18:00"];
 
 interface BookingFormProps {
   templeId: string;
@@ -36,55 +47,69 @@ interface BookingFormProps {
 /* ── load Razorpay checkout.js lazily ─────────────────────────── */
 function loadRazorpayScript(): Promise<void> {
   return new Promise((resolve, reject) => {
-    if ((window as any).Razorpay) { resolve(); return; }
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    if ((window as any).Razorpay) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Razorpay SDK failed to load'));
+    script.onerror = () => reject(new Error("Razorpay SDK failed to load"));
     document.body.appendChild(script);
   });
 }
 
-export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName, pkg, userId, onSuccess }: BookingFormProps) {
+export function BookingForm({
+  templeId,
+  pujaId,
+  packageId,
+  pujaName,
+  templeName,
+  pkg,
+  userId,
+  onSuccess,
+}: BookingFormProps) {
   // Personal
-  const [fullName, setFullName] = useState('');
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [whatsappNumber, setWhatsappNumber] = useState('');
-  const [address, setAddress] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [address, setAddress] = useState("");
 
   // Sankalp
-  const [gotra, setGotra] = useState('');
-  const [birthDate, setBirthDate] = useState('');
-  const [birthTime, setBirthTime] = useState('');
-  const [birthPlace, setBirthPlace] = useState('');
-  const [rashi, setRashi] = useState('');
-  const [nakshatra, setNakshatra] = useState('');
+  const [gotra, setGotra] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [birthTime, setBirthTime] = useState("");
+  const [birthPlace, setBirthPlace] = useState("");
+  const [rashi, setRashi] = useState("");
+  const [nakshatra, setNakshatra] = useState("");
   const [sankalpCount, setSankalpCount] = useState(1);
-  const [members, setMembers] = useState<{ name: string; relation: string }[]>([{ name: '', relation: '' }]);
-  const [specialWish, setSpecialWish] = useState('');
+  const [members, setMembers] = useState<{ name: string; relation: string }[]>([
+    { name: "", relation: "" },
+  ]);
+  const [specialWish, setSpecialWish] = useState("");
 
   // Schedule
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [selectedTime, setSelectedTime] = useState('');
+  const [selectedTime, setSelectedTime] = useState("");
 
   // Media & Delivery Toggles
   const [wantPhoto, setWantPhoto] = useState(pkg.photo ?? true);
   const [wantVideo, setWantVideo] = useState(pkg.video ?? false);
   const [wantLiveCall, setWantLiveCall] = useState(pkg.live_call ?? false);
   const [needPrasad, setNeedPrasad] = useState(pkg.prasad ?? false);
-  const [prasadAddress, setPrasadAddress] = useState('');
+  const [prasadAddress, setPrasadAddress] = useState("");
 
   // UI state
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
-  const [confirmedNumber, setConfirmedNumber] = useState('');
+  const [confirmedNumber, setConfirmedNumber] = useState("");
 
   const createBooking = useServerFn(createPujaBooking);
   const verifyPayment = useServerFn(verifyPujaPayment);
 
   /* ── helpers ──────────────────────────────────────────────────── */
-  const handleMemberChange = (index: number, field: 'name' | 'relation', value: string) => {
+  const handleMemberChange = (index: number, field: "name" | "relation", value: string) => {
     const m = [...members];
     m[index][field] = value;
     setMembers(m);
@@ -93,7 +118,7 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
   const updateSankalpCount = (count: number) => {
     setSankalpCount(count);
     const m = [...members];
-    while (m.length < count) m.push({ name: '', relation: '' });
+    while (m.length < count) m.push({ name: "", relation: "" });
     setMembers(m.slice(0, count));
   };
 
@@ -102,11 +127,11 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
     e.preventDefault();
 
     if (!fullName.trim() || !mobileNumber.trim() || !gotra.trim()) {
-      toast.error('Please fill Name, Mobile & Gotra (mandatory)');
+      toast.error("Please fill Name, Mobile & Gotra (mandatory)");
       return;
     }
     if (!selectedDate || !selectedTime) {
-      toast.error('Please select a date and time slot');
+      toast.error("Please select a date and time slot");
       return;
     }
 
@@ -132,7 +157,7 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
           birthPlace,
           rashi,
           nakshatra,
-          bookingDate: format(selectedDate, 'yyyy-MM-dd'),
+          bookingDate: format(selectedDate, "yyyy-MM-dd"),
           timeSlot: selectedTime,
           specialWish,
           videoRequired: wantVideo,
@@ -140,8 +165,8 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
           liveRequired: wantLiveCall,
           prasadRequired: needPrasad,
           prasadAddress: needPrasad ? prasadAddress : undefined,
-          members: members.filter(m => m.name.trim()),
-        }
+          members: members.filter((m) => m.name.trim()),
+        },
       });
 
       /* 2️⃣ Load Razorpay SDK and open checkout modal */
@@ -152,9 +177,9 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
           key: res.keyId,
           amount: res.amountPaise,
           currency: res.currency,
-          name: 'Aastha Support',
+          name: "Aastha Support",
           description: `${templeName} — ${pujaName} (${pkg.name})`,
-          image: '/logo.png',
+          image: "/logo.png",
           order_id: res.razorpayOrderId,
           prefill: {
             name: fullName,
@@ -166,7 +191,7 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
             puja: pujaName,
             temple: templeName,
           },
-          theme: { color: '#8B1A1A' },
+          theme: { color: "#8B1A1A" },
           handler: async (rzpResponse: {
             razorpay_order_id: string;
             razorpay_payment_id: string;
@@ -180,12 +205,12 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
                   razorpay_order_id: rzpResponse.razorpay_order_id,
                   razorpay_payment_id: rzpResponse.razorpay_payment_id,
                   razorpay_signature: rzpResponse.razorpay_signature,
-                }
+                },
               });
 
               setConfirmedNumber(res.bookingNumber);
               setConfirmed(true);
-              toast.success('🙏 Booking confirmed! Check your profile for details.');
+              toast.success("🙏 Booking confirmed! Check your profile for details.");
               onSuccess?.(res.bookingNumber);
               resolve();
             } catch (err: any) {
@@ -194,23 +219,22 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
           },
           modal: {
             ondismiss: () => {
-              toast.info('Payment cancelled. Your draft booking has been saved.');
-              reject(new Error('dismissed'));
-            }
-          }
+              toast.info("Payment cancelled. Your draft booking has been saved.");
+              reject(new Error("dismissed"));
+            },
+          },
         };
 
         const rzp = new (window as any).Razorpay(options);
-        rzp.on('payment.failed', (resp: any) => {
-          toast.error('Payment failed: ' + (resp.error?.description || 'Unknown error'));
-          reject(new Error('payment_failed'));
+        rzp.on("payment.failed", (resp: any) => {
+          toast.error("Payment failed: " + (resp.error?.description || "Unknown error"));
+          reject(new Error("payment_failed"));
         });
         rzp.open();
       });
-
     } catch (err: any) {
-      if (err?.message !== 'dismissed' && err?.message !== 'payment_failed') {
-        toast.error(err.message || 'Something went wrong. Please try again.');
+      if (err?.message !== "dismissed" && err?.message !== "payment_failed") {
+        toast.error(err.message || "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -220,10 +244,14 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
   /* ── Confirmed Screen ─────────────────────────────────────────── */
   if (confirmed) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8d5c0]/60 shadow-lg p-10 text-center space-y-6"
-        style={{ background: 'linear-gradient(160deg, #fdf8f3 0%, #faf4ec 100%)' }}>
-        <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #6b1a1a 0%, #8B2020 100%)' }}>
+      <div
+        className="bg-white rounded-2xl border border-[#e8d5c0]/60 shadow-lg p-10 text-center space-y-6"
+        style={{ background: "linear-gradient(160deg, #fdf8f3 0%, #faf4ec 100%)" }}
+      >
+        <div
+          className="w-20 h-20 rounded-full mx-auto flex items-center justify-center"
+          style={{ background: "linear-gradient(135deg, #6b1a1a 0%, #8B2020 100%)" }}
+        >
           <CheckCircle2 className="w-10 h-10 text-white" />
         </div>
         <div>
@@ -250,16 +278,20 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
           </div>
           <div className="bg-[#fdf8f3] rounded-xl p-3 border border-[#f0e4d4]">
             <p className="text-stone-400 text-xs">Date</p>
-            <p className="font-semibold text-[#6b1a1a] mt-0.5">{selectedDate ? format(selectedDate, 'dd MMM yyyy') : ''}</p>
+            <p className="font-semibold text-[#6b1a1a] mt-0.5">
+              {selectedDate ? format(selectedDate, "dd MMM yyyy") : ""}
+            </p>
           </div>
         </div>
         <p className="text-xs text-stone-400 max-w-xs mx-auto leading-relaxed">
-          Our team will call you within 24 hours to confirm your pandit assignment. You can also track your booking from your profile.
+          Our team will call you within 24 hours to confirm your pandit assignment. You can also
+          track your booking from your profile.
         </p>
         <button
-          onClick={() => window.location.href = '/profile'}
+          onClick={() => (window.location.href = "/profile")}
           className="inline-flex items-center gap-2 px-7 py-3 rounded-full text-sm font-semibold text-white transition"
-          style={{ background: 'linear-gradient(135deg, #8B2020 0%, #6b1a1a 100%)' }}>
+          style={{ background: "linear-gradient(135deg, #8B2020 0%, #6b1a1a 100%)" }}
+        >
           <Star className="w-4 h-4" /> View in My Profile
         </button>
       </div>
@@ -272,14 +304,20 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
   const total = price + fee;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 bg-white rounded-2xl border border-[#e8d5c0]/60 shadow-md overflow-hidden">
-
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-8 bg-white rounded-2xl border border-[#e8d5c0]/60 shadow-md overflow-hidden"
+    >
       {/* Header summary */}
-      <div className="px-6 md:px-8 pt-6 md:pt-8 pb-5 border-b border-[#f0e4d4]"
-        style={{ background: 'linear-gradient(135deg, #fdf8f3 0%, #faf4ec 100%)' }}>
+      <div
+        className="px-6 md:px-8 pt-6 md:pt-8 pb-5 border-b border-[#f0e4d4]"
+        style={{ background: "linear-gradient(135deg, #fdf8f3 0%, #faf4ec 100%)" }}
+      >
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #6b1a1a 0%, #8B2020 100%)' }}>
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #6b1a1a 0%, #8B2020 100%)" }}
+          >
             <Flame className="w-6 h-6 text-[#e8b84b]" />
           </div>
           <div className="flex-1">
@@ -288,56 +326,102 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
             <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1">
               <span className="text-xs text-stone-500">🕌 {templeName}</span>
               <span className="text-xs text-stone-500">📦 {pkg.name}</span>
-              <span className="text-xs font-semibold text-[#8B2020]">₹{price.toLocaleString('en-IN')}</span>
+              <span className="text-xs font-semibold text-[#8B2020]">
+                ₹{price.toLocaleString("en-IN")}
+              </span>
             </div>
           </div>
         </div>
       </div>
 
       <div className="px-6 md:px-8 space-y-8 pb-8">
-
         {/* 1. Personal Details */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-full bg-[#6b1a1a] text-white text-xs flex items-center justify-center font-bold">1</div>
+            <div className="w-6 h-6 rounded-full bg-[#6b1a1a] text-white text-xs flex items-center justify-center font-bold">
+              1
+            </div>
             <h3 className="font-display text-lg text-[#6b1a1a] font-semibold">Personal Details</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="fullName" className="flex items-center gap-1.5 text-[#3d1a0a] text-xs font-semibold mb-1.5">
+              <Label
+                htmlFor="fullName"
+                className="flex items-center gap-1.5 text-[#3d1a0a] text-xs font-semibold mb-1.5"
+              >
                 <User className="w-3.5 h-3.5 text-[#c49a3c]" /> Full Name *
               </Label>
-              <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} required
-                placeholder="Your full name" className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl" />
+              <Input
+                id="fullName"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                placeholder="Your full name"
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl"
+              />
             </div>
             <div>
-              <Label htmlFor="mobileNumber" className="flex items-center gap-1.5 text-[#3d1a0a] text-xs font-semibold mb-1.5">
+              <Label
+                htmlFor="mobileNumber"
+                className="flex items-center gap-1.5 text-[#3d1a0a] text-xs font-semibold mb-1.5"
+              >
                 <Phone className="w-3.5 h-3.5 text-[#c49a3c]" /> Mobile Number *
               </Label>
-              <Input id="mobileNumber" value={mobileNumber} onChange={e => setMobileNumber(e.target.value)} required
-                placeholder="10-digit mobile" className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl" />
+              <Input
+                id="mobileNumber"
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
+                required
+                placeholder="10-digit mobile"
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl"
+              />
             </div>
             <div>
-              <Label htmlFor="email" className="flex items-center gap-1.5 text-[#3d1a0a] text-xs font-semibold mb-1.5">
+              <Label
+                htmlFor="email"
+                className="flex items-center gap-1.5 text-[#3d1a0a] text-xs font-semibold mb-1.5"
+              >
                 <Mail className="w-3.5 h-3.5 text-[#c49a3c]" /> Email Address
               </Label>
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="email@example.com" className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl" />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@example.com"
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl"
+              />
             </div>
             <div>
-              <Label htmlFor="whatsapp" className="flex items-center gap-1.5 text-[#3d1a0a] text-xs font-semibold mb-1.5">
+              <Label
+                htmlFor="whatsapp"
+                className="flex items-center gap-1.5 text-[#3d1a0a] text-xs font-semibold mb-1.5"
+              >
                 <Phone className="w-3.5 h-3.5 text-[#c49a3c]" /> WhatsApp Number
               </Label>
-              <Input id="whatsapp" value={whatsappNumber} onChange={e => setWhatsappNumber(e.target.value)}
-                placeholder="WhatsApp contact" className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl" />
+              <Input
+                id="whatsapp"
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumber(e.target.value)}
+                placeholder="WhatsApp contact"
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl"
+              />
             </div>
             <div className="md:col-span-2">
-              <Label htmlFor="address" className="flex items-center gap-1.5 text-[#3d1a0a] text-xs font-semibold mb-1.5">
+              <Label
+                htmlFor="address"
+                className="flex items-center gap-1.5 text-[#3d1a0a] text-xs font-semibold mb-1.5"
+              >
                 <MapPin className="w-3.5 h-3.5 text-[#c49a3c]" /> Full Address
               </Label>
-              <Textarea id="address" value={address} onChange={e => setAddress(e.target.value)}
-                placeholder="Your address for billing & communication" rows={2}
-                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl resize-none" />
+              <Textarea
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Your address for billing & communication"
+                rows={2}
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl resize-none"
+              />
             </div>
           </div>
         </section>
@@ -345,39 +429,79 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
         {/* 2. Sankalp Details */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-full bg-[#6b1a1a] text-white text-xs flex items-center justify-center font-bold">2</div>
-            <h3 className="font-display text-lg text-[#6b1a1a] font-semibold">Sankalp Details <span className="text-sm text-stone-400 font-normal">(संकल्प विवरण)</span></h3>
+            <div className="w-6 h-6 rounded-full bg-[#6b1a1a] text-white text-xs flex items-center justify-center font-bold">
+              2
+            </div>
+            <h3 className="font-display text-lg text-[#6b1a1a] font-semibold">
+              Sankalp Details{" "}
+              <span className="text-sm text-stone-400 font-normal">(संकल्प विवरण)</span>
+            </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">Gotra (गोत्र) *</Label>
-              <Input value={gotra} onChange={e => setGotra(e.target.value)} required
-                placeholder="e.g., Kashyap" className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl" />
+              <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">
+                Gotra (गोत्र) *
+              </Label>
+              <Input
+                value={gotra}
+                onChange={(e) => setGotra(e.target.value)}
+                required
+                placeholder="e.g., Kashyap"
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl"
+              />
             </div>
             <div>
-              <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">Date of Birth</Label>
-              <Input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)}
-                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl" />
+              <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">
+                Date of Birth
+              </Label>
+              <Input
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl"
+              />
             </div>
             <div>
-              <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">Birth Time</Label>
-              <Input type="time" value={birthTime} onChange={e => setBirthTime(e.target.value)}
-                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl" />
+              <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">
+                Birth Time
+              </Label>
+              <Input
+                type="time"
+                value={birthTime}
+                onChange={(e) => setBirthTime(e.target.value)}
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl"
+              />
             </div>
             <div>
-              <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">Birth Place</Label>
-              <Input value={birthPlace} onChange={e => setBirthPlace(e.target.value)}
-                placeholder="City/State" className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl" />
+              <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">
+                Birth Place
+              </Label>
+              <Input
+                value={birthPlace}
+                onChange={(e) => setBirthPlace(e.target.value)}
+                placeholder="City/State"
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl"
+              />
             </div>
             <div>
-              <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">Rashi (राशि)</Label>
-              <Input value={rashi} onChange={e => setRashi(e.target.value)}
-                placeholder="e.g., Mesh" className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl" />
+              <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">
+                Rashi (राशि)
+              </Label>
+              <Input
+                value={rashi}
+                onChange={(e) => setRashi(e.target.value)}
+                placeholder="e.g., Mesh"
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl"
+              />
             </div>
             <div>
               <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">Nakshatra</Label>
-              <Input value={nakshatra} onChange={e => setNakshatra(e.target.value)}
-                placeholder="e.g., Ashwini" className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl" />
+              <Input
+                value={nakshatra}
+                onChange={(e) => setNakshatra(e.target.value)}
+                placeholder="e.g., Ashwini"
+                className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl"
+              />
             </div>
           </div>
 
@@ -387,38 +511,63 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
               <h4 className="text-sm font-semibold text-[#6b1a1a]">Members for Sankalp</h4>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-stone-400">Count:</span>
-                <Input type="number" min={1} max={10} value={sankalpCount}
-                  onChange={e => updateSankalpCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-                  className="w-16 h-8 text-center border-[#e8d5c0] rounded-lg text-sm" />
+                <Input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={sankalpCount}
+                  onChange={(e) =>
+                    updateSankalpCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))
+                  }
+                  className="w-16 h-8 text-center border-[#e8d5c0] rounded-lg text-sm"
+                />
               </div>
             </div>
             <div className="space-y-2">
               {members.map((member, idx) => (
                 <div key={idx} className="flex gap-3">
-                  <Input placeholder={`Member ${idx + 1} name *`} value={member.name}
-                    onChange={e => handleMemberChange(idx, 'name', e.target.value)} required
-                    className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl text-sm" />
-                  <Input placeholder="Relation (e.g. Self, Son)" value={member.relation}
-                    onChange={e => handleMemberChange(idx, 'relation', e.target.value)}
-                    className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl text-sm" />
+                  <Input
+                    placeholder={`Member ${idx + 1} name *`}
+                    value={member.name}
+                    onChange={(e) => handleMemberChange(idx, "name", e.target.value)}
+                    required
+                    className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl text-sm"
+                  />
+                  <Input
+                    placeholder="Relation (e.g. Self, Son)"
+                    value={member.relation}
+                    onChange={(e) => handleMemberChange(idx, "relation", e.target.value)}
+                    className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl text-sm"
+                  />
                 </div>
               ))}
             </div>
           </div>
 
           <div className="mt-4">
-            <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">Special Wish (विशेष मनोकामना)</Label>
-            <Textarea value={specialWish} onChange={e => setSpecialWish(e.target.value)}
-              placeholder="Type your special prayer or wish here…" rows={2}
-              className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl resize-none" />
+            <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">
+              Special Wish (विशेष मनोकामना)
+            </Label>
+            <Textarea
+              value={specialWish}
+              onChange={(e) => setSpecialWish(e.target.value)}
+              placeholder="Type your special prayer or wish here…"
+              rows={2}
+              className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl resize-none"
+            />
           </div>
         </section>
 
         {/* 3. Date & Time */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-full bg-[#6b1a1a] text-white text-xs flex items-center justify-center font-bold">3</div>
-            <h3 className="font-display text-lg text-[#6b1a1a] font-semibold">Schedule Ritual <span className="text-sm text-stone-400 font-normal">(पूजा की तारीख और समय)</span></h3>
+            <div className="w-6 h-6 rounded-full bg-[#6b1a1a] text-white text-xs flex items-center justify-center font-bold">
+              3
+            </div>
+            <h3 className="font-display text-lg text-[#6b1a1a] font-semibold">
+              Schedule Ritual{" "}
+              <span className="text-sm text-stone-400 font-normal">(पूजा की तारीख और समय)</span>
+            </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="border border-[#e8d5c0]/60 rounded-2xl p-4 bg-[#fdfaf6] flex justify-center">
@@ -434,21 +583,29 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
                 <Clock className="w-3.5 h-3.5 text-[#c49a3c]" /> Select Time Slot *
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {TIME_SLOTS.map(slot => (
-                  <button key={slot} type="button" onClick={() => setSelectedTime(slot)}
+                {TIME_SLOTS.map((slot) => (
+                  <button
+                    key={slot}
+                    type="button"
+                    onClick={() => setSelectedTime(slot)}
                     className={`px-4 py-3 rounded-xl border text-sm font-semibold transition-all ${
                       selectedTime === slot
-                        ? 'bg-[#6b1a1a] text-white border-[#6b1a1a] shadow-md'
-                        : 'border-[#e8d5c0] text-[#6b1a1a] bg-white hover:border-[#8B2020] hover:bg-[#fdf8f3]'
-                    }`}>
+                        ? "bg-[#6b1a1a] text-white border-[#6b1a1a] shadow-md"
+                        : "border-[#e8d5c0] text-[#6b1a1a] bg-white hover:border-[#8B2020] hover:bg-[#fdf8f3]"
+                    }`}
+                  >
                     {slot}
                   </button>
                 ))}
               </div>
               {selectedDate && selectedTime && (
                 <div className="mt-4 p-4 rounded-2xl border border-[#e8b84b]/30 bg-[#fdf8ec]">
-                  <p className="text-xs text-[#c49a3c] font-semibold tracking-wide mb-1">SCHEDULED FOR</p>
-                  <p className="font-bold text-[#6b1a1a]">{format(selectedDate, 'EEEE, dd MMMM yyyy')}</p>
+                  <p className="text-xs text-[#c49a3c] font-semibold tracking-wide mb-1">
+                    SCHEDULED FOR
+                  </p>
+                  <p className="font-bold text-[#6b1a1a]">
+                    {format(selectedDate, "EEEE, dd MMMM yyyy")}
+                  </p>
                   <p className="text-sm text-[#8B2020] font-medium">at {selectedTime}</p>
                 </div>
               )}
@@ -459,32 +616,58 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
         {/* 4. Media & Delivery Options (फोटो, वीडियो, लाइव कॉल व प्रसाद) */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-full bg-[#6b1a1a] text-white text-xs flex items-center justify-center font-bold">4</div>
-            <h3 className="font-display text-lg text-[#6b1a1a] font-semibold">Media &amp; Delivery Options <span className="text-sm text-stone-400 font-normal">(मीडिया व प्रसाद)</span></h3>
+            <div className="w-6 h-6 rounded-full bg-[#6b1a1a] text-white text-xs flex items-center justify-center font-bold">
+              4
+            </div>
+            <h3 className="font-display text-lg text-[#6b1a1a] font-semibold">
+              Media &amp; Delivery Options{" "}
+              <span className="text-sm text-stone-400 font-normal">(मीडिया व प्रसाद)</span>
+            </h3>
           </div>
 
           <div className="p-5 rounded-2xl border border-[#f0e4d4] bg-[#fdfaf6] space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="flex items-center space-x-3 p-3 rounded-xl border border-[#e8d5c0]/60 bg-white">
-                <Checkbox id="wantPhoto" checked={wantPhoto} onCheckedChange={val => setWantPhoto(!!val)}
-                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]" />
-                <Label htmlFor="wantPhoto" className="cursor-pointer text-xs font-semibold text-[#3d1a0a]">
+                <Checkbox
+                  id="wantPhoto"
+                  checked={wantPhoto}
+                  onCheckedChange={(val) => setWantPhoto(!!val)}
+                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]"
+                />
+                <Label
+                  htmlFor="wantPhoto"
+                  className="cursor-pointer text-xs font-semibold text-[#3d1a0a]"
+                >
                   📸 फोटो चाहिए? (Photos)
                 </Label>
               </div>
 
               <div className="flex items-center space-x-3 p-3 rounded-xl border border-[#e8d5c0]/60 bg-white">
-                <Checkbox id="wantVideo" checked={wantVideo} onCheckedChange={val => setWantVideo(!!val)}
-                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]" />
-                <Label htmlFor="wantVideo" className="cursor-pointer text-xs font-semibold text-[#3d1a0a]">
+                <Checkbox
+                  id="wantVideo"
+                  checked={wantVideo}
+                  onCheckedChange={(val) => setWantVideo(!!val)}
+                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]"
+                />
+                <Label
+                  htmlFor="wantVideo"
+                  className="cursor-pointer text-xs font-semibold text-[#3d1a0a]"
+                >
                   🎥 रिकॉर्डेड वीडियो चाहिए?
                 </Label>
               </div>
 
               <div className="flex items-center space-x-3 p-3 rounded-xl border border-[#e8d5c0]/60 bg-white">
-                <Checkbox id="wantLiveCall" checked={wantLiveCall} onCheckedChange={val => setWantLiveCall(!!val)}
-                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]" />
-                <Label htmlFor="wantLiveCall" className="cursor-pointer text-xs font-semibold text-[#3d1a0a]">
+                <Checkbox
+                  id="wantLiveCall"
+                  checked={wantLiveCall}
+                  onCheckedChange={(val) => setWantLiveCall(!!val)}
+                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]"
+                />
+                <Label
+                  htmlFor="wantLiveCall"
+                  className="cursor-pointer text-xs font-semibold text-[#3d1a0a]"
+                >
                   📹 लाइव वीडियो कॉल चाहिए?
                 </Label>
               </div>
@@ -492,18 +675,32 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
 
             <div className="pt-2 border-t border-[#f0e4d4]">
               <div className="flex items-center space-x-3 p-3 rounded-xl border border-[#e8d5c0]/60 bg-white">
-                <Checkbox id="needPrasad" checked={needPrasad} onCheckedChange={val => setNeedPrasad(!!val)}
-                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]" />
-                <Label htmlFor="needPrasad" className="cursor-pointer text-xs font-semibold text-[#3d1a0a]">
+                <Checkbox
+                  id="needPrasad"
+                  checked={needPrasad}
+                  onCheckedChange={(val) => setNeedPrasad(!!val)}
+                  className="border-[#e8d5c0] data-[state=checked]:bg-[#6b1a1a]"
+                />
+                <Label
+                  htmlFor="needPrasad"
+                  className="cursor-pointer text-xs font-semibold text-[#3d1a0a]"
+                >
                   📦 प्रसाद चाहिए? (Prasad Delivery)
                 </Label>
               </div>
               {needPrasad && (
                 <div className="mt-3">
-                  <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">Prasad Delivery Address * (प्रसाद का पता)</Label>
-                  <Textarea value={prasadAddress} onChange={e => setPrasadAddress(e.target.value)} required={needPrasad}
-                    placeholder="पूरा पता, लैंडमार्क एवं पिन कोड सहित दर्ज़ करें" rows={2}
-                    className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl resize-none text-sm" />
+                  <Label className="text-[#3d1a0a] text-xs font-semibold mb-1.5 block">
+                    Prasad Delivery Address * (प्रसाद का पता)
+                  </Label>
+                  <Textarea
+                    value={prasadAddress}
+                    onChange={(e) => setPrasadAddress(e.target.value)}
+                    required={needPrasad}
+                    placeholder="पूरा पता, लैंडमार्क एवं पिन कोड सहित दर्ज़ करें"
+                    rows={2}
+                    className="border-[#e8d5c0] focus:border-[#8B2020] rounded-xl resize-none text-sm"
+                  />
                 </div>
               )}
             </div>
@@ -515,32 +712,42 @@ export function BookingForm({ templeId, pujaId, packageId, pujaName, templeName,
           <div className="rounded-2xl border border-[#e8d5c0]/60 bg-[#fdfaf6] p-5 mb-6 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-stone-500">Puja Package ({pkg.name})</span>
-              <span className="text-[#3d1a0a] font-medium">₹{price.toLocaleString('en-IN')}</span>
+              <span className="text-[#3d1a0a] font-medium">₹{price.toLocaleString("en-IN")}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-stone-500">Processing Fee (2%)</span>
-              <span className="text-[#3d1a0a] font-medium">₹{fee.toLocaleString('en-IN')}</span>
+              <span className="text-[#3d1a0a] font-medium">₹{fee.toLocaleString("en-IN")}</span>
             </div>
             <div className="border-t border-[#f0e4d4] pt-2 flex justify-between">
               <span className="font-bold text-[#6b1a1a]">Total Payable</span>
-              <span className="font-bold text-[#6b1a1a] text-lg">₹{total.toLocaleString('en-IN')}</span>
+              <span className="font-bold text-[#6b1a1a] text-lg">
+                ₹{total.toLocaleString("en-IN")}
+              </span>
             </div>
           </div>
 
-          <Button type="submit" disabled={loading || !selectedDate || !selectedTime}
+          <Button
+            type="submit"
+            disabled={loading || !selectedDate || !selectedTime}
             className="w-full text-base font-semibold py-6 rounded-2xl text-white transition-all"
-            style={{ background: loading ? '#9e9e9e' : 'linear-gradient(135deg, #8B2020 0%, #6b1a1a 100%)' }}>
+            style={{
+              background: loading ? "#9e9e9e" : "linear-gradient(135deg, #8B2020 0%, #6b1a1a 100%)",
+            }}
+          >
             {loading ? (
-              <span className="flex items-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> Opening Secure Payment…</span>
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" /> Opening Secure Payment…
+              </span>
             ) : (
-              <span className="flex items-center gap-2">🔒 Pay ₹{total.toLocaleString('en-IN')} &amp; Confirm Booking</span>
+              <span className="flex items-center gap-2">
+                🔒 Pay ₹{total.toLocaleString("en-IN")} &amp; Confirm Booking
+              </span>
             )}
           </Button>
           <p className="text-center text-xs text-stone-400 mt-3">
             Secured by Razorpay · Your booking data is stored safely in Supabase
           </p>
         </div>
-
       </div>
     </form>
   );

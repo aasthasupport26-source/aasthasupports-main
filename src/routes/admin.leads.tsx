@@ -9,13 +9,19 @@ export const Route = createFileRoute("/admin/leads")({ component: LeadsPage });
 function LeadsPage() {
   const [items, setItems] = useState<any[]>([]);
   const load = async () => {
-    const { data } = await supabase.from("contact_leads").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("contact_leads")
+      .select("*")
+      .order("created_at", { ascending: false });
     setItems(data ?? []);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const update = async (id: string, status: string) => {
-    await supabase.from("contact_leads").update({ status }).eq("id", id); load();
+    await supabase.from("contact_leads").update({ status }).eq("id", id);
+    load();
   };
   const remove = async (id: string) => {
     if (!confirm("Delete?")) return;
@@ -42,18 +48,33 @@ function LeadsPage() {
                 </div>
                 {l.subject && <div className="text-sm text-maroon mt-1">{l.subject}</div>}
                 <p className="text-sm mt-2 whitespace-pre-wrap">{l.message}</p>
-                <div className="text-xs text-muted-foreground mt-2">{new Date(l.created_at).toLocaleString()}</div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  {new Date(l.created_at).toLocaleString()}
+                </div>
               </div>
               <div className="flex flex-col gap-2 items-end">
-                <select value={l.status} onChange={(e) => update(l.id, e.target.value)} className="text-xs border rounded px-2 py-1 bg-white">
-                  <option value="new">new</option><option value="contacted">contacted</option><option value="resolved">resolved</option>
+                <select
+                  value={l.status}
+                  onChange={(e) => update(l.id, e.target.value)}
+                  className="text-xs border rounded px-2 py-1 bg-white"
+                >
+                  <option value="new">new</option>
+                  <option value="contacted">contacted</option>
+                  <option value="resolved">resolved</option>
                 </select>
-                <button onClick={() => remove(l.id)} className="text-rose-600 p-1.5 hover:bg-rose-50 rounded"><Trash2 className="w-4 h-4" /></button>
+                <button
+                  onClick={() => remove(l.id)}
+                  className="text-rose-600 p-1.5 hover:bg-rose-50 rounded"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
         ))}
-        {items.length === 0 && <div className="text-center text-sm text-muted-foreground py-12">No leads yet.</div>}
+        {items.length === 0 && (
+          <div className="text-center text-sm text-muted-foreground py-12">No leads yet.</div>
+        )}
       </div>
     </div>
   );

@@ -7,9 +7,16 @@ export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       { title: "Contact — Aastha Support" },
-      { name: "description", content: "Speak to our Vedic astrologers and customer care team — phone, WhatsApp, email or visit our Haridwar ashram." },
+      {
+        name: "description",
+        content:
+          "Speak to our Vedic astrologers and customer care team — phone, WhatsApp, email or visit our Haridwar ashram.",
+      },
       { property: "og:title", content: "Contact — Aastha Support" },
-      { property: "og:description", content: "Speak to our Vedic astrologers and customer care team." },
+      {
+        property: "og:description",
+        content: "Speak to our Vedic astrologers and customer care team.",
+      },
       { property: "og:url", content: "https://aasthasupport.com/contact" },
     ],
     links: [{ rel: "canonical", href: "https://aasthasupport.com/contact" }],
@@ -65,7 +72,9 @@ function ContactPage() {
             {submitted ? (
               <div className="py-10 text-center">
                 <p className="font-devanagari text-gold text-2xl">|| धन्यवाद ||</p>
-                <p className="mt-3 text-foreground/80">We have received your message. Our team will reach out within 24 hours.</p>
+                <p className="mt-3 text-foreground/80">
+                  We have received your message. Our team will reach out within 24 hours.
+                </p>
               </div>
             ) : (
               <form
@@ -77,7 +86,9 @@ function ContactPage() {
               >
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs tracking-widest uppercase text-maroon-deep">Name</label>
+                    <label className="text-xs tracking-widest uppercase text-maroon-deep">
+                      Name
+                    </label>
                     <input
                       required
                       type="text"
@@ -85,7 +96,9 @@ function ContactPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs tracking-widest uppercase text-maroon-deep">Phone</label>
+                    <label className="text-xs tracking-widest uppercase text-maroon-deep">
+                      Phone
+                    </label>
                     <input
                       required
                       type="tel"
@@ -94,7 +107,9 @@ function ContactPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs tracking-widest uppercase text-maroon-deep">Email</label>
+                  <label className="text-xs tracking-widest uppercase text-maroon-deep">
+                    Email
+                  </label>
                   <input
                     required
                     type="email"
@@ -102,7 +117,9 @@ function ContactPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs tracking-widest uppercase text-maroon-deep">How can we help?</label>
+                  <label className="text-xs tracking-widest uppercase text-maroon-deep">
+                    How can we help?
+                  </label>
                   <textarea
                     required
                     rows={5}
@@ -122,12 +139,35 @@ function ContactPage() {
           {/* Info */}
           <div className="space-y-6">
             {[
-              { icon: Phone, title: "Call Us", v1: "+91 99999 99999", v2: "Mon–Sat · 9am – 8pm IST" },
-              { icon: MessageCircle, title: "WhatsApp", v1: "+91 99999 99999", v2: "Instant replies for queries" },
-              { icon: Mail, title: "Email Us", v1: "care@aasthasupport.com", v2: "Replied within 24 hours" },
-              { icon: MapPin, title: "Visit Ashram", v1: "Aastha Bhawan, Haridwar", v2: "Uttarakhand, Bharat 249401" },
+              {
+                icon: Phone,
+                title: "Call Us",
+                v1: "+91 99999 99999",
+                v2: "Mon–Sat · 9am – 8pm IST",
+              },
+              {
+                icon: MessageCircle,
+                title: "WhatsApp",
+                v1: "+91 99999 99999",
+                v2: "Instant replies for queries",
+              },
+              {
+                icon: Mail,
+                title: "Email Us",
+                v1: "care@aasthasupport.com",
+                v2: "Replied within 24 hours",
+              },
+              {
+                icon: MapPin,
+                title: "Visit Ashram",
+                v1: "Aastha Bhawan, Haridwar",
+                v2: "Uttarakhand, Bharat 249401",
+              },
             ].map((c) => (
-              <div key={c.title} className="bg-white rounded-xl p-6 border border-gold/20 shadow-soft flex gap-5">
+              <div
+                key={c.title}
+                className="bg-white rounded-xl p-6 border border-gold/20 shadow-soft flex gap-5"
+              >
                 <div className="w-12 h-12 rounded-full bg-gold/15 flex items-center justify-center shrink-0">
                   <c.icon className="w-5 h-5 text-gold" />
                 </div>

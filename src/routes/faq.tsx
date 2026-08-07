@@ -1,15 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 import { HelpCircle } from "lucide-react";
 
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
       { title: "FAQ — Aastha Support" },
-      { name: "description", content: "Find answers to frequently asked questions about rudraksha, gemstones, online pooja, shipping, returns and Vedic certification at Aastha Support." },
+      {
+        name: "description",
+        content:
+          "Find answers to frequently asked questions about rudraksha, gemstones, online pooja, shipping, returns and Vedic certification at Aastha Support.",
+      },
       { property: "og:title", content: "FAQ — Aastha Support" },
-      { property: "og:description", content: "Answers on rudraksha, gemstones, online pooja, shipping, returns and Vedic certification." },
+      {
+        property: "og:description",
+        content:
+          "Answers on rudraksha, gemstones, online pooja, shipping, returns and Vedic certification.",
+      },
       { property: "og:url", content: "https://aasthasupport.com/faq" },
     ],
     links: [{ rel: "canonical", href: "https://aasthasupport.com/faq" }],
@@ -157,7 +170,8 @@ function FaqPage() {
             Frequently Asked Questions
           </h1>
           <p className="mt-4 text-cream/75 max-w-xl mx-auto">
-            Everything you need to know about our products, services, shipping, returns, and Vedic practices.
+            Everything you need to know about our products, services, shipping, returns, and Vedic
+            practices.
           </p>
         </div>
       </section>
@@ -172,7 +186,11 @@ function FaqPage() {
               </h2>
               <Accordion type="multiple" className="w-full">
                 {cat.items.map((item, i) => (
-                  <AccordionItem key={i} value={`${cat.title}-${i}`} className="border-b border-gold/15">
+                  <AccordionItem
+                    key={i}
+                    value={`${cat.title}-${i}`}
+                    className="border-b border-gold/15"
+                  >
                     <AccordionTrigger className="text-maroon-deep hover:text-gold font-medium text-left py-5">
                       {item.q}
                     </AccordionTrigger>
@@ -192,7 +210,8 @@ function FaqPage() {
         <div className="container mx-auto px-4 text-center max-w-2xl">
           <h2 className="font-display text-3xl">Still have questions?</h2>
           <p className="mt-4 text-cream/80">
-            Our dedicated support team is here to help. Reach out via WhatsApp, email, or call us directly.
+            Our dedicated support team is here to help. Reach out via WhatsApp, email, or call us
+            directly.
           </p>
           <div className="mt-8 flex flex-wrap gap-3 justify-center">
             <a
