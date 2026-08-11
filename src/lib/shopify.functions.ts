@@ -50,7 +50,8 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
           variantId: node.variants.edges[0]?.node.id,
           stock: node.variants.edges[0]?.node.quantityAvailable || 0,
           available: node.variants.edges[0]?.node.availableForSale || false,
-          category: categoryMeta?.value || "",
+          category: node.productType || categoryMeta?.value || "", // Fallback to metafield if empty
+          productType: node.productType || "",
           benefits: benefitsMeta?.value ? JSON.parse(benefitsMeta.value) : [],
           certified: certifiedMeta?.value === "true",
         };
