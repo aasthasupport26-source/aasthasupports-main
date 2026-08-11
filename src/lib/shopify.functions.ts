@@ -16,16 +16,15 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }) => {
     try {
-      // Use Shopify's query parameter for server-side filtering when a category is specified
-      // Use a broad free-text search to catch items without strict product_type attributes
-      const queryFilter = data.category ? data.category : undefined;
+      let queryFilter = data.category ? data.category : undefined;
+      if (queryFilter === "bracelets") queryFilter = "bracelet";
 
       const response: any = await shopifyClient.request(GET_PRODUCTS_QUERY, {
         first: data.limit,
         query: queryFilter,
       });
 
-      const products = response.products.edges.map((edge: any) => {
+      let products = response.products.edges.map((edge: any) => {
         const node = edge.node;
         const categoryMeta = node.metafields?.find((m: any) => m?.key === "category");
         const benefitsMeta = node.metafields?.find((m: any) => m?.key === "benefits");
@@ -49,6 +48,31 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
           certified: certifiedMeta?.value === "true",
         };
       });
+
+      // Post-filtering to fix conflicts between categories (e.g., Mala vs Rudraksha)
+      if (data.category) {
+        products = products.filter((p: any) => {
+          const title = p.name.toLowerCase();
+
+          if (data.category === "mala") {
+            // Must actually be a mala (have mala in title) to filter out stray rudraksha beads
+            return title.includes("mala");
+          }
+          if (data.category === "bracelets") {
+            return title.includes("bracelet");
+          }
+          if (data.category === "gemstones") {
+            // Filter out rudrakshas/malas that might have gemstone in description
+            return !title.includes("rudraksha") && !title.includes("mala");
+          }
+          if (data.category === "rudraksha") {
+            // Rudraksha category can have beads, malas, and bracelets, so keep all matching
+            return title.includes("rudraksha") || title.includes("mukhi");
+          }
+
+          return true;
+        });
+      }
 
       return products;
     } catch (error) {
