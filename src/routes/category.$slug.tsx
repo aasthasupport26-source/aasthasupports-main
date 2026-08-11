@@ -87,20 +87,6 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
           height={800}
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-maroon-deep/90 via-maroon-deep/60 to-maroon-deep/30" />
-        <div className="container relative mx-auto px-4 z-10">
-          <p className="text-gold tracking-[0.4em] text-xs">✦ COLLECTION ✦</p>
-          <h1 className="font-display text-5xl md:text-6xl text-cream mt-3">{cat.name}</h1>
-          <p className="text-cream/85 mt-4 max-w-xl leading-relaxed">{cat.tagline}</p>
-          <div className="flex items-center gap-4 mt-5 text-xs tracking-widest uppercase text-gold-soft">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4" /> Certified
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4" /> Energised
-            </span>
-          </div>
-        </div>
       </section>
 
       {loading ? (
@@ -621,29 +607,6 @@ function OnlinePoojaHero({ cat }: { cat: any }) {
           }`}
         />
       ))}
-      <div className="absolute inset-0 bg-gradient-to-r from-maroon-deep/95 via-maroon-deep/60 to-transparent" />
-
-      <div className="container relative mx-auto px-4 z-10 flex items-center justify-between">
-        <div className="max-w-2xl drop-shadow-lg">
-          <p className="text-gold tracking-[0.4em] text-xs font-semibold select-none">
-            ✦ COLLECTION ✦
-          </p>
-          <h1 className="font-display text-5xl md:text-6xl text-cream mt-3 [text-shadow:0_2px_10px_rgba(0,0,0,0.7)]">
-            {cat.name}
-          </h1>
-          <p className="text-cream mt-4 max-w-xl leading-relaxed [text-shadow:0_1px_5px_rgba(0,0,0,0.7)] font-medium">
-            {cat.tagline}
-          </p>
-          <div className="flex items-center gap-4 mt-5 text-xs tracking-widest uppercase text-gold-soft">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4" /> Certified
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4" /> Energised
-            </span>
-          </div>
-        </div>
-      </div>
 
       <button
         onClick={prev}
