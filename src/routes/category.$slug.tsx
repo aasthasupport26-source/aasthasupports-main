@@ -120,21 +120,11 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
       ) : (
         cat.sections.map((section: any) => {
           const sectionItems = products.filter((product) => {
-            // First check if the product matches any sub-item in this section
-            const matchesSub = section.items.some(
-              (sub: any) =>
-                product.slug.toLowerCase().includes(sub.slug.toLowerCase()) ||
-                product.name.toLowerCase().includes(sub.name.toLowerCase()) ||
-                sub.slug.toLowerCase().includes(product.slug.toLowerCase()),
-            );
-
-            if (!matchesSub) return false;
-
-            // Strict filtering for Rudraksha sections based on Nepal/Indonesian keywords
             const title = section.title.toLowerCase();
             const prodName = product.name.toLowerCase();
             const prodTags = (product.tags || []).map((t: string) => t.toLowerCase());
 
+            // Strict filtering for Rudraksha sections based on Nepal/Indonesian keywords
             if (title.includes("nepali") || title.includes("nepal")) {
               return (
                 prodName.includes("nepal") ||
@@ -150,6 +140,8 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
               );
             }
 
+            // For all other categories (gemstones, bracelets, yantra, mala)
+            // where there is typically only 1 section, include all products fetched.
             return true;
           });
 

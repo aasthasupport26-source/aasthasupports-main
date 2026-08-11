@@ -1,11 +1,3 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/Layout';
-import { useServerFn } from '@tanstack/react-start';
-import { getShopifyProducts } from '@/lib/shopify.functions';
-import { useCart } from '@/contexts/CartContext';
-import { toast } from 'sonner';
-import { Search, Star, ShieldCheck, Sparkles, SlidersHorizontal, ShoppingBag, Loader2 } from 'lucide-react';
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import React, { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
@@ -104,7 +96,6 @@ function ShopPage() {
       categoryName: product.category,
     });
     toast.success(`${product.name} added to cart`);
-    navigate({ to: '/cart' });
     navigate({ to: "/cart", search: { cleared: undefined } });
   };
 
