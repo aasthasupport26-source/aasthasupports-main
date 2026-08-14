@@ -72,7 +72,7 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
 
   useEffect(() => {
     fetchProducts({ data: { category: cat.slug, limit: 50 } })
-      .then(setProducts)
+      .then((data) => setProducts(data?.products || []))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [cat.slug]);

@@ -13,7 +13,7 @@ function CartCheckoutRedirect() {
   useEffect(() => {
     const storeDomain = "08axwa-1x.myshopify.com";
     const search = window.location.search || "";
-    const targetUrl = `https://${storeDomain}/cart/c/${id}${search}`;
+    const targetUrl = `https://${storeDomain}/cart/c/${id}${search}${search ? '&' : '?'}_fd=0`;
     window.location.href = targetUrl;
   }, [id]);
 

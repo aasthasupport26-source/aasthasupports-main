@@ -38,7 +38,7 @@ function ProductsPage() {
       const data = await fetchProducts({
         data: { category: selectedCategory || undefined, limit: 100 },
       });
-      setProducts(data || []);
+      setProducts(data?.products || []);
     } catch (err) {
       console.error("Failed to fetch Shopify products:", err);
     } finally {

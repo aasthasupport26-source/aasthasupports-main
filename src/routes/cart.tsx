@@ -46,9 +46,10 @@ function CartPage() {
         quantity: i.quantity,
       }));
       const res = await checkout({ data: { items: payload } });
+      console.log("[Cart] Checkout response:", res);
       if (res.checkoutUrl) {
-        // Clear cart immediately before leaving to Shopify
-        clear();
+        console.log("[Cart] Redirecting to:", res.checkoutUrl);
+        // Don't clear cart - let Shopify handle it after successful checkout
         window.location.href = res.checkoutUrl;
       } else {
         throw new Error("No checkout URL returned");

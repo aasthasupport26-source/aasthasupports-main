@@ -11,23 +11,23 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
   .validator(
     z.object({
       category: z.string().optional(),
-      limit: z.number().int().min(1).max(100).default(50),
+      limit: z.number().int().min(1).max(50).default(20),
+      cursor: z.string().optional(),
     }),
   )
   .handler(async ({ data }) => {
     try {
       let queryFilter: string | undefined = undefined;
-      if (data.category) {
-        // Map category slugs to Shopify product_type exactly as configured by merchant
+      if (data.category && data.category !== "all") {
         let productType = data.category;
         if (productType === "bracelets") productType = "bracelet";
         if (productType === "gemstones") productType = "gemstone";
-
         queryFilter = `product_type:${productType}`;
       }
 
       const response: any = await shopifyClient.request(GET_PRODUCTS_QUERY, {
         first: data.limit,
+        after: data.cursor,
         query: queryFilter,
       });
 
@@ -57,7 +57,13 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
         };
       });
 
-      return products;
+      return {
+        products,
+        pageInfo: {
+          hasNextPage: response.products.pageInfo.hasNextPage,
+          endCursor: response.products.pageInfo.endCursor,
+        },
+      };
     } catch (error) {
       console.error("Shopify API error:", error);
       throw new Error("Failed to fetch products from Shopify");
@@ -136,34 +142,49 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    try {
-      const lines = data.items.map((item) => ({
-        merchandiseId: item.variantId,
-        quantity: item.quantity,
-        attributes: item.attributes || [],
-      }));
+    const maxRetries = 3;
+    let lastError: any;
 
-      const response: any = await shopifyClient.request(CREATE_CART_MUTATION, {
-        lines,
-      });
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const lines = data.items.map((item) => ({
+          merchandiseId: item.variantId,
+          quantity: item.quantity,
+          attributes: item.attributes || [],
+        }));
 
-      const cartCreate = response.cartCreate;
-      if (cartCreate.userErrors && cartCreate.userErrors.length > 0) {
-        throw new Error(cartCreate.userErrors[0].message);
+        const response: any = await shopifyClient.request(CREATE_CART_MUTATION, {
+          lines,
+        });
+
+        const cartCreate = response.cartCreate;
+        if (cartCreate.userErrors && cartCreate.userErrors.length > 0) {
+          throw new Error(cartCreate.userErrors[0].message);
+        }
+
+        let checkoutUrl: string = cartCreate.cart.checkoutUrl;
+        console.log("[Shopify] Original checkout URL:", checkoutUrl);
+
+        checkoutUrl = checkoutUrl.replace(
+          /^https?:\/\/[^\/]+/,
+          "https://08axwa-1x.myshopify.com"
+        );
+        checkoutUrl += (checkoutUrl.includes("?") ? "&" : "?") + "_fd=0";
+        console.log("[Shopify] Rewritten checkout URL:", checkoutUrl);
+
+        return { checkoutUrl };
+      } catch (error: any) {
+        lastError = error;
+        if (attempt < maxRetries - 1 && error.message?.includes("throttled")) {
+          await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+          continue;
+        }
+        break;
       }
-
-      // Shopify returns our custom domain in checkoutUrl — rewrite to myshopify checkout
-      let checkoutUrl: string = cartCreate.cart.checkoutUrl;
-      checkoutUrl = checkoutUrl.replace(
-        /^https?:\/\/(www\.)?aasthasupports\.com/i,
-        "https://08axwa-1x.myshopify.com",
-      );
-
-      return { checkoutUrl };
-    } catch (error: any) {
-      console.error("Shopify checkout creation error:", error);
-      throw new Error(error.message || "Failed to create Shopify checkout");
     }
+
+    console.error("Shopify checkout creation error:", lastError);
+    throw new Error(lastError?.message || "Failed to create Shopify checkout");
   });
 
 export const getCustomerOrders = createServerFn({ method: "GET" })

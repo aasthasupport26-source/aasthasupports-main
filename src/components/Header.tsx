@@ -37,7 +37,9 @@ export function Header() {
       </div>
 
       {/* Main nav */}
-      <div className="bg-royal border-b border-gold/30 shadow-royal">
+      <div
+        className="bg-royal border-b border-gold/30 shadow-royal relative"
+      >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center h-20 relative">
             <div className="absolute left-0 -ml-6">
@@ -45,12 +47,9 @@ export function Header() {
             </div>
 
             {/* Desktop nav - centered */}
-            <nav
-              className="hidden lg:flex items-center gap-3"
-              onMouseLeave={() => setOpenSlug(null)}
-            >
+            <nav className="hidden lg:flex items-center gap-3">
               {categories.map((cat) => (
-                <div key={cat.slug} className="relative" onMouseEnter={() => setOpenSlug(cat.slug)}>
+                <div key={cat.slug} className="relative" onMouseEnter={() => setOpenSlug(cat.slug)} onMouseLeave={() => setOpenSlug(null)}>
                   <Link
                     to="/category/$slug"
                     params={{ slug: cat.slug }}

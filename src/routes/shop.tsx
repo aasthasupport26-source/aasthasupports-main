@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { Layout } from "@/components/Layout";
 import { useServerFn } from "@tanstack/react-start";
 import { getShopifyProducts } from "@/lib/shopify.functions";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import {
   Search,
   Star,
@@ -41,27 +42,28 @@ function ShopPage() {
   const fetchProducts = useServerFn(getShopifyProducts);
 
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  // Fetch products on mount
   React.useEffect(() => {
-    const loadProducts = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchProducts({ data: { limit: 50 } });
-        setProducts(data);
-      } catch (err: any) {
-        setError(err?.message || "Failed to load products");
-        toast.error("Failed to load products from Shopify");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadProducts();
-  }, []);
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["products", selectedCategory],
+    queryFn: () =>
+      fetchProducts({
+        data: {
+          category: selectedCategory,
+          limit: 20,
+        },
+      }),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+
+  const products = data?.products || [];
 
   const categories = [
     { name: "All Products", slug: "all" },
@@ -72,14 +74,17 @@ function ShopPage() {
     { name: "Yantras", slug: "yantra" },
   ];
 
-  // Filter products
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.description?.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredProducts = useMemo(() => {
+    const searchLower = debouncedSearch.trim().toLowerCase();
+    if (!searchLower) return products;
+    return products.filter(
+      (p: any) =>
+        p.name?.toLowerCase().includes(searchLower) ||
+        p.description?.toLowerCase().includes(searchLower) ||
+        p.category?.toLowerCase().includes(searchLower) ||
+        p.productType?.toLowerCase().includes(searchLower),
+    );
+  }, [products, debouncedSearch]);
 
   const handleAddToCart = (product: any) => {
     if (!product.variantId) {
@@ -146,7 +151,7 @@ function ShopPage() {
           </div>
 
           {/* Loading State */}
-          {loading && (
+          {isLoading && (
             <div className="flex justify-center items-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-gold" />
               <span className="ml-3 text-muted-foreground">Loading products from Shopify...</span>
@@ -154,9 +159,9 @@ function ShopPage() {
           )}
 
           {/* Error State */}
-          {error && !loading && (
+          {error && !isLoading && (
             <div className="text-center py-20">
-              <p className="text-red-500 mb-4">{error}</p>
+              <p className="text-red-500 mb-4">{error instanceof Error ? error.message : "Failed to load products"}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-6 py-3 bg-maroon-deep text-white rounded-lg hover:bg-maroon-darker"
@@ -167,7 +172,7 @@ function ShopPage() {
           )}
 
           {/* Products Grid */}
-          {!loading && !error && (
+          {!isLoading && !error && (
             <>
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-20">
