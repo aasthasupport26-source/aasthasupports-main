@@ -165,12 +165,13 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
         let checkoutUrl: string = cartCreate.cart.checkoutUrl;
         console.log("[Shopify] Original checkout URL:", checkoutUrl);
 
-        checkoutUrl = checkoutUrl.replace(
-          /^https?:\/\/[^\/]+/,
-          "https://08axwa-1x.myshopify.com"
-        );
-        checkoutUrl += (checkoutUrl.includes("?") ? "&" : "?") + "_fd=0";
-        console.log("[Shopify] Rewritten checkout URL:", checkoutUrl);
+        // Do not force-rewrite the host. Use Shopify's returned checkout URL
+        // and append `_fd=0` to bypass Shopify's automatic primary-domain
+        // redirect when necessary. Only add the flag if it's not already present.
+        if (!checkoutUrl.includes("_fd=0")) {
+          checkoutUrl += (checkoutUrl.includes("?") ? "&" : "?") + "_fd=0";
+        }
+        console.log("[Shopify] Checkout URL with _fd=0:", checkoutUrl);
 
         return { checkoutUrl };
       } catch (error: any) {

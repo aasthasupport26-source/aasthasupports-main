@@ -73,7 +73,10 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
   useEffect(() => {
     fetchProducts({ data: { category: cat.slug, limit: 50 } })
       .then((data) => setProducts(data?.products || []))
-      .catch(() => {})
+      .catch((err) => {
+        console.error("Failed to load products:", err);
+        toast.error("Failed to load products");
+      })
       .finally(() => setLoading(false));
   }, [cat.slug]);
 

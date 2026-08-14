@@ -108,7 +108,10 @@ function ProfilePage() {
     if (accessToken) {
       fetchOrders({ data: { customerAccessToken: accessToken, limit: 20 } })
         .then((res) => setOrders(res.orders || []))
-        .catch(() => setOrders([]))
+        .catch((err) => {
+          console.error("Failed to load orders:", err);
+          setOrders([]);
+        })
         .finally(() => setLoadingOrders(false));
     } else if (!authLoading) {
       setLoadingOrders(false);
@@ -119,7 +122,10 @@ function ProfilePage() {
     if (customer?.id) {
       fetchPujaBookings({ data: { userId: customer.id } })
         .then((data) => setPujaBookings(data || []))
-        .catch(() => setPujaBookings([]))
+        .catch((err) => {
+          console.error("Failed to load bookings:", err);
+          setPujaBookings([]);
+        })
         .finally(() => setLoadingPujas(false));
     } else if (!authLoading) {
       setLoadingPujas(false);

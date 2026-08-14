@@ -11,7 +11,7 @@ function CartCheckoutRedirect() {
   const { id } = Route.useParams();
 
   useEffect(() => {
-    const storeDomain = "08axwa-1x.myshopify.com";
+    const storeDomain = process.env.SHOPIFY_STORE_DOMAIN || "08axwa-1x.myshopify.com";
     const search = window.location.search || "";
     const targetUrl = `https://${storeDomain}/cart/c/${id}${search}${search ? '&' : '?'}_fd=0`;
     window.location.href = targetUrl;
