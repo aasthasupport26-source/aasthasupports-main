@@ -4,7 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 
-export const Route = createFileRoute("/admin/leads")({ component: LeadsPage });
+export const Route = createFileRoute("/admin/leads")({
+  component: LeadsPage,
+  beforeLoad: async ({ context }) => {
+    const { isAdmin } = context.auth || {};
+    if (!isAdmin) {
+      throw new Error("Unauthorized");
+    }
+  },
+});
 
 function LeadsPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -42,12 +50,12 @@ function LeadsPage() {
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium">{l.name}</span>
-                  {l.email && <span className="text-xs text-muted-foreground">{l.email}</span>}
-                  {l.phone && <span className="text-xs text-muted-foreground">📞 {l.phone}</span>}
+                  <span className="font-medium">{String(l.name || '').replace(/[<>]/g, '')}</span>
+                  {l.email && <span className="text-xs text-muted-foreground">{String(l.email).replace(/[<>]/g, '')}</span>}
+                  {l.phone && <span className="text-xs text-muted-foreground">📞 {String(l.phone).replace(/[<>]/g, '')}</span>}
                 </div>
-                {l.subject && <div className="text-sm text-maroon mt-1">{l.subject}</div>}
-                <p className="text-sm mt-2 whitespace-pre-wrap">{l.message}</p>
+                {l.subject && <div className="text-sm text-maroon mt-1">{String(l.subject).replace(/[<>]/g, '')}</div>}
+                <p className="text-sm mt-2 whitespace-pre-wrap">{String(l.message || '').replace(/[<>]/g, '')}</p>
                 <div className="text-xs text-muted-foreground mt-2">
                   {new Date(l.created_at).toLocaleString()}
                 </div>

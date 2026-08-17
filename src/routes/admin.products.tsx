@@ -14,6 +14,12 @@ import {
 
 export const Route = createFileRoute("/admin/products")({
   component: ProductsPage,
+  beforeLoad: async ({ context }) => {
+    const { isAdmin } = context.auth || {};
+    if (!isAdmin) {
+      throw new Error("Unauthorized");
+    }
+  },
 });
 
 const CATEGORIES = [

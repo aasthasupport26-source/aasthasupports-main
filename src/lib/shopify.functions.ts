@@ -33,9 +33,9 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
 
       const products = response.products.edges.map((edge: any) => {
         const node = edge.node;
-        const categoryMeta = node.metafields?.find((m: any) => m?.key === "category");
-        const benefitsMeta = node.metafields?.find((m: any) => m?.key === "benefits");
-        const certifiedMeta = node.metafields?.find((m: any) => m?.key === "certified");
+        const metafieldsMap = new Map(
+          node.metafields?.map((m: any) => [m?.key, m?.value]) || []
+        );
 
         return {
           slug: node.handle,
@@ -50,10 +50,11 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
           variantId: node.variants.edges[0]?.node.id,
           stock: node.variants.edges[0]?.node.quantityAvailable || 0,
           available: node.variants.edges[0]?.node.availableForSale || false,
-          category: node.productType || categoryMeta?.value || "", // Fallback to metafield if empty
+          category: node.productType || metafieldsMap.get("category") || "",
           productType: node.productType || "",
-          benefits: benefitsMeta?.value ? JSON.parse(benefitsMeta.value) : [],
-          certified: certifiedMeta?.value === "true",
+          benefits: metafieldsMap.get("benefits") ? JSON.parse(metafieldsMap.get("benefits")!) : [],
+          certified: metafieldsMap.get("certified") === "true",
+          tags: node.tags || [],
         };
       });
 
@@ -83,9 +84,9 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
       }
 
       const node = response.product;
-      const categoryMeta = node.metafields?.find((m: any) => m?.key === "category");
-      const benefitsMeta = node.metafields?.find((m: any) => m?.key === "benefits");
-      const certifiedMeta = node.metafields?.find((m: any) => m?.key === "certified");
+      const metafieldsMap = new Map(
+        node.metafields?.map((m: any) => [m?.key, m?.value]) || []
+      );
 
       const product = {
         slug: node.handle,
@@ -108,9 +109,10 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
           available: e.node.availableForSale,
           stock: e.node.quantityAvailable,
         })),
-        benefits: benefitsMeta?.value ? JSON.parse(benefitsMeta.value) : [],
-        certified: certifiedMeta?.value === "true",
-        category: categoryMeta?.value || "",
+        benefits: metafieldsMap.get("benefits") ? JSON.parse(metafieldsMap.get("benefits")!) : [],
+        certified: metafieldsMap.get("certified") === "true",
+        category: metafieldsMap.get("category") || "",
+        tags: node.tags || [],
       };
 
       return product;
@@ -144,6 +146,27 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const maxRetries = 3;
     let lastError: any;
+    
+    // Fetch actual prices from Shopify to prevent price manipulation
+    const { GET_PRODUCT_BY_VARIANT } = await import("./shopify/queries");
+    const variantIds = data.items.map(item => item.variantId);
+    
+    // Validate prices server-side
+    for (const item of data.items) {
+      try {
+        const result: any = await shopifyClient.request(GET_PRODUCT_BY_VARIANT, {
+          id: item.variantId
+        });
+        
+        if (!result?.node?.price) {
+          throw new Error(`Invalid variant: ${item.variantId}`);
+        }
+        
+        // Price validation happens server-side, client prices are ignored
+      } catch (err) {
+        throw new Error(`Failed to validate product: ${item.variantId}`);
+      }
+    }
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {

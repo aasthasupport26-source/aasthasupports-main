@@ -26,7 +26,16 @@ export function generatePKCE() {
   return { verifier, challenge };
 }
 
-const STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || "08axwa-1x.myshopify.com";
+const STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
+
+if (!STORE_DOMAIN) throw new Error("SHOPIFY_STORE_DOMAIN is required");
+
+// Whitelist of allowed redirect URIs for OAuth
+const ALLOWED_REDIRECT_URIS = [
+  process.env.VITE_SHOPIFY_REDIRECT_URI,
+  "http://localhost:3000/auth/callback",
+  "http://localhost:5173/auth/callback",
+].filter(Boolean) as string[];
 
 export async function getOidcConfig(): Promise<OidcConfig> {
   const url = `https://shopify.com/authentication/${SHOP_ID}/.well-known/openid-configuration`;
@@ -42,6 +51,11 @@ export async function getOidcConfig(): Promise<OidcConfig> {
 }
 
 export async function buildAuthorizeUrl(redirectUri: string) {
+  // Validate redirect URI against whitelist
+  if (!ALLOWED_REDIRECT_URIS.includes(redirectUri)) {
+    throw new Error("Invalid redirect URI");
+  }
+  
   const oidc = await getOidcConfig();
   const { verifier, challenge } = generatePKCE();
   const state = generateRandomString(16);
@@ -69,6 +83,11 @@ export async function buildAuthorizeUrl(redirectUri: string) {
 }
 
 export async function exchangeCodeForTokens(code: string, verifier: string, redirectUri: string) {
+  // Validate redirect URI against whitelist
+  if (!ALLOWED_REDIRECT_URIS.includes(redirectUri)) {
+    throw new Error("Invalid redirect URI");
+  }
+  
   const oidc = await getOidcConfig();
   const bodyParams: Record<string, string> = {
     grant_type: "authorization_code",

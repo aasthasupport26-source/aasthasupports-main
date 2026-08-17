@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useRef, useMemo, useCallback } from "react";
 import { verifyAccessToken } from "@/lib/auth.functions";
 import { checkIsAdmin } from "@/lib/admin-auth.functions";
+import { getSession, setSession, clearSession } from "@/lib/session.functions";
 import { useServerFn } from "@tanstack/react-start";
 
 interface ShopifyCustomer {
@@ -28,101 +29,97 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const verify = useServerFn(verifyAccessToken);
+  const initRef = useRef(false);
+  const getSessionFn = useServerFn(getSession);
   const checkAdmin = useServerFn(checkIsAdmin);
 
   useEffect(() => {
-    const token = localStorage.getItem("aastha_access_token");
-    const storedCustomer = localStorage.getItem("aastha_customer");
-    const storedExpiry = localStorage.getItem("aastha_token_expires");
-
-    // Check if token has expired
-    if (storedExpiry) {
-      const expiryDate = new Date(storedExpiry);
-      if (expiryDate.getTime() < Date.now()) {
-        // Token has expired — clear session
-        localStorage.removeItem("aastha_customer");
-        localStorage.removeItem("aastha_access_token");
-        localStorage.removeItem("aastha_token_expires");
+    if (initRef.current) return;
+    initRef.current = true;
+    
+    getSessionFn()
+      .then((session) => {
+        if (session) {
+          setCustomer({
+            id: session.customerId,
+            email: session.email,
+            firstName: session.firstName,
+            lastName: session.lastName,
+            phone: session.phone,
+            displayName: session.displayName,
+          });
+          setAccessToken(session.accessToken);
+          setIsAdmin(session.isAdmin);
+        }
         setLoading(false);
-        return;
-      }
-    }
-
-    if (token && storedCustomer) {
-      try {
-        const parsedCustomer = JSON.parse(storedCustomer);
-        setCustomer(parsedCustomer);
-        setAccessToken(token);
-
-        // Check admin status and wait before setting loading to false
-        checkAdmin({ data: { email: parsedCustomer.email } })
-          .then((result) => {
-            setIsAdmin(result.isAdmin);
-            setLoading(false);
-          })
-          .catch(() => {
-            setIsAdmin(false);
-            setLoading(false);
-          });
-
-        // Verification in background (preserves local session even if offline)
-        verify({ data: { accessToken: token } })
-          .then((result) => {
-            if (result?.customer) setCustomer(result.customer);
-          })
-          .catch((err) => {
-            if (process.env.NODE_ENV !== "production") {
-              console.warn("Background token verification notice, maintaining session:", err);
-            }
-          });
-        return;
-      } catch (e) {
-        console.error("Failed to parse stored customer:", e);
-      }
-    }
-
-    // No stored session
-    setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   }, []);
 
-  const login = async (
+  const setSessionFn = useServerFn(setSession);
+
+  const login = useCallback(async (
     customer: ShopifyCustomer,
     token: string,
     expiresAt?: string,
   ): Promise<boolean> => {
-    // Default to 1-year persistent session if expiresAt not provided
-    const farFuture = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
-    const finalExpires = expiresAt || farFuture;
+    const defaultExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const finalExpires = expiresAt || defaultExpiry;
 
-    setCustomer(customer);
-    setAccessToken(token);
-    localStorage.setItem("aastha_customer", JSON.stringify(customer));
-    localStorage.setItem("aastha_access_token", token);
-    localStorage.setItem("aastha_token_expires", finalExpires);
-
-    // Check admin status
     try {
-      const result = await checkAdmin({ data: { email: customer.email } });
-      setIsAdmin(result.isAdmin);
-      return result.isAdmin;
+      const adminResult = await checkAdmin({ data: { email: customer.email } });
+      const isAdminUser = adminResult.isAdmin;
+
+      await setSessionFn({
+        data: {
+          customerId: customer.id,
+          email: customer.email,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          phone: customer.phone,
+          displayName: customer.displayName,
+          accessToken: token,
+          isAdmin: isAdminUser,
+          expiresAt: finalExpires,
+        },
+      });
+
+      setCustomer(customer);
+      setAccessToken(token);
+      setIsAdmin(isAdminUser);
+      return isAdminUser;
     } catch {
       setIsAdmin(false);
       return false;
     }
-  };
+  }, [checkAdmin, setSessionFn]);
 
-  const logout = () => {
+  const clearSessionFn = useServerFn(clearSession);
+
+  const logout = useCallback(async () => {
+    if (accessToken && isAdmin) {
+      try {
+        const { revokeAdminToken } = await import("@/lib/admin-guard");
+        await revokeAdminToken(accessToken);
+      } catch (error) {
+        console.error("Failed to revoke admin token:", error);
+      }
+    }
+    clearSessionFn();
     setCustomer(null);
     setAccessToken(null);
     setIsAdmin(false);
-    localStorage.removeItem("aastha_customer");
-    localStorage.removeItem("aastha_access_token");
-    localStorage.removeItem("aastha_token_expires");
-  };
+  }, [clearSessionFn, accessToken, isAdmin]);
+
+  const value = useMemo(
+    () => ({ customer, accessToken, loading, isAdmin, login, logout }),
+    [customer, accessToken, loading, isAdmin, login, logout]
+  );
 
   return (
-    <AuthContext.Provider value={{ customer, accessToken, loading, isAdmin, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

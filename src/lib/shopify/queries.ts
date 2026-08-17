@@ -10,6 +10,7 @@ export const GET_PRODUCTS_QUERY = gql`
           title
           productType
           description
+          tags
           priceRange {
             minVariantPrice {
               amount
@@ -71,6 +72,7 @@ export const GET_PRODUCT_BY_HANDLE_QUERY = gql`
       title
       description
       descriptionHtml
+      tags
       priceRange {
         minVariantPrice {
           amount

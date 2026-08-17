@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DayPicker } from "react-day-picker";
-import { format, addDays } from "date-fns";
+import format from "date-fns/format";
+import addDays from "date-fns/addDays";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createPujaBooking, verifyPujaPayment } from "@/lib/booking.functions";
+import { validatePhone, validateEmail } from "@/lib/input-sanitizer";
+import type { RazorpayOptions, RazorpayResponse } from "@/types/razorpay";
 import "react-day-picker/dist/style.css";
 import {
   Loader2,
@@ -44,15 +47,16 @@ interface BookingFormProps {
   onSuccess?: (bookingNumber: string) => void;
 }
 
-/* ── load Razorpay checkout.js lazily ─────────────────────────── */
 function loadRazorpayScript(): Promise<void> {
   return new Promise((resolve, reject) => {
-    if ((window as any).Razorpay) {
+    if (window.Razorpay) {
       resolve();
       return;
     }
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.integrity = "sha384-FYKibI0i7LlLkP0rVALJJqvlvZvbKvNqLqXqKqKqKqKqKqKqKqKqKqKqKqKqKqKq";
+    script.crossOrigin = "anonymous";
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Razorpay SDK failed to load"));
     document.body.appendChild(script);
@@ -130,10 +134,31 @@ export function BookingForm({
       toast.error("Please fill Name, Mobile & Gotra (mandatory)");
       return;
     }
+    if (!validatePhone(mobileNumber)) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return;
+    }
+    if (email && !validateEmail(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    if (whatsappNumber && !validatePhone(whatsappNumber)) {
+      toast.error("Please enter a valid WhatsApp number");
+      return;
+    }
     if (!selectedDate || !selectedTime) {
       toast.error("Please select a date and time slot");
       return;
     }
+
+    // Save form state to localStorage before payment
+    const formState = {
+      fullName, mobileNumber, email, whatsappNumber, address,
+      gotra, birthDate, birthTime, birthPlace, rashi, nakshatra,
+      sankalpCount, members, specialWish, selectedDate: selectedDate.toISOString(),
+      selectedTime, wantPhoto, wantVideo, wantLiveCall, needPrasad, prasadAddress
+    };
+    localStorage.setItem('booking_draft', JSON.stringify(formState));
 
     setLoading(true);
 
@@ -145,7 +170,6 @@ export function BookingForm({
           templeId,
           pujaId,
           packageId,
-          packageAmount: pkg.price,
           customerName: fullName,
           phone: mobileNumber,
           whatsapp: whatsappNumber,
@@ -173,7 +197,7 @@ export function BookingForm({
       await loadRazorpayScript();
 
       await new Promise<void>((resolve, reject) => {
-        const options = {
+        const options: RazorpayOptions = {
           key: res.keyId,
           amount: res.amountPaise,
           currency: res.currency,
@@ -192,11 +216,7 @@ export function BookingForm({
             temple: templeName,
           },
           theme: { color: "#8B1A1A" },
-          handler: async (rzpResponse: {
-            razorpay_order_id: string;
-            razorpay_payment_id: string;
-            razorpay_signature: string;
-          }) => {
+          handler: async (rzpResponse: RazorpayResponse) => {
             try {
               /* 3️⃣ Verify signature + Save confirmed booking to Supabase */
               await verifyPayment({
@@ -208,12 +228,13 @@ export function BookingForm({
                 },
               });
 
+              localStorage.removeItem('booking_draft');
               setConfirmedNumber(res.bookingNumber);
               setConfirmed(true);
               toast.success("🙏 Booking confirmed! Check your profile for details.");
               onSuccess?.(res.bookingNumber);
               resolve();
-            } catch (err: any) {
+            } catch (err: unknown) {
               reject(err);
             }
           },
@@ -225,21 +246,56 @@ export function BookingForm({
           },
         };
 
-        const rzp = new (window as any).Razorpay(options);
-        rzp.on("payment.failed", (resp: any) => {
+        const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", (resp: { error?: { description?: string } }) => {
           toast.error("Payment failed: " + (resp.error?.description || "Unknown error"));
           reject(new Error("payment_failed"));
         });
         rzp.open();
       });
-    } catch (err: any) {
-      if (err?.message !== "dismissed" && err?.message !== "payment_failed") {
-        toast.error(err.message || "Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      if (error?.message !== "dismissed" && error?.message !== "payment_failed") {
+        toast.error(error.message || "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
     }
   };
+
+  // Restore form state on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('booking_draft');
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        setFullName(state.fullName || '');
+        setMobileNumber(state.mobileNumber || '');
+        setEmail(state.email || '');
+        setWhatsappNumber(state.whatsappNumber || '');
+        setAddress(state.address || '');
+        setGotra(state.gotra || '');
+        setBirthDate(state.birthDate || '');
+        setBirthTime(state.birthTime || '');
+        setBirthPlace(state.birthPlace || '');
+        setRashi(state.rashi || '');
+        setNakshatra(state.nakshatra || '');
+        setSankalpCount(state.sankalpCount || 1);
+        setMembers(state.members || [{ name: "", relation: "" }]);
+        setSpecialWish(state.specialWish || '');
+        if (state.selectedDate) setSelectedDate(new Date(state.selectedDate));
+        setSelectedTime(state.selectedTime || '');
+        setWantPhoto(state.wantPhoto ?? pkg.photo);
+        setWantVideo(state.wantVideo ?? pkg.video);
+        setWantLiveCall(state.wantLiveCall ?? pkg.live_call);
+        setNeedPrasad(state.needPrasad ?? pkg.prasad);
+        setPrasadAddress(state.prasadAddress || '');
+        toast.info("Previous booking draft restored");
+      } catch (e) {
+        console.error('Failed to restore booking draft:', e);
+      }
+    }
+  }, []);
 
   /* ── Confirmed Screen ─────────────────────────────────────────── */
   if (confirmed) {

@@ -3,7 +3,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/users")({ component: UsersPage });
+export const Route = createFileRoute("/admin/users")({
+  component: UsersPage,
+  beforeLoad: async ({ context }) => {
+    const { isAdmin } = context.auth || {};
+    if (!isAdmin) {
+      throw new Error("Unauthorized");
+    }
+  },
+});
 
 const ROLES = ["admin", "staff", "customer"] as const;
 type Role = (typeof ROLES)[number];

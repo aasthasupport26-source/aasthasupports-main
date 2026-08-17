@@ -4,8 +4,9 @@ import { getCategory } from "@/data/catalog";
 import { useCart } from "@/contexts/CartContext";
 import { getShopifyProduct } from "@/lib/shopify.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import {
   Star,
   ShieldCheck,
@@ -18,70 +19,81 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/product/$slug")({
-  loader: ({ params }) => {
-    return { slug: params.slug };
+  loader: async ({ params, context }) => {
+    const product = await context.queryClient.ensureQueryData({
+      queryKey: ['product', params.slug],
+      queryFn: async () => {
+        const fn = getShopifyProduct as any;
+        return fn({ data: { handle: params.slug } });
+      },
+      staleTime: 5 * 60 * 1000,
+    });
+    return { slug: params.slug, product };
   },
   head: ({ loaderData }) => {
-    const title = `Product — Aastha Support`;
+    const product = loaderData?.product;
+    const title = product ? `${product.name} — Aastha Support` : `Product — Aastha Support`;
+    const description = product?.description?.slice(0, 160) || "Authentic certified spiritual products";
     const url = `https://aasthasupport.com/product/${loaderData?.slug}`;
+    const image = product?.images?.[0] || "https://aasthasupport.com/og-image.jpg";
+    
     return {
       meta: [
         { title },
+        { name: "description", content: description },
         { property: "og:title", content: title },
+        { property: "og:description", content: description },
         { property: "og:url", content: url },
         { property: "og:type", content: "product" },
+        { property: "og:image", content: image },
+        { property: "product:price:amount", content: product?.price?.toString() || "" },
+        { property: "product:price:currency", content: "INR" },
       ],
-      links: [{ rel: "canonical", href: url }],
+      links: [
+        { rel: "canonical", href: url },
+        { rel: "preload", href: image, as: "image" },
+      ],
+      scripts: product ? [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            description: product.description,
+            image: product.images,
+            offers: {
+              "@type": "Offer",
+              price: product.price,
+              priceCurrency: "INR",
+              availability: product.variants?.[0]?.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            },
+          }),
+        },
+      ] : [],
     };
   },
   component: ProductPage,
 });
 
 function ProductPage() {
-  const { slug } = Route.useLoaderData();
-  const fetchProduct = useServerFn(getShopifyProduct);
-  const [product, setProduct] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
+  const { slug, product: initialProduct } = Route.useLoaderData();
   const { add } = useCart();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const loadProduct = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchProduct({ data: { handle: slug } });
-        setProduct(data);
-      } catch (error) {
-        console.error("Failed to load product:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadProduct();
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center py-32 min-h-[500px]">
-          <Loader2 className="w-8 h-8 animate-spin text-gold" />
-        </div>
-      </Layout>
-    );
-  }
+  const { data: product } = useQuery({
+    queryKey: ['product', slug],
+    queryFn: async () => {
+      const fn = getShopifyProduct as any;
+      return fn({ data: { handle: slug } });
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    initialData: initialProduct,
+  });
 
   if (!product) {
-    return (
-      <Layout>
-        <div className="container mx-auto px-4 py-32 text-center">
-          <h1 className="font-display text-4xl text-maroon-deep">Product not found</h1>
-          <Link to="/" className="text-gold mt-4 inline-block">
-            ← Back home
-          </Link>
-        </div>
-      </Layout>
-    );
+    throw notFound();
   }
 
   const price = product.price;

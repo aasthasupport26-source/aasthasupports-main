@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, ReactNode, useCallback } from "react";
 
 export type CartItem = {
   slug: string;
@@ -42,32 +42,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items]);
 
+  const add = useCallback((item: Omit<CartItem, "quantity">, qty = 1) => {
+    if (qty <= 0) return;
+    setItems((prev) => {
+      const ex = prev.find((p) => p.variantId === item.variantId);
+      if (ex)
+        return prev.map((p) =>
+          p.variantId === item.variantId ? { ...p, quantity: p.quantity + qty } : p,
+        );
+      return [...prev, { ...item, quantity: qty }];
+    });
+  }, []);
+
+  const update = useCallback((variantId: string, qty: number) => {
+    setItems((prev) =>
+      qty <= 0
+        ? prev.filter((p) => p.variantId !== variantId)
+        : prev.map((p) => (p.variantId === variantId ? { ...p, quantity: qty } : p)),
+    );
+  }, []);
+
+  const remove = useCallback((variantId: string) => {
+    setItems((prev) => prev.filter((p) => p.variantId !== variantId));
+  }, []);
+
+  const clear = useCallback(() => setItems([]), []);
+
+  const count = useMemo(() => items.reduce((s, i) => s + i.quantity, 0), [items]);
+  const subtotal = useMemo(() => items.reduce((s, i) => s + i.quantity * i.price, 0), [items]);
+
   const value = useMemo<CartCtx>(
-    () => ({
-      items,
-      count: items.reduce((s, i) => s + i.quantity, 0),
-      subtotal: items.reduce((s, i) => s + i.quantity * i.price, 0),
-      // Use variantId as the unique key so different variants of the same product
-      // don't merge together (which happened when keying by slug).
-      add: (item, qty = 1) =>
-        setItems((prev) => {
-          const ex = prev.find((p) => p.variantId === item.variantId);
-          if (ex)
-            return prev.map((p) =>
-              p.variantId === item.variantId ? { ...p, quantity: p.quantity + qty } : p,
-            );
-          return [...prev, { ...item, quantity: qty }];
-        }),
-      update: (variantId, qty) =>
-        setItems((prev) =>
-          qty <= 0
-            ? prev.filter((p) => p.variantId !== variantId)
-            : prev.map((p) => (p.variantId === variantId ? { ...p, quantity: qty } : p)),
-        ),
-      remove: (variantId) => setItems((prev) => prev.filter((p) => p.variantId !== variantId)),
-      clear: () => setItems([]),
-    }),
-    [items],
+    () => ({ items, count, subtotal, add, update, remove, clear }),
+    [items, count, subtotal, add, update, remove, clear],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

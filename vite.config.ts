@@ -19,5 +19,19 @@ export default defineConfig({
       strictPort: true,
     },
     plugins: [mcpPlugin()],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            if (id.includes('lucide-react')) return 'lucide';
+            if (id.includes('@radix-ui')) return 'radix';
+            if (id.includes('@supabase/supabase-js')) return 'supabase';
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) return 'react-vendor';
+            if (id.includes('graphql-request') || id.includes('graphql')) return 'shopify';
+            if (id.includes('razorpay')) return 'booking';
+          },
+        },
+      },
+    },
   },
 });

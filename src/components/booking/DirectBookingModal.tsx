@@ -7,12 +7,14 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { createDirectPujaBooking, verifyPujaPayment } from "@/lib/booking.functions";
+import { validatePhone } from "@/lib/input-sanitizer";
+import type { RazorpayOptions, RazorpayResponse } from "@/types/razorpay";
 import { Loader2, User, Phone, BookOpen, X } from "lucide-react";
 
 /* ── load Razorpay checkout.js lazily ─────────────────────────── */
 function loadRazorpayScript(): Promise<void> {
   return new Promise((resolve, reject) => {
-    if ((window as any).Razorpay) {
+    if (window.Razorpay) {
       resolve();
       return;
     }
@@ -24,17 +26,19 @@ function loadRazorpayScript(): Promise<void> {
   });
 }
 
+interface DirectBookingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  sevaName: string;
+  amount: number;
+}
+
 export function DirectBookingModal({
   isOpen,
   onClose,
   sevaName,
   amount,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  sevaName: string;
-  amount: number;
-}) {
+}: DirectBookingModalProps) {
   const { customer } = useAuth();
   const userId = customer?.id || "";
 
@@ -65,6 +69,10 @@ export function DirectBookingModal({
       toast.error("Please fill Name and Mobile Number");
       return;
     }
+    if (!validatePhone(phone)) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -82,7 +90,7 @@ export function DirectBookingModal({
       await loadRazorpayScript();
 
       await new Promise<void>((resolve, reject) => {
-        const options = {
+        const options: RazorpayOptions = {
           key: res.keyId,
           amount: res.amountPaise,
           currency: res.currency,
@@ -100,7 +108,7 @@ export function DirectBookingModal({
             puja: sevaName,
           },
           theme: { color: "#8B1A1A" },
-          handler: async (rzpResponse: any) => {
+          handler: async (rzpResponse: RazorpayResponse) => {
             try {
               await verifyPayment({
                 data: {
@@ -113,7 +121,7 @@ export function DirectBookingModal({
               toast.success("🙏 Booking confirmed! Redirecting to profile...");
               window.location.href = "/profile";
               resolve();
-            } catch (err: any) {
+            } catch (err: unknown) {
               reject(err);
             }
           },
@@ -125,16 +133,17 @@ export function DirectBookingModal({
           },
         };
 
-        const rzp = new (window as any).Razorpay(options);
-        rzp.on("payment.failed", (resp: any) => {
+        const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", (resp: { error?: { description?: string } }) => {
           toast.error("Payment failed: " + (resp.error?.description || "Unknown error"));
           reject(new Error("payment_failed"));
         });
         rzp.open();
       });
-    } catch (err: any) {
-      if (err?.message !== "dismissed" && err?.message !== "payment_failed") {
-        toast.error(err.message || "Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      if (error?.message !== "dismissed" && error?.message !== "payment_failed") {
+        toast.error(error.message || "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -145,11 +154,24 @@ export function DirectBookingModal({
   const total = amount + fee;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div 
+        className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="bg-maroon-deep text-cream p-4 flex justify-between items-center">
-          <h2 className="font-display text-lg">Instant Booking</h2>
-          <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition">
+          <h2 id="modal-title" className="font-display text-lg">Instant Booking</h2>
+          <button 
+            onClick={onClose} 
+            className="hover:bg-white/20 p-1 rounded-full transition"
+            aria-label="Close modal"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
