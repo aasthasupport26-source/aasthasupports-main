@@ -366,9 +366,9 @@ function ProfilePage() {
                   <div className="grid gap-8">
                     {pujaBookings.map((booking: any) => {
                       const isConfirmed =
-                        booking.booking_status === "Confirmed" ||
-                        booking.booking_status === "Completed" ||
-                        booking.booking_status === "Scheduled";
+                        booking.status === "Confirmed" ||
+                        booking.status === "Completed" ||
+                        booking.status === "Scheduled";
 
                       return (
                         <div
@@ -388,7 +388,7 @@ function ProfilePage() {
                                   #{booking.booking_number}
                                 </div>
                                 <h3 className="font-display text-3xl font-bold text-maroon-deep leading-tight">
-                                  {booking.puja?.name || "Sacred Online Puja"}
+                                  {booking.pooja_type || "Sacred Online Puja"}
                                 </h3>
                               </div>
 
@@ -493,20 +493,20 @@ function ProfilePage() {
                               <p
                                 className={`font-display text-xl font-bold ${isConfirmed ? "text-emerald-600" : "text-stone-600"}`}
                               >
-                                {booking.booking_status}
+                                {booking.status || "Pending"}
                               </p>
                             </div>
 
-                            {booking.payments?.[0] && (
+                            {booking.amount ? (
                               <div className="mt-4 pt-4 border-t border-stone-200 w-full text-center">
                                 <p className="text-[10px] font-bold text-stone-400 tracking-[0.2em] uppercase mb-1">
                                   Amount Paid
                                 </p>
                                 <p className="font-bold text-stone-800 text-lg">
-                                  ₹{parseFloat(booking.package?.price || 0).toLocaleString("en-IN")}
+                                  ₹{parseFloat(booking.amount).toLocaleString("en-IN")}
                                 </p>
                               </div>
-                            )}
+                            ) : null}
                           </div>
                         </div>
                       );
