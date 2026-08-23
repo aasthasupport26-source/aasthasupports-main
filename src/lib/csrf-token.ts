@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { setCookie } from "@tanstack/react-start/server";
-import { generateCSRFToken } from "./csrf-protection";
-
 export const getCSRFToken = createServerFn({ method: "GET" }).handler(async () => {
+  const { generateCSRFToken } = await import("./csrf-protection");
   const token = generateCSRFToken();
   
-  const isProd = process.env.NODE_ENV === "production";
+  const isNode = typeof process !== "undefined";
+  const isProd = isNode ? process.env.NODE_ENV === "production" : false;
   
   setCookie("csrf_token", token, {
     httpOnly: false,

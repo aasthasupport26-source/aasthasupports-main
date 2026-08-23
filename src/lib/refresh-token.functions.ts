@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { refreshAdminToken } from "./admin-guard";
+
 
 export const refreshToken = createServerFn({ method: "POST" })
   .validator(z.object({ refreshToken: z.string() }))
@@ -12,6 +12,7 @@ export const refreshToken = createServerFn({ method: "POST" })
     }
 
     try {
+      const { refreshAdminToken } = await import("./admin-guard");
       const { accessToken, accessExpiresAt } = await refreshAdminToken(data.refreshToken);
       
       return {

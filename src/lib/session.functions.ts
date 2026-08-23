@@ -34,7 +34,8 @@ export const setSession = createServerFn({ method: "POST" })
   .handler(async ({ data, request }) => {
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    const isProd = process.env.NODE_ENV === "production";
+    const isNode = typeof process !== "undefined";
+    const isProd = isNode ? process.env.NODE_ENV === "production" : false;
     setCookie(COOKIE_NAME, JSON.stringify(data), getSessionCookieOptions(isProd));
     return { success: true };
   });

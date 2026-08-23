@@ -1,6 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { shopifyClient } from "./shopify/client";
-import { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY } from "./shopify/queries";
 import { z } from "zod";
 
 // NOTE: In-memory caching is not effective on serverless platforms (Vercel, CF Workers)
@@ -16,6 +14,8 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
     }),
   )
   .handler(async ({ data }) => {
+    const { shopifyClient } = await import("./shopify/client");
+    const { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY, CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } = await import("./shopify/queries");
     try {
       let queryFilter: string | undefined = undefined;
       if (data.category && data.category !== "all") {
@@ -74,6 +74,8 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
 export const getShopifyProduct = createServerFn({ method: "GET" })
   .validator(z.object({ handle: z.string() }))
   .handler(async ({ data }) => {
+    const { shopifyClient } = await import("./shopify/client");
+    const { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY, CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } = await import("./shopify/queries");
     try {
       const response: any = await shopifyClient.request(GET_PRODUCT_BY_HANDLE_QUERY, {
         handle: data.handle,
@@ -122,7 +124,6 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
     }
   });
 
-import { CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } from "./shopify/queries";
 
 export const createShopifyCheckout = createServerFn({ method: "POST" })
   .validator(
@@ -144,6 +145,8 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
+    const { shopifyClient } = await import("./shopify/client");
+    const { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY, CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } = await import("./shopify/queries");
     const maxRetries = 3;
     let lastError: any;
     
@@ -219,6 +222,8 @@ export const getCustomerOrders = createServerFn({ method: "GET" })
     }),
   )
   .handler(async ({ data }) => {
+    const { shopifyClient } = await import("./shopify/client");
+    const { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY, CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } = await import("./shopify/queries");
     try {
       if (data.customerAccessToken.startsWith("shcat_")) {
         const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID;

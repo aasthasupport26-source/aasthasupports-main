@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabaseAdmin } from "./auth/shopify-customer";
 import { uuidSchema } from "./uuid-validator";
 import { getServerEnv } from "./env";
 
@@ -15,6 +14,7 @@ function generateUUID(): string {
 // ---------------------------------------------------------
 
 export const getTemples = createServerFn({ method: "GET" }).handler(async () => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
   try {
     const { data, error } = await supabaseAdmin
       .from("temples")
@@ -31,6 +31,7 @@ export const getTemples = createServerFn({ method: "GET" }).handler(async () => 
 export const getPujasByTemple = createServerFn({ method: "GET" })
   .validator(z.object({ templeId: uuidSchema }))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     try {
       const { data: pujas, error } = await supabaseAdmin
         .from("pujas")
@@ -49,6 +50,7 @@ export const getPujasByTemple = createServerFn({ method: "GET" })
 export const getPujaDetails = createServerFn({ method: "GET" })
   .validator(z.object({ slug: z.string() }))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     try {
       const { data: puja, error } = await supabaseAdmin
         .from("pujas")
@@ -110,6 +112,7 @@ const CreateBookingSchema = z.object({
 export const createPujaBooking = createServerFn({ method: "POST" })
   .validator(CreateBookingSchema)
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "payment");
     if (!rateCheck.allowed) {
@@ -258,6 +261,7 @@ const CreateDirectBookingSchema = z.object({
 export const createDirectPujaBooking = createServerFn({ method: "POST" })
   .validator(CreateDirectBookingSchema)
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "payment");
     if (!rateCheck.allowed) {
@@ -370,6 +374,7 @@ const VerifyPaymentSchema = z.object({
 export const verifyPujaPayment = createServerFn({ method: "POST" })
   .validator(VerifyPaymentSchema)
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "payment");
     if (!rateCheck.allowed) {
@@ -463,6 +468,7 @@ export const getUserBookings = createServerFn({ method: "GET" })
     offset: z.number().int().min(0).default(0)
   }))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     // Verify token and extract userId from authenticated session
     const { verifyAccessToken } = await import("./auth/shopify-customer");
     const customer = await verifyAccessToken({ accessToken: data.accessToken });

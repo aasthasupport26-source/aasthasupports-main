@@ -1,11 +1,11 @@
-import { useState, memo } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search, ShoppingBag, User, Menu, X, Phone } from "lucide-react";
 import { Logo } from "./Logo";
 import { categories } from "@/data/catalog";
 import { useCart } from "@/contexts/CartContext";
 
-export const Header = memo(function Header() {
+export function Header() {
   const [ui, setUi] = useState({
     openSlug: null as string | null,
     mobileOpen: false,
@@ -279,4 +279,4 @@ export const Header = memo(function Header() {
       )}
     </header>
   );
-});
+}

@@ -134,6 +134,19 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.onerror = function(msg, url, lineNo, columnNo, error) {
+                console.error('Client Error:', msg, error);
+                return false;
+              };
+              window.onunhandledrejection = function(event) {
+                console.error('Promise Rejection:', event.reason);
+              };
+            `,
+          }}
+        />
       </head>
       <body className="bg-cream">
         {children}

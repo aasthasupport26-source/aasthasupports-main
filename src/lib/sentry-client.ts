@@ -1,15 +1,15 @@
 import * as Sentry from "@sentry/react";
 
 export function initSentryClient() {
-  if (process.env.VITE_SENTRY_DSN) {
+  if (import.meta.env.VITE_SENTRY_DSN) {
     Sentry.init({
-      dsn: process.env.VITE_SENTRY_DSN,
-      environment: process.env.NODE_ENV || "development",
+      dsn: import.meta.env.VITE_SENTRY_DSN,
+      environment: import.meta.env.MODE || "development",
       integrations: [
         Sentry.browserTracingIntegration(),
         Sentry.replayIntegration(),
       ],
-      tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+      tracesSampleRate: import.meta.env.MODE === "production" ? 0.1 : 1.0,
       replaysSessionSampleRate: 0.1,
       replaysOnErrorSampleRate: 1.0,
       beforeSend(event) {
@@ -25,7 +25,7 @@ export function initSentryClient() {
 
 export function captureError(error: Error, context?: Record<string, any>) {
   console.error("Error captured:", error);
-  if (process.env.VITE_SENTRY_DSN) {
+  if (import.meta.env.VITE_SENTRY_DSN) {
     Sentry.captureException(error, { extra: context });
   }
 }

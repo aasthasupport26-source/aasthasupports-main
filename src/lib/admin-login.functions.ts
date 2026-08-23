@@ -1,8 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import bcrypt from "bcryptjs";
-import { supabaseAdmin } from "./auth/shopify-customer";
-import { signAdminToken } from "./admin-guard";
 
 /**
  * Admin-only login - bypasses Shopify, checks Supabase directly.
@@ -16,6 +13,10 @@ export const adminLogin = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
+    const bcrypt = (await import("bcryptjs")).default;
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
+    const { signAdminToken } = await import("./admin-guard");
+    const isNode = typeof process !== "undefined";
     // Check if user exists and is admin
     const { data: user, error } = await supabaseAdmin
       .from("users")
@@ -46,7 +47,7 @@ export const adminLogin = createServerFn({ method: "POST" })
     }
 
     // Sign a proper JWT instead of a predictable admin-token-* string
-    const { token, expiresAt } = signAdminToken(user.email);
+    const { token, expiresAt } = await signAdminToken(user.email);
 
     return {
       customer: {
