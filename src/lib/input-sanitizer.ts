@@ -1,28 +1,10 @@
-import DOMPurify from "isomorphic-dompurify";
-
-/**
- * Sanitize HTML content to prevent XSS attacks
- */
-export function sanitizeHtml(dirty: string): string {
-  return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
-    ALLOW_DATA_ATTR: false,
-  });
-}
-
-/**
- * Sanitize plain text - removes all HTML tags
- */
-export function sanitizeText(text: string): string {
-  return DOMPurify.sanitize(text, { ALLOWED_TAGS: [] });
-}
-
 /**
  * Sanitize a slug - removes all HTML tags, converts to lowercase, and replaces spaces with hyphens
  */
 export function sanitizeSlug(slug: string): string {
-  return sanitizeText(slug).toLowerCase().trim().replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '');
+  // Strip HTML tags using regex as a lightweight alternative to DOMPurify
+  const noHtml = slug.replace(/<[^>]*>?/gm, '');
+  return noHtml.toLowerCase().trim().replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '');
 }
 
 /**
