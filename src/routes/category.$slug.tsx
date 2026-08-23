@@ -4,8 +4,7 @@ import { getCategory } from "@/data/catalog";
 import { getShopifyProducts } from "@/lib/shopify.functions";
 import { getTemples, getPujasByTemple } from "@/lib/booking.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import {
   Star,
   Sparkles,
@@ -19,6 +18,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { DirectBookingModal } from "@/components/booking/DirectBookingModal";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/category/$slug")({
   loader: ({ params }) => {
@@ -28,9 +28,9 @@ export const Route = createFileRoute("/category/$slug")({
     };
   },
   head: ({ params, loaderData }) => {
-    const title = `${loaderData?.cat.name ?? "Category"} — Aastha Support`;
+    const title = `${loaderData?.cat.name ?? "Category"} — Aastha Supports`;
     const desc = loaderData?.cat.tagline ?? "";
-    const url = `https://aasthasupport.com/category/${params.slug}`;
+    const url = `https://aasthasupports.com/category/${params.slug}`;
     return {
       meta: [
         { title },
@@ -68,15 +68,18 @@ function CategoryPage() {
 // ─── Shopify products page (non-pooja categories) ────────────────
 function ShopifyProductsPage({ cat }: { cat: any }) {
   const fetchProducts = useServerFn(getShopifyProducts);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data, isLoading: loading } = useQuery({
-    queryKey: ['category-products', cat.slug],
-    queryFn: () => fetchProducts({ data: { category: cat.slug, limit: 50 } }),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
-
-  const products = data?.products || [];
+  useEffect(() => {
+    fetchProducts({ data: { category: cat.slug, limit: 250 } })
+      .then((data) => setProducts(data?.products || []))
+      .catch((err) => {
+        console.error("Failed to load products:", err);
+        toast.error("Failed to load products");
+      })
+      .finally(() => setLoading(false));
+  }, [cat.slug]);
 
   return (
     <Layout>
@@ -105,104 +108,71 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
           </div>
         </section>
       ) : (
-        <>
-          {(() => {
-            const sectionedProducts = useMemo(() => {
-              return cat.sections.map((section: any) => {
-                const sectionItems = products.filter((product) => {
-                  const title = section.title.toLowerCase();
-                  const prodName = product.name.toLowerCase();
-                  const prodTags = (product.tags || []).map((t: string) => t.toLowerCase());
-
-                  if (title.includes("nepali") || title.includes("nepal")) {
-                    return (
-                      prodName.includes("nepal") ||
-                      prodTags.includes("nepal") ||
-                      prodTags.includes("nepali")
-                    );
-                  }
-                  if (title.includes("indonesian") || title.includes("indonesia")) {
-                    return (
-                      prodName.includes("indonesia") ||
-                      prodTags.includes("indonesia") ||
-                      prodTags.includes("indonesian")
-                    );
-                  }
-                  return true;
-                });
-                return { section, items: sectionItems };
-              }).filter(s => s.items.length > 0);
-            }, [products, cat.sections]);
-
-            return sectionedProducts;
-          })().map(({ section, items }) => (
-            <section key={section.title} className="py-16 bg-cream odd:bg-white">
-              <div className="container mx-auto px-4">
-                <div className="flex items-end justify-between mb-10 flex-wrap gap-3">
-                  <div>
-                    <p className="text-gold tracking-[0.3em] text-xs">{cat.name.toUpperCase()}</p>
-                    <h2 className="font-display text-3xl md:text-4xl text-maroon-deep mt-2">
-                      {section.title}
-                    </h2>
-                  </div>
-                  <div className="divider-gold flex-1 max-w-xs ml-6 mb-2" />
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                  {items.map((item: any) => (
-                    <Link
-                      key={item.slug}
-                      to="/product/$slug"
-                      params={{ slug: item.slug }}
-                      className="group bg-white rounded-xl border border-gold/10 overflow-hidden hover:shadow-xl hover:border-gold/30 transition-all duration-300"
-                    >
-                      <div className="aspect-square overflow-hidden bg-cream relative">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        {item.certified && (
-                          <div className="absolute top-2 right-2 bg-gold text-maroon-deep text-[9px] px-2 py-1 rounded-full font-semibold tracking-wider flex items-center gap-1">
-                            <ShieldCheck className="w-3 h-3" /> CERTIFIED
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <div className="flex items-center gap-0.5 text-gold mb-1.5">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-3 h-3 fill-current" />
-                          ))}
-                        </div>
-                        <h3 className="font-display text-lg text-maroon-deep group-hover:text-maroon leading-tight">
-                          {item.name}
-                        </h3>
-                        {item.description && (
-                          <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
-                            {item.description}
-                          </p>
-                        )}
-                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
-                          <span className="text-maroon font-medium">
-                            ₹{item.price.toLocaleString("en-IN")}
-                          </span>
-                          <span className="text-[10px] tracking-widest uppercase text-gold">
-                            View
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+        <section className="py-16 bg-cream">
+          <div className="container mx-auto px-4">
+            <div className="flex items-end justify-between mb-10 flex-wrap gap-3">
+              <div>
+                <p className="text-gold tracking-[0.3em] text-xs">{cat.name.toUpperCase()}</p>
+                <h2 className="font-display text-3xl md:text-4xl text-maroon-deep mt-2">
+                  {cat.sections?.[0]?.title || cat.name}
+                </h2>
               </div>
-            </section>
-          ))}
-        </>
+              <div className="divider-gold flex-1 max-w-xs ml-6 mb-2" />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {products.map((item: any) => (
+                <Link
+                  key={item.slug}
+                  to="/product/$slug"
+                  params={{ slug: item.slug }}
+                  className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition"
+                >
+                  <div className="aspect-square overflow-hidden bg-cream">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      loading="lazy"
+                      width={400}
+                      height={400}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center gap-0.5 text-gold mb-1.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-3 h-3 fill-current" />
+                      ))}
+                    </div>
+                    <h3 className="font-display text-lg text-maroon-deep group-hover:text-maroon leading-tight">
+                      {item.name}
+                    </h3>
+                    {item.description && (
+                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
+                        {item.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
+                      <span className="text-maroon font-medium">
+                        ₹{item.price.toLocaleString("en-IN")}
+                      </span>
+                      <span className="text-[10px] tracking-widest uppercase text-gold">
+                        View
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
     </Layout>
   );
 }
 
+
 // ─── Online Pooja page — Supabase powered ─────────────────────────
+
 function OnlinePoojaPage({ cat }: { cat: any }) {
   const fetchTemples = useServerFn(getTemples);
   const fetchPujas = useServerFn(getPujasByTemple);

@@ -43,15 +43,15 @@ export function Footer() {
       <div className="container mx-auto px-4 py-14">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           <div className="md:col-span-4">
-            <Logo />
+            <Logo variant="light" />
             <p className="mt-5 text-sm leading-relaxed text-cream/80 max-w-sm">
-              Aastha Support brings you authentic, energised spiritual products and live Vedic
+              Aastha Supports brings you authentic, energised spiritual products and live Vedic
               rituals — honouring the divine traditions of Sanatan Dharma. Every product is chosen,
               blessed and delivered with shraddha.
             </p>
             <div className="flex items-center gap-3 mt-6">
               <a
-                href="https://www.facebook.com/aasthasupport"
+                href="https://www.facebook.com/aasthasupports"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-maroon-deep transition"
@@ -60,7 +60,7 @@ export function Footer() {
                 <Facebook className="w-4 h-4" />
               </a>
               <a
-                href="https://www.instagram.com/aasthasupport"
+                href="https://www.instagram.com/aasthasupports"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-maroon-deep transition"
@@ -69,7 +69,7 @@ export function Footer() {
                 <Instagram className="w-4 h-4" />
               </a>
               <a
-                href="https://www.youtube.com/@aasthasupport"
+                href="https://www.youtube.com/@aasthasupports"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-maroon-deep transition"
@@ -193,8 +193,8 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-gold shrink-0" />
-                <a href="mailto:care@aasthasupport.com" className="hover:text-gold">
-                  care@aasthasupport.com
+                <a href="mailto:care@aasthasupportss.com" className="hover:text-gold">
+                  care@aasthasupportss.com
                 </a>
               </li>
             </ul>
@@ -204,7 +204,7 @@ export function Footer() {
 
       <div className="border-t border-gold/20">
         <div className="container mx-auto px-4 py-5 flex flex-col md:flex-row items-center justify-between text-xs text-cream/60 gap-2">
-          <p>© {new Date().getFullYear()} Aastha Support · सर्व अधिकार सुरक्षित</p>
+          <p>© {new Date().getFullYear()} Aastha Supports · सर्व अधिकार सुरक्षित</p>
           <p className="font-devanagari text-gold-soft">|| ॐ नमः शिवाय ||</p>
         </div>
       </div>
