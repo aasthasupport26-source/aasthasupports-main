@@ -94,10 +94,8 @@ export const loginUser = createServerFn({ method: "POST" })
   .handler(async ({ data, request }) => {
     await validateCSRF(request);
     
-    const rateCheck = checkRateLimit(request, "auth");
-    if (!rateCheck.allowed) {
-      throw new Error(`Too many login attempts. Try again in ${rateCheck.retryAfter} seconds.`);
-    }
+    const clientIp = request.headers.get("x-forwarded-for") || "unknown";
+    const identifier = data.email;
     
     const rateCheck = checkRateLimit(request, "auth");
     if (!rateCheck.allowed) {
