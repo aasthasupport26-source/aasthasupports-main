@@ -16,6 +16,7 @@ export interface RateLimitConfig {
 }
 
 const DEFAULT_CONFIGS: Record<string, RateLimitConfig> = {
+  global: { maxRequests: 100, windowMs: 60 * 1000 }, // 100 requests per minute
   auth: { maxRequests: 5, windowMs: 15 * 60 * 1000 }, // 5 attempts per 15 minutes
   payment: { maxRequests: 10, windowMs: 60 * 1000 }, // 10 attempts per minute
   admin: { maxRequests: 20, windowMs: 60 * 1000 }, // 20 attempts per minute
