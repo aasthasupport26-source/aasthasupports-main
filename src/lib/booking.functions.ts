@@ -1,8 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "./auth/shopify-customer";
-import Razorpay from "razorpay";
-import crypto from "crypto";
 import { uuidSchema } from "./uuid-validator";
 import { getServerEnv } from "./env";
 

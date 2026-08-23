@@ -45,24 +45,14 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
   const nepaliProducts =
     cat.slug === "rudraksha"
       ? products
-          .filter(
-            (p: any) =>
-              p.productType.toLowerCase() === "rudraksha" &&
-              !p.productType.toLowerCase().includes("mala") &&
-              p.name.toLowerCase().includes("nepal")
-          )
+          .filter((p: any) => p.productType.toLowerCase() === "rudraksha" && p.name.toLowerCase().includes("nepal"))
           .sort(sortByMukhi)
           .slice(0, 4)
       : [];
   const indonesianProducts =
     cat.slug === "rudraksha"
       ? products
-          .filter(
-            (p: any) =>
-              p.productType.toLowerCase() === "rudraksha" &&
-              !p.productType.toLowerCase().includes("mala") &&
-              p.name.toLowerCase().includes("indonesian")
-          )
+          .filter((p: any) => p.productType.toLowerCase() === "rudraksha" && p.name.toLowerCase().includes("indonesian"))
           .sort(sortByMukhi)
           .slice(0, 4)
       : [];

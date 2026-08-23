@@ -14,10 +14,10 @@ export function Logo({ variant = "light", compact = false }: LogoProps) {
       <img
         src="/logo.png"
         alt="Aastha Supports"
-        className={`object-cover rounded-full bg-white shadow-sm transition-transform duration-500 group-hover:scale-105 ${compact ? 'w-10 h-10' : 'w-14 h-14'}`}
+        className={`object-cover rounded-full bg-white shadow-sm transition-transform duration-500 group-hover:scale-105 ${compact ? 'w-10 h-10' : 'w-16 h-16 xl:w-14 xl:h-14'}`}
       />
       {!compact && (
-        <span className={`font-display text-xl font-bold tracking-tight drop-shadow-sm ${textColor}`}>
+        <span className={`font-display text-xl font-bold tracking-tight drop-shadow-sm ${textColor} hidden min-[1100px]:inline`}>
           Aastha Supports
         </span>
       )}

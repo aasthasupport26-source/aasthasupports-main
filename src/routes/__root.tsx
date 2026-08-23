@@ -135,7 +135,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-cream">
         {children}
         <Scripts />
       </body>

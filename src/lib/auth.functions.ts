@@ -1,23 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { setCookie, getCookie, deleteCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
-import bcrypt from "bcryptjs";
-import {
-  createShopifyCustomer,
-  loginShopifyCustomer,
-  getShopifyCustomer,
-  logoutShopifyCustomer,
-  syncShopifyCustomerToSupabase,
-  supabaseAdmin,
-} from "./auth/shopify-customer";
-import {
-  buildAuthorizeUrl,
-  exchangeCodeForTokens,
-  fetchCustomerAccountData,
-} from "./shopify-oauth";
-import { signAdminToken, verifyAdminToken, isAdminToken } from "./admin-guard";
-import { checkRateLimit } from "./rate-limit";
-
 // Schema for registration
 const RegisterSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -50,14 +33,17 @@ const VerifyTokenSchema = z.object({
 export const registerUser = createServerFn({ method: "POST" })
   .validator(RegisterSchema)
   .handler(async ({ data, request }) => {
+    const { validateCSRF } = await import("./csrf-protection");
     await validateCSRF(request);
     
+    const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "auth");
     if (!rateCheck.allowed) {
       throw new Error(`Too many registration attempts. Try again in ${rateCheck.retryAfter} seconds.`);
     }
 
     try {
+      const { createShopifyCustomer, syncShopifyCustomerToSupabase, loginShopifyCustomer } = await import("./auth/shopify-customer");
       // Create Shopify customer
       const customer = await createShopifyCustomer({
         email: data.email,
@@ -92,13 +78,16 @@ export const registerUser = createServerFn({ method: "POST" })
 export const loginUser = createServerFn({ method: "POST" })
   .validator(LoginSchema)
   .handler(async ({ data, request }) => {
+    const { validateCSRF } = await import("./csrf-protection");
     await validateCSRF(request);
     
     const clientIp = request.headers.get("x-forwarded-for") || "unknown";
     const identifier = data.email;
     
+    const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "auth");
     if (!rateCheck.allowed) {
+      const { logSecurityEvent } = await import("./security-monitor");
       logSecurityEvent({
         type: "rate_limit",
         severity: "medium",
@@ -110,6 +99,12 @@ export const loginUser = createServerFn({ method: "POST" })
     }
 
     try {
+      const { supabaseAdmin, loginShopifyCustomer, syncShopifyCustomerToSupabase } = await import("./auth/shopify-customer");
+      const bcrypt = await import("bcryptjs").then(m => m.default || m);
+      const { signAdminToken } = await import("./admin-guard");
+      const { recordFailedAttempt, resetAttempts } = await import("./brute-force-protection");
+      const { logSecurityEvent } = await import("./security-monitor");
+
       const { data: adminUser } = await supabaseAdmin
         .from("users")
         .select("email, full_name, is_admin, password_hash")
@@ -180,6 +175,9 @@ export const verifyAccessToken = createServerFn({ method: "POST" })
   .validator(VerifyTokenSchema)
   .handler(async ({ data }) => {
     try {
+      const { isAdminToken, verifyAdminToken } = await import("./admin-guard");
+      const { supabaseAdmin, getShopifyCustomer, syncShopifyCustomerToSupabase } = await import("./auth/shopify-customer");
+
       // Check if this is an admin JWT token
       if (isAdminToken(data.accessToken)) {
         const payload = verifyAdminToken(data.accessToken);
@@ -232,6 +230,7 @@ export const logoutUser = createServerFn({ method: "POST" })
   .validator(VerifyTokenSchema)
   .handler(async ({ data }) => {
     try {
+      const { logoutShopifyCustomer } = await import("./auth/shopify-customer");
       await logoutShopifyCustomer(data.accessToken);
 
       return {
@@ -253,6 +252,7 @@ export const logoutUser = createServerFn({ method: "POST" })
 export const getUserByEmail = createServerFn({ method: "POST" })
   .validator(z.object({ email: z.string().email() }))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { data: user, error } = await supabaseAdmin
       .from("users")
       .select("*")
@@ -274,6 +274,7 @@ export const getShopifyOAuthUrl = createServerFn({ method: "POST" })
   .validator(z.object({ redirectUri: z.string().url() }))
   .handler(async ({ data }) => {
     try {
+      const { buildAuthorizeUrl } = await import("./shopify-oauth");
       const authData = await buildAuthorizeUrl(data.redirectUri);
 
       const isProd = process.env.NODE_ENV === "production";
@@ -316,6 +317,9 @@ export const exchangeOAuthCode = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     try {
+      const { exchangeCodeForTokens, fetchCustomerAccountData } = await import("./shopify-oauth");
+      const { syncShopifyCustomerToSupabase } = await import("./auth/shopify-customer");
+
       const sessionStr = getCookie("shopify_oauth_session");
       let verifier = "";
       let savedState = "";

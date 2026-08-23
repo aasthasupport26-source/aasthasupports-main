@@ -1,12 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabaseAdmin } from "./auth/shopify-customer";
-import { verifyAdminToken, isAdminToken } from "./admin-guard";
 import { sanitizeLimit, sanitizeOffset } from "./db-validator";
 import { uuidSchema } from "./uuid-validator";
-import { logAdminAction } from "./admin-audit";
 
 const requireAdmin = async (token: string) => {
+  const { verifyAdminToken, isAdminToken } = await import("./admin-guard");
   if (!isAdminToken(token)) throw new Error("Unauthorized");
   const payload = await verifyAdminToken(token);
   return payload.email;
@@ -22,6 +20,7 @@ export const getAdminBookings = createServerFn({ method: "POST" })
     offset: z.number().int().min(0).default(0)
   }))
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -55,6 +54,7 @@ export const getAdminCustomers = createServerFn({ method: "POST" })
     offset: z.number().int().min(0).default(0)
   }))
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -89,6 +89,7 @@ export const updateBookingStatus = createServerFn({ method: "POST" })
     accessToken: z.string()
   }))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const adminEmail = await requireAdmin(data.accessToken);
     
     const { logAdminAction } = await import("./admin-audit");
@@ -116,6 +117,7 @@ export const updateBookingStatus = createServerFn({ method: "POST" })
 export const deleteTemple = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string(), id: uuidSchema }))
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -152,6 +154,7 @@ export const deleteTemple = createServerFn({ method: "POST" })
 export const getAdminTemples = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string() }))
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -183,6 +186,7 @@ export const createTemple = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -226,6 +230,7 @@ export const updateTemple = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -261,6 +266,7 @@ export const updateTemple = createServerFn({ method: "POST" })
 export const getAdminPujas = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string(), templeId: uuidSchema.optional() }))
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -293,6 +299,7 @@ export const createPuja = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -326,6 +333,7 @@ export const updatePuja = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -347,6 +355,7 @@ export const updatePuja = createServerFn({ method: "POST" })
 export const deletePuja = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string(), id: uuidSchema }))
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -372,6 +381,7 @@ export const deletePuja = createServerFn({ method: "POST" })
 export const getAdminPackages = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string(), pujaId: uuidSchema.optional() }))
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -402,6 +412,7 @@ export const createPackage = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -433,6 +444,7 @@ export const updatePackage = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {
@@ -466,6 +478,7 @@ export const updatePackage = createServerFn({ method: "POST" })
 export const deletePackage = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string(), id: uuidSchema }))
   .handler(async ({ data, request }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
     if (!rateCheck.allowed) {

@@ -1,0 +1,4 @@
+src/routes/category.$slug.tsx(78,9): error TS2304: Cannot find name 'toast'.
+src/routes/product.$slug.tsx(112,14): error TS2345: Argument of type '{ to: "/cart"; }' is not assignable to parameter of type 'NavigateOptions<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, string, "/cart", string, "">'.
+  Property 'search' is missing in type '{ to: "/cart"; }' but required in type 'MakeRequiredSearchParams<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, string, "/cart">'.
+src/routes/shop.tsx(213,44): error TS7006: Parameter 'product' implicitly has an 'any' type.

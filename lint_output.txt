@@ -1,0 +1,111 @@
+
+> lint
+> eslint .
+
+
+/Users/anik_1/Desktop/Aasthasupport/src/components/ui/badge.tsx
+  32:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/anik_1/Desktop/Aasthasupport/src/components/ui/button.tsx
+  49:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/anik_1/Desktop/Aasthasupport/src/components/ui/form.tsx
+  163:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/anik_1/Desktop/Aasthasupport/src/components/ui/navigation-menu.tsx
+  111:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/anik_1/Desktop/Aasthasupport/src/components/ui/sidebar.tsx
+  743:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/anik_1/Desktop/Aasthasupport/src/components/ui/toggle.tsx
+  42:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/anik_1/Desktop/Aasthasupport/src/contexts/AuthContext.tsx
+   87:6   warning  React Hook useEffect has missing dependencies: 'checkAdmin' and 'verify'. Either include them or remove the dependency array    react-hooks/exhaustive-deps
+  131:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/anik_1/Desktop/Aasthasupport/src/contexts/CartContext.tsx
+  76:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/[.mcp]/invoke-tool/$tool.ts
+  16:50  error  Replace `·resourcePath:·"/mcp",·metadataPath:·"/.well-known/oauth-protected-resource",·trustForwardedHost:·true` with `⏎········resourcePath:·"/mcp",⏎········metadataPath:·"/.well-known/oauth-protected-resource",⏎········trustForwardedHost:·true,⏎·····`  prettier/prettier
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/[.mcp]/list-tools.ts
+  16:49  error  Replace `·resourcePath:·"/mcp",·metadataPath:·"/.well-known/oauth-protected-resource",·trustForwardedHost:·true` with `⏎········resourcePath:·"/mcp",⏎········metadataPath:·"/.well-known/oauth-protected-resource",⏎········trustForwardedHost:·true,⏎·····`  prettier/prettier
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/[.well-known]/oauth-protected-resource.ts
+  15:70  error  Replace `·resourcePath:·"/mcp",·metadataPath:·"/.well-known/oauth-protected-resource",·trustForwardedHost:·true` with `⏎········resourcePath:·"/mcp",⏎········metadataPath:·"/.well-known/oauth-protected-resource",⏎········trustForwardedHost:·true,⏎·····`  prettier/prettier
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/admin.products.tsx
+  51:6  warning  React Hook useEffect has a missing dependency: 'loadProducts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/admin.pujas.tsx
+   55:6  warning  React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array      react-hooks/exhaustive-deps
+  488:6  warning  React Hook useEffect has a missing dependency: 'loadPackages'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/admin.temples.tsx
+  37:6  warning  React Hook useEffect has a missing dependency: 'loadTemples'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/book-pooja.tsx
+  34:6  warning  React Hook useEffect has a missing dependency: 'loadTemples'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/cart.tsx
+  38:6  warning  React Hook useEffect has a missing dependency: 'clear'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/category.$slug.tsx
+   81:6   warning  React Hook useEffect has a missing dependency: 'fetchProducts'. Either include it or remove the dependency array                                                                                            react-hooks/exhaustive-deps
+  138:1   error    Delete `··········`                                                                                                                                                                                         prettier/prettier
+  140:38  error    Replace `·a.name.localeCompare(b.name,·undefined,·{·numeric:·true,·sensitivity:·'base'·})` with `⏎············a.name.localeCompare(b.name,·undefined,·{·numeric:·true,·sensitivity:·"base"·}),⏎··········`  prettier/prettier
+  234:6   warning  React Hook useEffect has a missing dependency: 'fetchTemples'. Either include it or remove the dependency array                                                                                             react-hooks/exhaustive-deps
+  245:6   warning  React Hook useEffect has missing dependencies: 'fetchPujas' and 'selectedTemple'. Either include them or remove the dependency array                                                                        react-hooks/exhaustive-deps
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/mcp.ts
+  15:43  error  Replace `·resourcePath:·"/mcp",·metadataPath:·"/.well-known/oauth-protected-resource",·trustForwardedHost:·true` with `⏎········resourcePath:·"/mcp",⏎········metadataPath:·"/.well-known/oauth-protected-resource",⏎········trustForwardedHost:·true,⏎·····`  prettier/prettier
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/product.$slug.tsx
+  62:6  warning  React Hook useEffect has a missing dependency: 'fetchProduct'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/profile.tsx
+  119:6  warning  React Hook useEffect has a missing dependency: 'fetchOrders'. Either include it or remove the dependency array        react-hooks/exhaustive-deps
+  133:6  warning  React Hook useEffect has a missing dependency: 'fetchPujaBookings'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/anik_1/Desktop/Aasthasupport/src/routes/shop.tsx
+  66:9  warning  The 'products' logical expression could make the dependencies of useMemo Hook (at line 87) change on every render. Move it inside the useMemo callback. Alternatively, wrap the initialization of 'products' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+/Users/anik_1/Desktop/Aasthasupport/test-shopify-api.cjs
+   1:35  error  Replace `'graphql-request'` with `"graphql-request"`                                                                                                                                                                     prettier/prettier
+   2:20  error  Replace `'fs'` with `"fs"`                                                                                                                                                                                               prettier/prettier
+   4:33  error  Replace `'.env',·'utf8'` with `".env",·"utf8"`                                                                                                                                                                           prettier/prettier
+   6:15  error  Replace `'\n').forEach(line` with `"\n").forEach((line)`                                                                                                                                                                 prettier/prettier
+   7:21  error  Replace `'='` with `"="`                                                                                                                                                                                                 prettier/prettier
+   8:39  error  Replace `'='` with `"="`                                                                                                                                                                                                 prettier/prettier
+   9:33  error  Replace `'=').trim().replace(/^"|'/,·'').replace(/"|'$/,·''` with `"=").trim().replace(/^"|'/,·"").replace(/"|'$/,·""`                                                                                                   prettier/prettier
+  17:43  error  Insert `⏎·······`                                                                                                                                                                                                        prettier/prettier
+  47:32  error  Replace `e` with `(e)`                                                                                                                                                                                                   prettier/prettier
+  48:19  error  Replace ``-·${e.node.title}·|·Type:·'${e.node.productType}'·|·Tags:·${JSON.stringify(e.node.tags)}`` with `⏎········`-·${e.node.title}·|·Type:·'${e.node.productType}'·|·Tags:·${JSON.stringify(e.node.tags)}`,⏎······`  prettier/prettier
+  50:10  error  Insert `·`                                                                                                                                                                                                               prettier/prettier
+
+/Users/anik_1/Desktop/Aasthasupport/test-shopify-api.mjs
+   1:8   error  Replace `'dotenv/config'` with `"dotenv/config"`                                                                                                                                                                         prettier/prettier
+   2:31  error  Replace `'graphql-request'` with `"graphql-request"`                                                                                                                                                                     prettier/prettier
+  38:32  error  Replace `e` with `(e)`                                                                                                                                                                                                   prettier/prettier
+  39:19  error  Replace ``-·${e.node.title}·|·Type:·'${e.node.productType}'·|·Tags:·${JSON.stringify(e.node.tags)}`` with `⏎········`-·${e.node.title}·|·Type:·'${e.node.productType}'·|·Tags:·${JSON.stringify(e.node.tags)}`,⏎······`  prettier/prettier
+  41:10  error  Insert `·`                                                                                                                                                                                                               prettier/prettier
+
+/Users/anik_1/Desktop/Aasthasupport/test-shopify-category.cjs
+   1:35  error  Replace `'graphql-request'` with `"graphql-request"`                                                                     prettier/prettier
+   2:20  error  Replace `'fs'` with `"fs"`                                                                                               prettier/prettier
+   4:33  error  Replace `'.env',·'utf8'` with `".env",·"utf8"`                                                                           prettier/prettier
+   6:15  error  Replace `'\n').forEach(line` with `"\n").forEach((line)`                                                                 prettier/prettier
+   7:21  error  Replace `'='` with `"="`                                                                                                 prettier/prettier
+   8:39  error  Replace `'='` with `"="`                                                                                                 prettier/prettier
+   9:33  error  Replace `'=').trim().replace(/^"|'/,·'').replace(/"|'$/,·''` with `"=").trim().replace(/^"|'/,·"").replace(/"|'$/,·""`   prettier/prettier
+  17:43  error  Insert `⏎·······`                                                                                                        prettier/prettier
+  40:66  error  Replace `·first:·5,·query:·"product_type:rudraksha"` with `⏎······first:·5,⏎······query:·"product_type:rudraksha",⏎···`  prettier/prettier
+  42:32  error  Replace `e` with `(e)`                                                                                                   prettier/prettier
+  43:10  error  Insert `·`                                                                                                               prettier/prettier
+
+✖ 55 problems (33 errors, 22 warnings)
+  33 errors and 0 warnings potentially fixable with the `--fix` option.
+

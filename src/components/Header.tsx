@@ -48,12 +48,10 @@ export const Header = memo(function Header() {
       </div>
 
       {/* Main nav */}
-      <div
-        className="bg-royal border-b border-gold/30 shadow-royal relative"
-      >
+      <div className="bg-royal border-b border-gold/30 shadow-royal relative">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center h-20 relative">
-            <div className="absolute left-0 -ml-6">
+          <div className="flex items-center justify-between lg:justify-center h-20 relative gap-4">
+            <div className="lg:absolute lg:left-0 flex-shrink-0">
               <Logo />
             </div>
 
@@ -75,7 +73,7 @@ export const Header = memo(function Header() {
               ))}
             </nav>
 
-            <div className="absolute right-0 flex items-center gap-3">
+            <div className="lg:absolute lg:right-0 flex items-center gap-3 flex-shrink-0">
               <button 
                 onClick={() => setUi(prev => ({ ...prev, searchOpen: !prev.searchOpen }))}
                 className="p-2.5 text-cream hover:text-gold transition" 

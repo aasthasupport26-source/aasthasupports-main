@@ -1,14 +1,15 @@
 // Server-side environment variables with validation
 export function getServerEnv() {
+  const isNode = typeof process !== "undefined";
   const required = {
-    RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
-    RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
-    RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET,
-    SUPABASE_URL: process.env.SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    ADMIN_JWT_SECRET: process.env.ADMIN_JWT_SECRET,
-    SHOPIFY_STORE_DOMAIN: process.env.SHOPIFY_STORE_DOMAIN,
-    SHOPIFY_CLIENT_SECRET: process.env.SHOPIFY_CLIENT_SECRET,
+    RAZORPAY_KEY_ID: isNode ? process.env.RAZORPAY_KEY_ID : undefined,
+    RAZORPAY_KEY_SECRET: isNode ? process.env.RAZORPAY_KEY_SECRET : undefined,
+    RAZORPAY_WEBHOOK_SECRET: isNode ? process.env.RAZORPAY_WEBHOOK_SECRET : undefined,
+    SUPABASE_URL: isNode ? process.env.SUPABASE_URL : undefined,
+    SUPABASE_SERVICE_ROLE_KEY: isNode ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined,
+    ADMIN_JWT_SECRET: isNode ? process.env.ADMIN_JWT_SECRET : undefined,
+    SHOPIFY_STORE_DOMAIN: isNode ? process.env.SHOPIFY_STORE_DOMAIN : undefined,
+    SHOPIFY_CLIENT_SECRET: isNode ? process.env.SHOPIFY_CLIENT_SECRET : undefined,
   };
 
   for (const [key, value] of Object.entries(required)) {
