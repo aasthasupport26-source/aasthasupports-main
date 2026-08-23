@@ -6,8 +6,8 @@ interface LogoProps {
 }
 
 export function Logo({ variant = "light", compact = false }: LogoProps) {
-  // On dark backgrounds (header, footer) → gold tint; on light (admin sidebar) → maroon
-  const textColor = variant === "dark" ? "text-maroon-deep" : "text-gold";
+  // On dark backgrounds (header, footer) → cream; on light (admin sidebar) → maroon
+  const textColor = variant === "dark" ? "text-maroon-deep" : "text-cream";
 
   return (
     <Link to="/" className="flex items-center gap-3 group" aria-label="Aastha Supports home">
