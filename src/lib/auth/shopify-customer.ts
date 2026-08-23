@@ -1,12 +1,39 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+if (!supabaseUrl) throw new Error("SUPABASE_URL is required");
+if (!supabaseServiceKey) throw new Error("SUPABASE_SERVICE_ROLE_KEY is required");
+if (!supabaseAnonKey) throw new Error("SUPABASE_ANON_KEY is required");
 
-const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || "08axwa-1x.myshopify.com";
-const SHOPIFY_STOREFRONT_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
+let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
+let _supabase: ReturnType<typeof createClient> | null = null;
+
+export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient>, {
+  get(target, prop) {
+    if (!_supabaseAdmin) {
+      _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    }
+    return Reflect.get(_supabaseAdmin, prop);
+  }
+});
+
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(target, prop) {
+    if (!_supabase) {
+      _supabase = createClient(supabaseUrl, supabaseAnonKey);
+    }
+    return Reflect.get(_supabase, prop);
+  }
+});
+
+const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
+const SHOPIFY_STOREFRONT_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+
+if (!SHOPIFY_STORE_DOMAIN) throw new Error("SHOPIFY_STORE_DOMAIN is required");
+if (!SHOPIFY_STOREFRONT_TOKEN) throw new Error("SHOPIFY_STOREFRONT_ACCESS_TOKEN is required");
 
 interface ShopifyCustomerCreateInput {
   email: string;

@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { submitContactForm } from "@/lib/contact.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -49,6 +52,30 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const submitForm = useServerFn(submitContactForm);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get("name") as string,
+      phone: formData.get("phone") as string,
+      email: formData.get("email") as string,
+      message: formData.get("message") as string,
+    };
+
+    try {
+      await submitForm({ data });
+      setSubmitted(true);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to submit form");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Layout>
@@ -78,10 +105,7 @@ function ContactPage() {
               </div>
             ) : (
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setSubmitted(true);
-                }}
+                onSubmit={handleSubmit}
                 className="space-y-4"
               >
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -91,6 +115,7 @@ function ContactPage() {
                     </label>
                     <input
                       required
+                      name="name"
                       type="text"
                       className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
                     />
@@ -101,6 +126,7 @@ function ContactPage() {
                     </label>
                     <input
                       required
+                      name="phone"
                       type="tel"
                       className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
                     />
@@ -112,6 +138,7 @@ function ContactPage() {
                   </label>
                   <input
                     required
+                    name="email"
                     type="email"
                     className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
                   />
@@ -122,15 +149,17 @@ function ContactPage() {
                   </label>
                   <textarea
                     required
+                    name="message"
                     rows={5}
                     className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold resize-none"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-royal text-cream px-6 py-4 rounded-md font-medium tracking-widest text-xs uppercase hover:opacity-90 transition shadow-royal"
+                  disabled={loading}
+                  className="w-full bg-royal text-cream px-6 py-4 rounded-md font-medium tracking-widest text-xs uppercase hover:opacity-90 transition shadow-royal disabled:opacity-50"
                 >
-                  Send Message
+                  {loading ? "Sending..." : "Send Message"}
                 </button>
               </form>
             )}

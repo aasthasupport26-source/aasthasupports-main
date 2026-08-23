@@ -285,3 +285,21 @@ CREATE TRIGGER update_pooja_bookings_updated_at BEFORE UPDATE ON public.pooja_bo
 
 -- Notify Schema Cache Reload
 NOTIFY pgrst, 'reload schema';
+
+-- Performance Indexes (added after table creation)
+CREATE INDEX IF NOT EXISTS idx_temples_active ON public.temples(active) WHERE active = true;
+CREATE INDEX IF NOT EXISTS idx_temples_slug ON public.temples(slug);
+
+CREATE INDEX IF NOT EXISTS idx_pujas_temple_id ON public.pujas(temple_id);
+CREATE INDEX IF NOT EXISTS idx_pujas_slug ON public.pujas(slug);
+CREATE INDEX IF NOT EXISTS idx_pujas_active ON public.pujas(active) WHERE active = true;
+
+CREATE INDEX IF NOT EXISTS idx_packages_puja_id ON public.packages(puja_id);
+CREATE INDEX IF NOT EXISTS idx_packages_price ON public.packages(price);
+
+CREATE INDEX IF NOT EXISTS idx_pooja_bookings_user_id ON public.pooja_bookings(user_id);
+CREATE INDEX IF NOT EXISTS idx_pooja_bookings_status ON public.pooja_bookings(status);
+CREATE INDEX IF NOT EXISTS idx_pooja_bookings_created_at ON public.pooja_bookings(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_booking_payments_booking_id ON public.booking_payments(booking_id);
+CREATE INDEX IF NOT EXISTS idx_booking_payments_gateway_payment_id ON public.booking_payments(gateway_payment_id);

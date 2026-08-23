@@ -4,6 +4,12 @@ import { Users, Calendar, Package, Settings } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
+  beforeLoad: async ({ context }) => {
+    const { isAdmin } = context.auth || {};
+    if (!isAdmin) {
+      throw new Error("Unauthorized");
+    }
+  },
 });
 
 function AdminDashboard() {
@@ -40,7 +46,7 @@ function AdminDashboard() {
       title: "Pooja Management",
       description: "Manage pooja offerings and pricing",
       icon: Package,
-      href: "/admin/poojas",
+      href: "/admin/pujas",
       color: "bg-purple-50 text-purple-600",
     },
     {

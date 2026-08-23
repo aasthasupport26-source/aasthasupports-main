@@ -19,17 +19,24 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/bookings")({
   component: AdminBookings,
+  beforeLoad: async ({ context }) => {
+    const { isAdmin } = context.auth || {};
+    if (!isAdmin) {
+      throw new Error("Unauthorized");
+    }
+  },
 });
 
 function AdminBookings() {
-  const { customer, loading, isAdmin } = useAuth();
+  const { customer, accessToken, loading, isAdmin } = useAuth();
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadBookings = async () => {
+    if (!accessToken) return;
     setIsLoading(true);
     try {
-      const data = await getAdminBookings({ data: {} });
+      const data = await getAdminBookings({ data: { accessToken } });
       setBookings(data);
     } catch (err) {
       console.error("Failed to load bookings:", err);
@@ -40,17 +47,18 @@ function AdminBookings() {
   };
 
   useEffect(() => {
-    if (customer && isAdmin) {
+    if (customer && isAdmin && accessToken) {
       loadBookings();
     }
-  }, [customer, isAdmin]);
+  }, [customer, isAdmin, accessToken]);
 
   const handleStatusChange = async (
     bookingId: string,
     newStatus: "draft" | "confirmed" | "completed" | "cancelled",
   ) => {
+    if (!accessToken) return;
     try {
-      await updateBookingStatus({ data: { bookingId, status: newStatus } });
+      await updateBookingStatus({ data: { bookingId, status: newStatus, accessToken } });
       toast.success("Booking status updated successfully");
       loadBookings();
     } catch (err) {

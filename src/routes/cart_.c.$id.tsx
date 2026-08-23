@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Loader2 } from "lucide-react";
+import { getClientEnv } from "@/lib/env";
 
 export const Route = createFileRoute("/cart_/c/$id")({
   component: CartCheckoutRedirect,
@@ -11,9 +12,20 @@ function CartCheckoutRedirect() {
   const { id } = Route.useParams();
 
   useEffect(() => {
-    const storeDomain = process.env.SHOPIFY_STORE_DOMAIN || "08axwa-1x.myshopify.com";
-    const search = window.location.search || "";
-    const targetUrl = `https://${storeDomain}/cart/c/${id}${search}${search ? '&' : '?'}_fd=0`;
+    const { SHOPIFY_STORE_DOMAIN } = getClientEnv();
+    if (!SHOPIFY_STORE_DOMAIN) {
+      console.error("SHOPIFY_STORE_DOMAIN not configured");
+      return;
+    }
+    
+    // Validate cart ID format (alphanumeric + hyphens only)
+    if (!/^[a-zA-Z0-9-]+$/.test(id)) {
+      console.error("Invalid cart ID format");
+      return;
+    }
+    
+    // Only allow redirect to configured Shopify domain
+    const targetUrl = `https://${SHOPIFY_STORE_DOMAIN}/cart/c/${encodeURIComponent(id)}?_fd=0`;
     window.location.href = targetUrl;
   }, [id]);
 

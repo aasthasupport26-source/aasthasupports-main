@@ -1,22 +1,13 @@
-import { createClient } from "@supabase/supabase-js";
-import { defineTool } from "@lovable.dev/mcp-js";
-import { z } from "zod";
+import { supabase } from "@/lib/auth/shopify-customer";
 
-export default defineTool({
+export const listCategories = {
   name: "list_categories",
-  title: "List categories",
-  description:
-    "List active product categories on Aastha Support (rudraksha, malas, bracelets, gemstones, yantras, online pooja).",
-  inputSchema: {},
-  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  description: "List all active product categories",
+  inputSchema: {
+    type: "object",
+    properties: {},
+  },
   handler: async () => {
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
-      {
-        auth: { persistSession: false, autoRefreshToken: false },
-      },
-    );
     const { data, error } = await supabase
       .from("categories")
       .select("slug,name,description,image_url,sort_order")
@@ -28,4 +19,4 @@ export default defineTool({
       structuredContent: { categories: data ?? [] },
     };
   },
-});
+};

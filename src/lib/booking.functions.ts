@@ -3,8 +3,14 @@ import { z } from "zod";
 import { supabaseAdmin } from "./auth/shopify-customer";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { uuidSchema } from "./uuid-validator";
+import { getServerEnv } from "./env";
 
 import { TEMPLES_CATALOG, PUJAS_CATALOG } from "@/data/pooja-catalog";
+
+function generateUUID(): string {
+  return crypto.randomUUID();
+}
 
 // ---------------------------------------------------------
 // FETCHERS (For Browsing Temples, Pujas, Packages)
@@ -14,7 +20,7 @@ export const getTemples = createServerFn({ method: "GET" }).handler(async () => 
   try {
     const { data, error } = await supabaseAdmin
       .from("temples")
-      .select("*")
+      .select("id, name, city, slug, image_url, active")
       .eq("active", true)
       .order("name");
     if (!error && data && data.length > 0) return data;
@@ -25,7 +31,7 @@ export const getTemples = createServerFn({ method: "GET" }).handler(async () => 
 });
 
 export const getPujasByTemple = createServerFn({ method: "GET" })
-  .validator(z.object({ templeId: z.string() }))
+  .validator(z.object({ templeId: uuidSchema }))
   .handler(async ({ data }) => {
     try {
       const { data: pujas, error } = await supabaseAdmin
@@ -73,10 +79,9 @@ const SankalpMemberSchema = z.object({
 
 const CreateBookingSchema = z.object({
   userId: z.string().optional(),
-  templeId: z.string(),
-  pujaId: z.string(),
-  packageId: z.string(),
-  packageAmount: z.number().optional(), // frontend passes price as fallback
+  templeId: uuidSchema,
+  pujaId: uuidSchema,
+  packageId: uuidSchema,
 
   customerName: z.string().min(1),
   phone: z.string().min(7),
@@ -106,22 +111,30 @@ const CreateBookingSchema = z.object({
 
 export const createPujaBooking = createServerFn({ method: "POST" })
   .validator(CreateBookingSchema)
-  .handler(async ({ data }) => {
-    try {
-      // 1. Fetch package pricing (fallback to frontend-passed amount if packages table fails)
-      let baseAmount = data.packageAmount || 0;
-      try {
-        const { data: pkg } = await (supabaseAdmin as any)
-          .from("packages")
-          .select("price")
-          .eq("id", data.packageId)
-          .single();
-        if (pkg?.price) baseAmount = parseFloat(pkg.price);
-      } catch (_) {
-        // packages table may not exist yet; use packageAmount from frontend
-      }
+  .handler(async ({ data, request }) => {
+    const { checkRateLimit } = await import("./rate-limit");
+    const rateCheck = checkRateLimit(request, "payment");
+    if (!rateCheck.allowed) {
+      throw new Error(`Too many booking attempts. Try again in ${rateCheck.retryAfter} seconds.`);
+    }
 
-      if (!baseAmount) throw new Error("Could not determine package price. Please try again.");
+    const { validateCSRF } = await import("./csrf-protection");
+    validateCSRF(request);
+
+    try {
+      // 1. Fetch package pricing from database ONLY
+      const { data: pkg, error: pkgError } = await (supabaseAdmin as any)
+        .from("packages")
+        .select("price")
+        .eq("id", data.packageId)
+        .single();
+      
+      if (pkgError || !pkg?.price) {
+        throw new Error("Package not found or price unavailable");
+      }
+      
+      const baseAmount = parseFloat(pkg.price);
+      if (!baseAmount || baseAmount <= 0) throw new Error("Invalid package price");
 
       // 2. Fetch processing fee (fallback 2% silently)
       let feePercent = 2.0;
@@ -139,10 +152,24 @@ export const createPujaBooking = createServerFn({ method: "POST" })
       const processingFee = Math.round((baseAmount * feePercent) / 100);
       const totalAmount = baseAmount + processingFee;
 
-      // 3. Generate Booking Number
-      const year = new Date().getFullYear();
-      const bookingTs = Date.now().toString().slice(-6);
-      const bookingNumber = `PUJ-${year}-${bookingTs}`;
+      // 3. Check availability before creating booking
+      const preferredDate = new Date(data.preferredDate);
+      const { data: existingBookings, error: availError } = await (supabaseAdmin as any)
+        .from("pooja_bookings")
+        .select("id")
+        .eq("temple_id", data.templeId)
+        .eq("preferred_date", preferredDate.toISOString().split('T')[0])
+        .eq("preferred_time", data.preferredTime)
+        .in("status", ["pending", "confirmed"]);
+      
+      if (availError) throw new Error("Failed to check availability");
+      
+      if (existingBookings && existingBookings.length >= 5) {
+        throw new Error("This time slot is fully booked. Please select another time.");
+      }
+
+      // 4. Generate Booking Number using UUID
+      const bookingNumber = `PUJ-${generateUUID()}`;
 
       // Build sankalp notes combining devotee details
       const sankalpNotes = [
@@ -169,11 +196,8 @@ export const createPujaBooking = createServerFn({ method: "POST" })
         .join(" | ");
 
       // 4. Create Razorpay Order with booking details encoded in notes
-      const keyId = process.env.RAZORPAY_KEY_ID;
-      const keySecret = process.env.RAZORPAY_KEY_SECRET;
-      if (!keyId || !keySecret) throw new Error("Razorpay keys not configured");
-
-      const rzp = new Razorpay({ key_id: keyId, key_secret: keySecret });
+      const env = getServerEnv();
+      const rzp = new Razorpay({ key_id: env.RAZORPAY_KEY_ID, key_secret: env.RAZORPAY_KEY_SECRET });
       const order = await rzp.orders.create({
         amount: Math.round(totalAmount * 100), // in paise
         currency: "INR",
@@ -213,11 +237,13 @@ export const createPujaBooking = createServerFn({ method: "POST" })
         razorpayOrderId: order.id,
         amountPaise: Math.round(totalAmount * 100),
         currency: "INR",
-        keyId,
+        keyId: env.RAZORPAY_KEY_ID,
         totalAmount,
         processingFee,
       };
     } catch (error: any) {
+      const { captureError } = await import("./sentry");
+      captureError(error, { context: "createPujaBooking", userId: data.userId });
       console.error("Booking draft creation failed:", error);
       throw new Error(error.message || "Failed to create booking");
     }
@@ -225,8 +251,7 @@ export const createPujaBooking = createServerFn({ method: "POST" })
 
 const CreateDirectBookingSchema = z.object({
   userId: z.string().optional(),
-  sevaName: z.string(),
-  amount: z.number(),
+  sevaId: uuidSchema,
   customerName: z.string().min(1),
   phone: z.string().min(7),
   sankalpNotes: z.string().optional(),
@@ -234,9 +259,30 @@ const CreateDirectBookingSchema = z.object({
 
 export const createDirectPujaBooking = createServerFn({ method: "POST" })
   .validator(CreateDirectBookingSchema)
-  .handler(async ({ data }) => {
+  .handler(async ({ data, request }) => {
+    const { checkRateLimit } = await import("./rate-limit");
+    const rateCheck = checkRateLimit(request, "payment");
+    if (!rateCheck.allowed) {
+      throw new Error(`Too many booking attempts. Try again in ${rateCheck.retryAfter} seconds.`);
+    }
+
+    const { validateCSRF } = await import("./csrf-protection");
+    validateCSRF(request);
+
     try {
-      const baseAmount = data.amount;
+      // Fetch seva pricing from database ONLY
+      const { data: seva, error: sevaError } = await (supabaseAdmin as any)
+        .from("sevas")
+        .select("name, price")
+        .eq("id", data.sevaId)
+        .single();
+      
+      if (sevaError || !seva?.price) {
+        throw new Error("Seva not found or price unavailable");
+      }
+      
+      const baseAmount = parseFloat(seva.price);
+      if (!baseAmount || baseAmount <= 0) throw new Error("Invalid seva price");
 
       // Fetch processing fee (fallback 2% silently)
       let feePercent = 2.0;
@@ -254,15 +300,10 @@ export const createDirectPujaBooking = createServerFn({ method: "POST" })
       const processingFee = Math.round((baseAmount * feePercent) / 100);
       const totalAmount = baseAmount + processingFee;
 
-      const year = new Date().getFullYear();
-      const bookingTs = Date.now().toString().slice(-6);
-      const bookingNumber = `DIR-${year}-${bookingTs}`;
+      const bookingNumber = `DIR-${generateUUID()}`;
 
-      const keyId = process.env.RAZORPAY_KEY_ID;
-      const keySecret = process.env.RAZORPAY_KEY_SECRET;
-      if (!keyId || !keySecret) throw new Error("Razorpay keys not configured");
-
-      const rzp = new Razorpay({ key_id: keyId, key_secret: keySecret });
+      const env = getServerEnv();
+      const rzp = new Razorpay({ key_id: env.RAZORPAY_KEY_ID, key_secret: env.RAZORPAY_KEY_SECRET });
       const order = await rzp.orders.create({
         amount: Math.round(totalAmount * 100),
         currency: "INR",
@@ -272,7 +313,7 @@ export const createDirectPujaBooking = createServerFn({ method: "POST" })
           userId: data.userId || "",
           customerName: data.customerName,
           phone: data.phone,
-          pooja_type: data.sevaName,
+          pooja_type: seva.name,
           sankalpNotes: data.sankalpNotes || "",
           totalAmount: totalAmount.toString(),
         },
@@ -285,7 +326,7 @@ export const createDirectPujaBooking = createServerFn({ method: "POST" })
           user_id: data.userId || null,
           devotee_name: data.customerName,
           phone: data.phone,
-          pooja_type: data.sevaName,
+          pooja_type: seva.name,
           sankalp: data.sankalpNotes || null,
           amount: totalAmount,
         },
@@ -293,11 +334,13 @@ export const createDirectPujaBooking = createServerFn({ method: "POST" })
         razorpayOrderId: order.id,
         amountPaise: Math.round(totalAmount * 100),
         currency: "INR",
-        keyId,
+        keyId: env.RAZORPAY_KEY_ID,
         totalAmount,
         processingFee,
       };
     } catch (error: any) {
+      const { captureError } = await import("./sentry");
+      captureError(error, { context: "createDirectPujaBooking", userId: data.userId });
       console.error("Direct booking creation failed:", error);
       throw new Error(error.message || "Failed to create direct booking");
     }
@@ -328,52 +371,87 @@ const VerifyPaymentSchema = z.object({
 
 export const verifyPujaPayment = createServerFn({ method: "POST" })
   .validator(VerifyPaymentSchema)
-  .handler(async ({ data }) => {
-    const secret = process.env.RAZORPAY_KEY_SECRET;
-    if (!secret) throw new Error("Razorpay secret not configured");
+  .handler(async ({ data, request }) => {
+    const { checkRateLimit } = await import("./rate-limit");
+    const rateCheck = checkRateLimit(request, "payment");
+    if (!rateCheck.allowed) {
+      throw new Error(`Too many verification attempts. Try again in ${rateCheck.retryAfter} seconds.`);
+    }
+
+    const { validateCSRF } = await import("./csrf-protection");
+    validateCSRF(request);
+
+    const env = getServerEnv();
+
+    // Check idempotency - prevent duplicate bookings for same payment
+    const { data: existingPayment } = await supabaseAdmin
+      .from("booking_payments")
+      .select("id, booking_id")
+      .eq("gateway_payment_id", data.razorpay_payment_id)
+      .single();
+
+    if (existingPayment) {
+      return { success: true, bookingId: existingPayment.booking_id };
+    }
 
     // 1. Verify Signature
     const body = `${data.razorpay_order_id}|${data.razorpay_payment_id}`;
-    const expected = crypto.createHmac("sha256", secret).update(body).digest("hex");
+    const expected = crypto.createHmac("sha256", env.RAZORPAY_KEY_SECRET).update(body).digest("hex");
 
     const a = Buffer.from(expected);
     const b = Buffer.from(data.razorpay_signature);
     if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+      const { logSecurityEvent } = await import("./security-monitor");
+      logSecurityEvent({
+        type: "invalid_signature",
+        severity: "high",
+        endpoint: "/api/payment/verify",
+        details: { order_id: data.razorpay_order_id, payment_id: data.razorpay_payment_id },
+      });
       throw new Error("Invalid payment signature");
     }
 
-    // 2. Signature valid -> SAVE DETAILS IN SUPABASE POST-PAYMENT CONFIRMATION ONLY
+    // 2. Fetch payment details from Razorpay to verify amount
+    const rzp = new Razorpay({ key_id: env.RAZORPAY_KEY_ID, key_secret: env.RAZORPAY_KEY_SECRET });
+    const payment = await rzp.payments.fetch(data.razorpay_payment_id);
+    
+    if (payment.status !== "captured" && payment.status !== "authorized") {
+      throw new Error("Payment not successful");
+    }
+    
+    const paidAmount = payment.amount / 100;
+    if (Math.abs(paidAmount - data.bookingPayload.amount) > 0.01) {
+      throw new Error("Payment amount mismatch");
+    }
+    
+    if (payment.currency !== "INR") {
+      throw new Error("Invalid payment currency");
+    }
+
+    // 3. Save booking with payment
     const { data: booking, error: bookingErr } = await (supabaseAdmin as any)
-      .from("pooja_bookings")
-      .insert({
-        ...data.bookingPayload,
-        status: "Confirmed",
-      })
-      .select()
-      .single();
+      .rpc('create_booking_with_payment', {
+        booking_data: {
+          ...data.bookingPayload,
+          status: "Confirmed",
+        },
+        payment_data: {
+          amount: data.bookingPayload.amount,
+          currency: "INR",
+          gateway: "razorpay",
+          gateway_order_id: data.razorpay_order_id,
+          gateway_payment_id: data.razorpay_payment_id,
+          gateway_signature: data.razorpay_signature,
+          status: "Captured",
+        }
+      });
 
     if (bookingErr) {
       console.error("Error inserting confirmed booking:", bookingErr);
-      throw new Error("Payment verified, but failed to save booking record: " + bookingErr.message);
+      throw new Error("Failed to save booking. Please contact support.");
     }
 
-    // 3. Try to record payment in booking_payments table
-    try {
-      await (supabaseAdmin as any).from("booking_payments").insert({
-        booking_id: booking.id,
-        amount: data.bookingPayload.amount,
-        currency: "INR",
-        gateway: "razorpay",
-        gateway_order_id: data.razorpay_order_id,
-        gateway_payment_id: data.razorpay_payment_id,
-        gateway_signature: data.razorpay_signature,
-        status: "Captured",
-      });
-    } catch (_) {
-      console.warn("booking_payments record skipped");
-    }
-
-    return { success: true, bookingId: booking.id };
+    return { success: true, bookingId: booking.booking_id };
   });
 
 // ---------------------------------------------------------
@@ -381,14 +459,25 @@ export const verifyPujaPayment = createServerFn({ method: "POST" })
 // ---------------------------------------------------------
 
 export const getUserBookings = createServerFn({ method: "GET" })
-  .validator(z.object({ userId: z.string() }))
+  .validator(z.object({ 
+    accessToken: z.string(),
+    limit: z.number().int().min(1).max(50).default(20),
+    offset: z.number().int().min(0).default(0)
+  }))
   .handler(async ({ data }) => {
-    const { data: bookings, error } = await (supabaseAdmin as any)
+    // Verify token and extract userId from authenticated session
+    const { verifyAccessToken } = await import("./auth/shopify-customer");
+    const customer = await verifyAccessToken({ accessToken: data.accessToken });
+    const userId = customer.customer.id;
+    
+    const { data: bookings, error, count } = await supabaseAdmin
       .from("pooja_bookings")
-      .select("*")
-      .eq("user_id", data.userId)
-      .order("created_at", { ascending: false });
+      .select("id, booking_number, pooja_type, amount, status, created_at, devotee_name, preferred_date", { count: 'exact' })
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .range(data.offset, data.offset + data.limit - 1);
 
-    if (error) throw error;
-    return bookings || [];
+    if (error) throw new Error("Failed to fetch bookings");
+    
+    return { bookings: bookings || [], total: count || 0 };
   });

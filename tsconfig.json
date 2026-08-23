@@ -12,6 +12,8 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": false,
     "noEmit": true,
+    "isolatedModules": true,
+    "incremental": true,
 
     /* Linting */
     "skipLibCheck": true,

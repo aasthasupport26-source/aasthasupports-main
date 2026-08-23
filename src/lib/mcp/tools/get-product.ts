@@ -1,34 +1,32 @@
-import { createClient } from "@supabase/supabase-js";
-import { defineTool } from "@lovable.dev/mcp-js";
-import { z } from "zod";
+import { supabase } from "@/lib/auth/shopify-customer";
+import { sanitizeSlug } from "@/lib/input-sanitizer";
 
-export default defineTool({
+export const getProduct = {
   name: "get_product",
-  title: "Get product details",
-  description:
-    "Fetch full details for a single active product by its slug, including description, benefits, gallery, price, and stock.",
+  description: "Get detailed information about a specific product by slug",
   inputSchema: {
-    slug: z.string().min(1).describe("Product slug (URL identifier)."),
-  },
-  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ slug }) => {
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
-      {
-        auth: { persistSession: false, autoRefreshToken: false },
+    type: "object",
+    properties: {
+      slug: {
+        type: "string",
+        description: "Product slug (URL-friendly identifier)",
       },
-    );
+    },
+    required: ["slug"],
+  },
+  handler: async ({ slug }: { slug: string }) => {
+    const sanitizedSlug = sanitizeSlug(slug);
+    
     const { data, error } = await supabase
       .from("products")
       .select("*")
-      .eq("slug", slug)
+      .eq("slug", sanitizedSlug)
       .eq("is_active", true)
       .maybeSingle();
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     if (!data)
       return {
-        content: [{ type: "text", text: `No active product with slug '${slug}'.` }],
+        content: [{ type: "text", text: `No active product with slug '${sanitizedSlug}'.` }],
         isError: true,
       };
     return {
@@ -36,4 +34,4 @@ export default defineTool({
       structuredContent: { product: data },
     };
   },
-});
+};

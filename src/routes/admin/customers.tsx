@@ -6,31 +6,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getAdminCustomers, deleteCustomer } from "@/lib/admin.functions";
-import { Loader2, Search, Trash2, Mail, Phone, Calendar } from "lucide-react";
+import { getAdminCustomers } from "@/lib/admin.functions";
+import { Loader2, Search, Mail, Phone, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/customers")({
   component: AdminCustomers,
+  beforeLoad: async ({ context }) => {
+    const { isAdmin } = context.auth || {};
+    if (!isAdmin) {
+      throw new Error("Unauthorized");
+    }
+  },
 });
 
 function AdminCustomers() {
-  const { customer, loading: authLoading, isAdmin } = useAuth();
+  const { customer, accessToken, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
   const getCustomers = useServerFn(getAdminCustomers);
-  const deleteCustomerFn = useServerFn(deleteCustomer);
 
   const {
-    data: customers = [],
+    data: customersData,
     isLoading,
     refetch,
   } = useQuery({
     queryKey: ["admin-customers"],
-    queryFn: () => getCustomers({ data: {} }),
-    enabled: !!customer && isAdmin,
+    queryFn: () => getCustomers({ data: { limit: 50, offset: 0, accessToken: accessToken || "" } }),
+    enabled: !!customer && isAdmin && !!accessToken,
   });
+
+  const customers = customersData?.customers || [];
 
   if (authLoading) {
     return (
@@ -54,18 +61,6 @@ function AdminCustomers() {
       c.phone?.includes(query)
     );
   });
-
-  const handleDelete = async (email: string) => {
-    if (!confirm(`Delete customer ${email}? This cannot be undone.`)) return;
-
-    try {
-      await deleteCustomerFn({ data: { email } });
-      toast.success("Customer deleted");
-      refetch();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete customer");
-    }
-  };
 
   return (
     <Layout>
@@ -147,16 +142,6 @@ function AdminCustomers() {
                           <Calendar className="h-3 w-3" />
                           {new Date(c.created_at).toLocaleDateString()}
                         </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(c.email)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </td>
                     </tr>
                   ))}

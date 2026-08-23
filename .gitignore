@@ -1,5 +1,36 @@
-# Logs
-logs
+# ─── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ─── Build Outputs ─────────────────────────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+out/
+.output/
+.vinxi/
+.nitro/
+
+# ─── Framework / Tooling ───────────────────────────────────────────────────────
+.tanstack/
+.vercel/
+.wrangler/
+.dev.vars
+.turbo/
+
+# ─── Environment & Secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.cert
+
+# ─── Logs ──────────────────────────────────────────────────────────────────────
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,29 +38,48 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-.output
-.vercel
-.vinxi
-.tanstack/**
-.nitro
-.env
-.env.*
-*.local
+# ─── Testing ───────────────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
 
-# Wrangler / Cloudflare
-.wrangler/
-.dev.vars
+# ─── Cache ─────────────────────────────────────────────────────────────────────
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+.tsbuildinfo
+*.tsbuildinfo
+tsconfig.tsbuildinfo
 
-# Editor directories and files
+# ─── Editor ────────────────────────────────────────────────────────────────────
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+!.vscode/settings.json
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+
+# ─── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ─── Misc ──────────────────────────────────────────────────────────────────────
+*.tgz
+*.tar.gz
+*.zip
+scratch-*.js
+scratch-*.ts
