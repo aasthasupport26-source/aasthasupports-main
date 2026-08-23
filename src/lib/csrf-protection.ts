@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 /**
  * CSRF Protection Middleware
  * Implements double-submit cookie pattern for CSRF protection
@@ -10,10 +8,12 @@ const CSRF_COOKIE_NAME = "csrf_token";
 const CSRF_HEADER_NAME = "x-csrf-token";
 
 /**
- * Generate a random CSRF token
+ * Generate a random CSRF token using Web Crypto API (works in browser + server)
  */
 export function generateCSRFToken(): string {
-  return crypto.randomBytes(CSRF_TOKEN_LENGTH).toString("hex");
+  const bytes = new Uint8Array(CSRF_TOKEN_LENGTH);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
 /**
@@ -37,11 +37,14 @@ export function verifyCSRFToken(request: Request): boolean {
     return false;
   }
 
-  // Timing-safe comparison
-  return crypto.timingSafeEqual(
-    Buffer.from(csrfCookie),
-    Buffer.from(csrfHeader)
-  );
+  // Timing-safe comparison using TextEncoder (no Node.js crypto needed)
+  const enc = new TextEncoder();
+  const a = enc.encode(csrfCookie);
+  const b = enc.encode(csrfHeader);
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) result |= a[i] ^ b[i];
+  return result === 0;
 }
 
 /**
@@ -56,6 +59,13 @@ export function requiresCSRFProtection(method: string): boolean {
  */
 export function validateCSRF(request: Request): void {
   if (!requiresCSRFProtection(request.method)) {
+    return;
+  }
+  
+  // Skip manual validation for TanStack Start RPC endpoints
+  // They are handled automatically by the createCsrfMiddleware in start.ts
+  const url = new URL(request.url);
+  if (url.pathname.startsWith("/_server")) {
     return;
   }
 

@@ -48,7 +48,10 @@ export function Header() {
       </div>
 
       {/* Main nav */}
-      <div className="bg-royal border-b border-gold/30 shadow-royal relative">
+      <div 
+        className="bg-royal border-b border-gold/30 shadow-royal relative"
+        onMouseLeave={() => setUi(prev => ({ ...prev, openSlug: null }))}
+      >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between lg:justify-center h-20 relative gap-4">
             <div className="lg:absolute lg:left-0 flex-shrink-0">
@@ -58,7 +61,11 @@ export function Header() {
             {/* Desktop nav - centered */}
             <nav className="hidden lg:flex items-center gap-3">
               {categories.map((cat) => (
-                <div key={cat.slug} className="relative" onMouseEnter={() => setUi(prev => ({ ...prev, openSlug: cat.slug }))} onMouseLeave={() => setUi(prev => ({ ...prev, openSlug: null }))}>
+                <div 
+                  key={cat.slug} 
+                  className="relative h-full flex items-center cursor-pointer" 
+                  onMouseEnter={() => setUi(prev => ({ ...prev, openSlug: cat.slug }))}
+                >
                   <Link
                     to="/category/$slug"
                     params={{ slug: cat.slug }}
@@ -115,8 +122,6 @@ export function Header() {
         {ui.openSlug && (
           <div
             className="absolute top-full left-0 right-0 bg-cream border-t-2 border-gold shadow-2xl hidden lg:block animate-fade-up -mt-px"
-            onMouseEnter={() => setUi(prev => ({ ...prev, openSlug: prev.openSlug }))}
-            onMouseLeave={() => setUi(prev => ({ ...prev, openSlug: null }))}
             role="menu"
           >
             <div className="container mx-auto px-4 py-8">
@@ -165,7 +170,7 @@ export function Header() {
                           <div className="grid gap-2">
                             {section.items.map((item) => (
                               <Link
-                                key={item.slug}
+                                key={item.name}
                                 to="/product/$slug"
                                 params={{ slug: item.slug }}
                                 className="text-sm text-maroon-deep hover:text-gold transition-colors"

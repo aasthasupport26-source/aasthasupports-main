@@ -1,8 +1,27 @@
-import crypto from "node:crypto";
+// Uses Web Crypto API (globalThis.crypto) which works in both browser and server
+// No Node.js 'crypto' module needed.
 
-const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID || "";
-const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID || "";
-const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET || "";
+function getShopId(): string {
+  return process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID || "";
+}
+function getClientId(): string {
+  return process.env.SHOPIFY_CLIENT_ID || "";
+}
+function getClientSecret(): string {
+  return process.env.SHOPIFY_CLIENT_SECRET || "";
+}
+function getStoreDomain(): string {
+  const val = process.env.SHOPIFY_STORE_DOMAIN;
+  if (!val) throw new Error("SHOPIFY_STORE_DOMAIN is required");
+  return val;
+}
+function getAllowedRedirectUris(): string[] {
+  return [
+    process.env.VITE_SHOPIFY_REDIRECT_URI,
+    "http://localhost:3000/auth/callback",
+    "http://localhost:5173/auth/callback",
+  ].filter(Boolean) as string[];
+}
 
 export interface OidcConfig {
   authorization_endpoint: string;
@@ -12,32 +31,29 @@ export interface OidcConfig {
 }
 
 export function generateRandomString(length: number = 32): string {
-  return crypto.randomBytes(length).toString("hex");
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-export function base64UrlEncode(str: Buffer): string {
-  return str.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+export function base64UrlEncode(buf: Uint8Array): string {
+  return btoa(String.fromCharCode(...buf))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
 }
 
-export function generatePKCE() {
-  const verifier = base64UrlEncode(crypto.randomBytes(32));
-  const hash = crypto.createHash("sha256").update(verifier).digest();
-  const challenge = base64UrlEncode(hash);
+export async function generatePKCE() {
+  const verifierBytes = new Uint8Array(32);
+  crypto.getRandomValues(verifierBytes);
+  const verifier = base64UrlEncode(verifierBytes);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+  const challenge = base64UrlEncode(new Uint8Array(hashBuffer));
   return { verifier, challenge };
 }
 
-const STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
-
-if (!STORE_DOMAIN) throw new Error("SHOPIFY_STORE_DOMAIN is required");
-
-// Whitelist of allowed redirect URIs for OAuth
-const ALLOWED_REDIRECT_URIS = [
-  process.env.VITE_SHOPIFY_REDIRECT_URI,
-  "http://localhost:3000/auth/callback",
-  "http://localhost:5173/auth/callback",
-].filter(Boolean) as string[];
-
 export async function getOidcConfig(): Promise<OidcConfig> {
+  const SHOP_ID = getShopId();
   const url = `https://shopify.com/authentication/${SHOP_ID}/.well-known/openid-configuration`;
   const res = await fetch(url, {
     headers: {
@@ -51,18 +67,18 @@ export async function getOidcConfig(): Promise<OidcConfig> {
 }
 
 export async function buildAuthorizeUrl(redirectUri: string) {
-  // Validate redirect URI against whitelist
+  const ALLOWED_REDIRECT_URIS = getAllowedRedirectUris();
   if (!ALLOWED_REDIRECT_URIS.includes(redirectUri)) {
     throw new Error("Invalid redirect URI");
   }
-  
+
   const oidc = await getOidcConfig();
-  const { verifier, challenge } = generatePKCE();
+  const { verifier, challenge } = await generatePKCE();
   const state = generateRandomString(16);
   const nonce = generateRandomString(16);
 
   const params = new URLSearchParams({
-    client_id: CLIENT_ID,
+    client_id: getClientId(),
     response_type: "code",
     redirect_uri: redirectUri,
     scope: "openid email customer-account-api:full",
@@ -83,15 +99,16 @@ export async function buildAuthorizeUrl(redirectUri: string) {
 }
 
 export async function exchangeCodeForTokens(code: string, verifier: string, redirectUri: string) {
-  // Validate redirect URI against whitelist
+  const ALLOWED_REDIRECT_URIS = getAllowedRedirectUris();
   if (!ALLOWED_REDIRECT_URIS.includes(redirectUri)) {
     throw new Error("Invalid redirect URI");
   }
-  
+
+  const CLIENT_SECRET = getClientSecret();
   const oidc = await getOidcConfig();
   const bodyParams: Record<string, string> = {
     grant_type: "authorization_code",
-    client_id: CLIENT_ID!,
+    client_id: getClientId(),
     code,
     redirect_uri: redirectUri,
     code_verifier: verifier,
@@ -120,6 +137,7 @@ export async function exchangeCodeForTokens(code: string, verifier: string, redi
 }
 
 export async function fetchCustomerAccountData(accessToken: string) {
+  const SHOP_ID = getShopId();
   const query = `
     query getCustomerInfo {
       customer {

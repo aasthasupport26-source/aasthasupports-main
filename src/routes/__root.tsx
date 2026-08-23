@@ -137,12 +137,27 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              window.onerror = function(msg, url, lineNo, columnNo, error) {
-                console.error('Client Error:', msg, error);
+              var __errs = [];
+              var __errDiv = null;
+              function __showErr(msg) {
+                __errs.push(msg);
+                if (!__errDiv) {
+                  __errDiv = document.createElement('div');
+                  __errDiv.id = '__agy_err';
+                  __errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#7f1d1d;color:#fff;font-family:monospace;font-size:13px;padding:16px;z-index:99999;white-space:pre-wrap;max-height:50vh;overflow:auto;';
+                  document.body.appendChild(__errDiv);
+                }
+                __errDiv.textContent = '❌ JS ERROR (open DevTools → Console for full trace):\\n\\n' + __errs.join('\\n\\n---\\n\\n');
+              }
+              window.onerror = function(msg, url, line, col, err) {
+                __showErr(msg + '\\n  at ' + url + ':' + line + ':' + col + (err ? '\\n  ' + err.stack : ''));
+                console.error('Client Error:', msg, err);
                 return false;
               };
-              window.onunhandledrejection = function(event) {
-                console.error('Promise Rejection:', event.reason);
+              window.onunhandledrejection = function(e) {
+                var r = e.reason;
+                __showErr('Unhandled Promise: ' + (r && r.stack ? r.stack : String(r)));
+                console.error('Promise Rejection:', r);
               };
             `,
           }}
@@ -160,15 +175,15 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <CartProvider>
-          <ErrorBoundary>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <CartProvider>
             <Outlet />
-          </ErrorBoundary>
-          <Toaster />
-        </CartProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+            <Toaster />
+          </CartProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }

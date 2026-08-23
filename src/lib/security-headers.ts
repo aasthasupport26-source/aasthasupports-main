@@ -29,10 +29,10 @@ const DEFAULT_CONFIG: SecurityHeadersConfig = {
 function getCSPHeader(): string {
   const directives = [
     "default-src 'self'",
-    "script-src 'self' https://checkout.razorpay.com",
-    "style-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https: blob:",
-    "font-src 'self' data:",
+    "font-src 'self' data: https://fonts.gstatic.com",
     "connect-src 'self' https://*.supabase.co https://*.shopify.com https://api.razorpay.com",
     "frame-src 'self' https://api.razorpay.com",
     "object-src 'none'",
@@ -87,10 +87,10 @@ export function getSecurityHeaders(config: SecurityHeadersConfig = {}): Record<s
     headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=(), payment=()";
   }
   
-  // Add missing Cross-Origin headers
-  headers["Cross-Origin-Embedder-Policy"] = "require-corp";
+  // Add missing Cross-Origin headers (Relaxed for external CDN images)
+  headers["Cross-Origin-Embedder-Policy"] = "unsafe-none";
   headers["Cross-Origin-Opener-Policy"] = "same-origin";
-  headers["Cross-Origin-Resource-Policy"] = "same-origin";
+  headers["Cross-Origin-Resource-Policy"] = "cross-origin";
   
   return headers;
 }

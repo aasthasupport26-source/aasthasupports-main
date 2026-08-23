@@ -224,3 +224,17 @@ export const ADJUST_INVENTORY_MUTATION = gql`
     }
   }
 `;
+
+export const GET_PRODUCT_BY_VARIANT = gql`
+  query getVariantById($id: ID!) {
+    node(id: $id) {
+      ... on ProductVariant {
+        id
+        price {
+          amount
+          currencyCode
+        }
+      }
+    }
+  }
+`;

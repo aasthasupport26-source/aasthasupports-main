@@ -1,12 +1,34 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+// All env vars are read lazily inside getters so the module can be safely
+// imported on the client without throwing. The actual values are only needed
+// on the server (inside createServerFn handlers).
 
-if (!supabaseUrl) throw new Error("SUPABASE_URL is required");
-if (!supabaseServiceKey) throw new Error("SUPABASE_SERVICE_ROLE_KEY is required");
-if (!supabaseAnonKey) throw new Error("SUPABASE_ANON_KEY is required");
+function getSupabaseUrl(): string {
+  const val = process.env.SUPABASE_URL;
+  if (!val) throw new Error("SUPABASE_URL is required");
+  return val;
+}
+function getSupabaseServiceKey(): string {
+  const val = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!val) throw new Error("SUPABASE_SERVICE_ROLE_KEY is required");
+  return val;
+}
+function getSupabaseAnonKey(): string {
+  const val = process.env.SUPABASE_ANON_KEY;
+  if (!val) throw new Error("SUPABASE_ANON_KEY is required");
+  return val;
+}
+function getShopifyStoreDomain(): string {
+  const val = process.env.SHOPIFY_STORE_DOMAIN;
+  if (!val) throw new Error("SHOPIFY_STORE_DOMAIN is required");
+  return val;
+}
+function getShopifyStorefrontToken(): string {
+  const val = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+  if (!val) throw new Error("SHOPIFY_STOREFRONT_ACCESS_TOKEN is required");
+  return val;
+}
 
 let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
 let _supabase: ReturnType<typeof createClient> | null = null;
@@ -14,7 +36,7 @@ let _supabase: ReturnType<typeof createClient> | null = null;
 export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient>, {
   get(target, prop) {
     if (!_supabaseAdmin) {
-      _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+      _supabaseAdmin = createClient(getSupabaseUrl(), getSupabaseServiceKey());
     }
     return Reflect.get(_supabaseAdmin, prop);
   }
@@ -23,17 +45,11 @@ export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient>, {
 export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
   get(target, prop) {
     if (!_supabase) {
-      _supabase = createClient(supabaseUrl, supabaseAnonKey);
+      _supabase = createClient(getSupabaseUrl(), getSupabaseAnonKey());
     }
     return Reflect.get(_supabase, prop);
   }
 });
-
-const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
-const SHOPIFY_STOREFRONT_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
-
-if (!SHOPIFY_STORE_DOMAIN) throw new Error("SHOPIFY_STORE_DOMAIN is required");
-if (!SHOPIFY_STOREFRONT_TOKEN) throw new Error("SHOPIFY_STOREFRONT_ACCESS_TOKEN is required");
 
 interface ShopifyCustomerCreateInput {
   email: string;
@@ -63,11 +79,13 @@ interface ShopifyCustomer {
 
 /**
  * Create a Shopify customer account
- * This creates a customer in Shopify but doesn't show Shopify branding to the user
  */
 export async function createShopifyCustomer(
   input: ShopifyCustomerCreateInput,
 ): Promise<ShopifyCustomer> {
+  const SHOPIFY_STORE_DOMAIN = getShopifyStoreDomain();
+  const SHOPIFY_STOREFRONT_TOKEN = getShopifyStorefrontToken();
+
   const mutation = `
     mutation customerCreate($input: CustomerCreateInput!) {
       customerCreate(input: $input) {
@@ -121,8 +139,6 @@ export async function createShopifyCustomer(
 
   const customer = json.data.customerCreate.customer;
 
-  // Note: Shopify automatically sends verification email if email verification is enabled in store settings
-  // Customer won't be able to login until they verify their email
   if (process.env.NODE_ENV !== "production") {
     console.info("Customer created - verification email sent to:", customer.email);
   }
@@ -132,12 +148,14 @@ export async function createShopifyCustomer(
 
 /**
  * Login a Shopify customer and get access token
- * Returns access token that can be used for authenticated requests
  */
 export async function loginShopifyCustomer(
   email: string,
   password: string,
 ): Promise<{ customer: ShopifyCustomer; accessToken: ShopifyCustomerAccessToken }> {
+  const SHOPIFY_STORE_DOMAIN = getShopifyStoreDomain();
+  const SHOPIFY_STOREFRONT_TOKEN = getShopifyStorefrontToken();
+
   const mutation = `
     mutation customerAccessTokenCreate($input: CustomerAccessTokenCreateInput!) {
       customerAccessTokenCreate(input: $input) {
@@ -179,14 +197,9 @@ export async function loginShopifyCustomer(
   }
 
   const accessToken = json.data.customerAccessTokenCreate.customerAccessToken;
-
-  // Fetch customer details with the access token
   const customer = await getShopifyCustomer(accessToken.accessToken);
 
-  return {
-    customer,
-    accessToken,
-  };
+  return { customer, accessToken };
 }
 
 /**
@@ -245,6 +258,9 @@ export async function getShopifyCustomer(accessToken: string): Promise<ShopifyCu
     };
   }
 
+  const SHOPIFY_STORE_DOMAIN = getShopifyStoreDomain();
+  const SHOPIFY_STOREFRONT_TOKEN = getShopifyStorefrontToken();
+
   const query = `
     query getCustomer($customerAccessToken: String!) {
       customer(customerAccessToken: $customerAccessToken) {
@@ -285,6 +301,9 @@ export async function getShopifyCustomer(accessToken: string): Promise<ShopifyCu
  * Logout customer (delete access token)
  */
 export async function logoutShopifyCustomer(accessToken: string): Promise<void> {
+  const SHOPIFY_STORE_DOMAIN = getShopifyStoreDomain();
+  const SHOPIFY_STOREFRONT_TOKEN = getShopifyStorefrontToken();
+
   const mutation = `
     mutation customerAccessTokenDelete($customerAccessToken: String!) {
       customerAccessTokenDelete(customerAccessToken: $customerAccessToken) {
@@ -315,7 +334,6 @@ export async function logoutShopifyCustomer(accessToken: string): Promise<void> 
 
 /**
  * Sync Shopify customer to our Supabase users table
- * This keeps our local database in sync with Shopify
  */
 export async function syncShopifyCustomerToSupabase(customer: ShopifyCustomer): Promise<void> {
   const { error } = await supabaseAdmin.from("users").upsert(
@@ -336,6 +354,17 @@ export async function syncShopifyCustomerToSupabase(customer: ShopifyCustomer): 
   if (error) {
     console.error("Failed to sync customer to Supabase:", error);
     throw new Error("Failed to sync user data");
+  }
+}
+
+/**
+ * Verify an access token and return customer info
+ */
+export async function verifyAccessToken(accessToken: string): Promise<ShopifyCustomer | null> {
+  try {
+    return await getShopifyCustomer(accessToken);
+  } catch {
+    return null;
   }
 }
 

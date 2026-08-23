@@ -1,15 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-// NOTE: In-memory caching is not effective on serverless platforms (Vercel, CF Workers)
-// because each invocation spins up a fresh instance. Use TanStack Query's `staleTime`
-// on the client side instead.
+// Use TanStack Query's `staleTime` on the client side, but we also add a basic
+// in-memory cache here to speed up development and consecutive requests on the same instance.
+let productsCache: any = null;
+let productsCacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export const getShopifyProducts = createServerFn({ method: "GET" })
   .validator(
     z.object({
       category: z.string().optional(),
-      limit: z.number().int().min(1).max(50).default(20),
+      limit: z.number().int().min(1).max(250).default(20),
       cursor: z.string().optional(),
     }),
   )
@@ -17,19 +19,23 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
     const { shopifyClient } = await import("./shopify/client");
     const { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY, CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } = await import("./shopify/queries");
     try {
-      let queryFilter: string | undefined = undefined;
-      if (data.category && data.category !== "all") {
-        let productType = data.category;
-        if (productType === "bracelets") productType = "bracelet";
-        if (productType === "gemstones") productType = "gemstone";
-        queryFilter = `product_type:${productType}`;
+      let response: any;
+      
+      // Use cache if available and not paginating
+      if (productsCache && Date.now() - productsCacheTime < CACHE_TTL && !data.cursor) {
+        response = productsCache;
+      } else {
+        response = await shopifyClient.request(GET_PRODUCTS_QUERY, {
+          first: 250, // Fetch all to filter in-memory due to dirty Shopify data
+          after: data.cursor,
+        });
+        
+        // Cache the full response if it's the first page
+        if (!data.cursor) {
+          productsCache = response;
+          productsCacheTime = Date.now();
+        }
       }
-
-      const response: any = await shopifyClient.request(GET_PRODUCTS_QUERY, {
-        first: data.limit,
-        after: data.cursor,
-        query: queryFilter,
-      });
 
       const products = response.products.edges.map((edge: any) => {
         const node = edge.node;
@@ -50,7 +56,7 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
           variantId: node.variants.edges[0]?.node.id,
           stock: node.variants.edges[0]?.node.quantityAvailable || 0,
           available: node.variants.edges[0]?.node.availableForSale || false,
-          category: node.productType || metafieldsMap.get("category") || "",
+          category: metafieldsMap.get("category") || node.productType || "",
           productType: node.productType || "",
           benefits: metafieldsMap.get("benefits") ? JSON.parse(metafieldsMap.get("benefits")!) : [],
           certified: metafieldsMap.get("certified") === "true",
@@ -58,16 +64,45 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
         };
       });
 
+      // Filter in-memory to fix dirty Shopify data where Malas are tagged as product_type:rudraksha
+      let filteredProducts = products;
+      if (data.category && data.category !== "all") {
+        const target = data.category.toLowerCase();
+        filteredProducts = products.filter((p: any) => {
+          const name = p.name.toLowerCase();
+          const cat = p.category.toLowerCase();
+          const type = p.productType.toLowerCase();
+          
+          if (target === "rudraksha") {
+            // Must be rudraksha but NOT a mala
+            return (name.includes("rudraksha") || cat.includes("rudraksha") || type.includes("rudraksha")) && !name.includes("mala") && !cat.includes("mala");
+          }
+          if (target === "mala") {
+            return name.includes("mala") || cat.includes("mala") || type.includes("mala");
+          }
+          if (target === "bracelet" || target === "bracelets") {
+            return name.includes("bracelet") || cat.includes("bracelet") || type.includes("bracelet");
+          }
+          if (target === "gemstone" || target === "gemstones") {
+            return name.includes("gemstone") || cat.includes("gemstone") || type.includes("gemstone");
+          }
+          if (target === "yantra") {
+            return name.includes("yantra") || cat.includes("yantra") || type.includes("yantra");
+          }
+          return false;
+        });
+      }
+
       return {
-        products,
+        products: filteredProducts,
         pageInfo: {
           hasNextPage: response.products.pageInfo.hasNextPage,
           endCursor: response.products.pageInfo.endCursor,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Shopify API error:", error);
-      throw new Error("Failed to fetch products from Shopify");
+      throw new Error(`Failed to fetch products from Shopify: ${error?.message || String(error)}`);
     }
   });
 

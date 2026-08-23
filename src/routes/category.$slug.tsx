@@ -81,6 +81,27 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
       .finally(() => setLoading(false));
   }, [cat.slug]);
 
+  const groupedProducts = products.reduce((acc: any, item: any) => {
+    let catName = (item.category || cat.name).trim().replace(/\s+/g, ' ');
+    catName = catName.toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase());
+    
+    // Smart grouping based on page slug and titles to match mega-menu expectations
+    if (cat.slug === "rudraksha") {
+      const name = item.name.toLowerCase();
+      if (name.includes("nepali")) catName = "Nepali Rudraksha";
+      else if (name.includes("indonesian")) catName = "Indonesian Rudraksha";
+      else if (name.includes("indian")) catName = "Indian Rudraksha";
+      else catName = "Premium Rudraksha";
+    } else if (cat.slug === "mala") {
+      if (item.name.toLowerCase().includes("rudraksha")) catName = "Rudraksha Malas";
+      else catName = "Premium Malas";
+    }
+
+    if (!acc[catName]) acc[catName] = [];
+    acc[catName].push(item);
+    return acc;
+  }, {});
+
   return (
     <Layout>
       <section className="relative h-[420px] overflow-hidden flex items-center">
@@ -94,9 +115,27 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
       </section>
 
       {loading ? (
-        <div className="flex justify-center items-center py-32 bg-cream min-h-[300px]">
-          <Loader2 className="w-8 h-8 animate-spin text-gold" />
-        </div>
+        <section className="py-16 bg-cream">
+          <div className="container mx-auto px-4">
+            <div className="flex items-end justify-between mb-10">
+              <div>
+                <div className="w-24 h-3 bg-gold/20 rounded mb-4 animate-pulse" />
+                <div className="w-64 h-10 bg-maroon-deep/10 rounded animate-pulse" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl border border-gold/10 p-4 animate-pulse">
+                  <div className="aspect-square bg-cream rounded-lg mb-4" />
+                  <div className="w-20 h-3 bg-gold/20 rounded mb-3" />
+                  <div className="w-full h-5 bg-maroon-deep/10 rounded mb-2" />
+                  <div className="w-2/3 h-5 bg-maroon-deep/10 rounded mb-4" />
+                  <div className="w-16 h-5 bg-maroon-deep/20 rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       ) : products.length === 0 ? (
         <section className="py-16 bg-cream">
           <div className="container mx-auto px-4 text-center">
@@ -114,55 +153,63 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
               <div>
                 <p className="text-gold tracking-[0.3em] text-xs">{cat.name.toUpperCase()}</p>
                 <h2 className="font-display text-3xl md:text-4xl text-maroon-deep mt-2">
-                  {cat.sections?.[0]?.title || cat.name}
+                  Explore Collection
                 </h2>
               </div>
               <div className="divider-gold flex-1 max-w-xs ml-6 mb-2" />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {products.map((item: any) => (
-                <Link
-                  key={item.slug}
-                  to="/product/$slug"
-                  params={{ slug: item.slug }}
-                  className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition"
-                >
-                  <div className="aspect-square overflow-hidden bg-cream">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      loading="lazy"
-                      width={400}
-                      height={400}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-center gap-0.5 text-gold mb-1.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3 fill-current" />
-                      ))}
-                    </div>
-                    <h3 className="font-display text-lg text-maroon-deep group-hover:text-maroon leading-tight">
-                      {item.name}
-                    </h3>
-                    {item.description && (
-                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
-                        {item.description}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
-                      <span className="text-maroon font-medium">
-                        ₹{item.price.toLocaleString("en-IN")}
-                      </span>
-                      <span className="text-[10px] tracking-widest uppercase text-gold">
-                        View
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+
+            {Object.entries(groupedProducts).map(([sectionTitle, sectionProducts]: [string, any]) => (
+              <div key={sectionTitle} className="mb-14">
+                <h3 className="font-display text-2xl text-maroon-deep mb-6 pb-2 border-b border-gold/20 inline-block">
+                  {sectionTitle}
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                  {sectionProducts.map((item: any) => (
+                    <Link
+                      key={item.slug}
+                      to="/product/$slug"
+                      params={{ slug: item.slug }}
+                      className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition flex flex-col"
+                    >
+                      <div className="aspect-square overflow-hidden bg-cream">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          loading="lazy"
+                          width={400}
+                          height={400}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
+                      </div>
+                      <div className="p-4 flex flex-col flex-1">
+                        <div className="flex items-center gap-0.5 text-gold mb-1.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-3 h-3 fill-current" />
+                          ))}
+                        </div>
+                        <h3 className="font-display text-lg text-maroon-deep group-hover:text-maroon leading-tight">
+                          {item.name}
+                        </h3>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 flex-1">
+                            {item.description}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
+                          <span className="text-maroon font-medium">
+                            ₹{item.price.toLocaleString("en-IN")}
+                          </span>
+                          <span className="text-[10px] tracking-widest uppercase text-gold">
+                            View
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       )}

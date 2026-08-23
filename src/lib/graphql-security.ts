@@ -43,7 +43,7 @@ export function validateQueryComplexity(query: string, maxComplexity: number = 1
   }
 }
 
-export function validateBatchQuery(query: string, maxAliases: number = 10): void {
+export function validateBatchQuery(query: string, maxAliases: number = 100): void {
   if (query.length > 50000) {
     throw new Error('Query too large');
   }

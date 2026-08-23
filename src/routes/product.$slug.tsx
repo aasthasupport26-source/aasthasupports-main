@@ -80,6 +80,7 @@ function ProductPage() {
   const { slug, product: initialProduct } = Route.useLoaderData();
   const { add } = useCart();
   const navigate = useNavigate();
+  const [activeImage, setActiveImage] = useState(0);
 
   const { data: product } = useQuery({
     queryKey: ['product', slug],
@@ -149,11 +150,11 @@ function ProductPage() {
           <div className="space-y-4">
             <div className="aspect-square rounded-2xl overflow-hidden bg-cream border border-gold/30 shadow-royal">
               <img
-                src={product.images[0] || ""}
+                src={product.images[activeImage] || ""}
                 alt={product.name}
                 width={800}
                 height={800}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-opacity duration-300"
               />
             </div>
             {product.images.length > 1 && (
@@ -161,7 +162,10 @@ function ProductPage() {
                 {product.images.slice(0, 4).map((img: string, i: number) => (
                   <div
                     key={i}
-                    className="aspect-square rounded-lg overflow-hidden border border-gold/20 cursor-pointer hover:border-gold transition"
+                    onClick={() => setActiveImage(i)}
+                    className={`aspect-square rounded-lg overflow-hidden border cursor-pointer hover:border-gold transition ${
+                      activeImage === i ? "border-gold ring-2 ring-gold/20" : "border-gold/20"
+                    }`}
                   >
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </div>

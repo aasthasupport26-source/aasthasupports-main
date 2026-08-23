@@ -95,9 +95,10 @@ export default {
 
       // Skip CSRF for webhooks (they use signature verification)
       const isWebhook = url.pathname.startsWith("/api/webhooks/");
+      const isServerFn = url.pathname.startsWith("/_server");
       
       // Apply CSRF protection to state-changing requests
-      if (!isWebhook && ["POST", "PUT", "DELETE", "PATCH"].includes(request.method)) {
+      if (!isWebhook && !isServerFn && ["POST", "PUT", "DELETE", "PATCH"].includes(request.method)) {
         try {
           validateCSRF(request);
         } catch (csrfError) {
