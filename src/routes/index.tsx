@@ -8,33 +8,33 @@ import { Star, Sparkles, ArrowRight, Quote } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aastha Support — Rudraksha, Gems & Online Pooja" },
+      { title: "Aastha Supports — Rudraksha, Gems & Online Pooja" },
       {
         name: "description",
         content:
           "Shop certified rudraksha, malas, bracelets, gemstones & yantras. Book online poojas performed live by Vedic pandits from Kashi, Ujjain & Haridwar.",
       },
-      { property: "og:title", content: "Aastha Support — Rudraksha, Gems & Online Pooja" },
+      { property: "og:title", content: "Aastha Supports — Rudraksha, Gems & Online Pooja" },
       {
         property: "og:description",
         content:
           "Certified rudraksha, gems, malas, bracelets, yantras and live Vedic poojas — energised by learned pandits.",
       },
-      { property: "og:url", content: "https://aasthasupport.com/" },
-      { property: "og:image", content: "https://aasthasupport.com/og-image.jpg" },
+      { property: "og:url", content: "https://aasthasupports.com/" },
+      { property: "og:image", content: "https://aasthasupports.com/og-image.jpg" },
     ],
-    links: [{ rel: "canonical", href: "https://aasthasupport.com/" }],
+    links: [{ rel: "canonical", href: "https://aasthasupports.com/" }],
     scripts: [
       {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "Aastha Support",
-          url: "https://aasthasupport.com",
+          name: "Aastha Supports",
+          url: "https://aasthasupports.com",
           potentialAction: {
             "@type": "SearchAction",
-            target: "https://aasthasupport.com/category/{search_term_string}",
+            target: "https://aasthasupports.com/category/{search_term_string}",
             "query-input": "required name=search_term_string",
           },
         }),
@@ -58,7 +58,7 @@ const testimonials = [
   {
     name: "Vikram Singh",
     city: "Jaipur",
-    text: "Pukhraj from Aastha Support changed my career trajectory. Lab certified and astrologically perfect.",
+    text: "Pukhraj from Aastha Supports changed my career trajectory. Lab certified and astrologically perfect.",
   },
 ];
 
@@ -76,8 +76,8 @@ function HomePage() {
           decoding="async"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-hero-overlay" />
-        <div className="absolute inset-0 bg-gradient-to-r from-maroon-deep/85 via-maroon-deep/40 to-transparent" />
+        <div className="absolute inset-0 bg-hero-overlay opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-maroon-deep/60 via-maroon-deep/20 to-transparent" />
 
         <div className="container relative mx-auto px-4 z-10">
           <div className="max-w-2xl animate-fade-up">

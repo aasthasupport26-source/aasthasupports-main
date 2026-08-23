@@ -9,8 +9,8 @@ import { ShieldCheck, Loader2 } from "lucide-react";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign In / Sign Up — Aastha Support" },
-      { name: "description", content: "Access your Aastha Support account." },
+      { title: "Sign In / Sign Up — Aastha Supports" },
+      { name: "description", content: "Access your Aastha Supports account." },
     ],
   }),
   component: AuthPage,
@@ -71,7 +71,7 @@ function AuthPage() {
                 {mode === "login" ? "Sign In" : "Create Account"}
               </h1>
               <p className="text-sm text-muted-foreground mt-2">
-                {mode === "login" ? "Welcome back to your spiritual journey." : "Join the Aastha Support family."}
+                {mode === "login" ? "Welcome back to your spiritual journey." : "Join the Aastha Supports family."}
               </p>
             </div>
 
