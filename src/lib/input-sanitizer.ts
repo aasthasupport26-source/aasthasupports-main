@@ -19,6 +19,13 @@ export function sanitizeText(text: string): string {
 }
 
 /**
+ * Sanitize a slug - removes all HTML tags, converts to lowercase, and replaces spaces with hyphens
+ */
+export function sanitizeSlug(slug: string): string {
+  return sanitizeText(slug).toLowerCase().trim().replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '');
+}
+
+/**
  * Sanitize user input for database storage
  */
 export function sanitizeInput(input: string): string {
