@@ -20,6 +20,7 @@ function getAllowedRedirectUris(): string[] {
     process.env.VITE_SHOPIFY_REDIRECT_URI,
     "http://localhost:3000/auth/callback",
     "http://localhost:5173/auth/callback",
+    "http://localhost:8082/auth/callback",
   ].filter(Boolean) as string[];
 }
 
