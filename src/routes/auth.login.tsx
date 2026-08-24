@@ -20,8 +20,7 @@ function AuthLoginPage() {
 
     const initOAuth = async () => {
       try {
-        const redirectUri =
-          import.meta.env.VITE_SHOPIFY_REDIRECT_URI || `${window.location.origin}/auth/callback`;
+        const redirectUri = `${window.location.origin}/auth/callback`;
         const res = await getOAuthUrl({ data: { redirectUri } });
 
         if (res?.authorizeUrl) {

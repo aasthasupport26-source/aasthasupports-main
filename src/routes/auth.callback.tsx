@@ -32,9 +32,7 @@ function AuthCallbackPage() {
           throw new Error("No authorization code provided in URL");
         }
 
-        const redirectUri =
-          import.meta.env.VITE_SHOPIFY_REDIRECT_URI ||
-          `${window.location.origin}${window.location.pathname}`;
+        const redirectUri = `${window.location.origin}${window.location.pathname}`;
         const res = await exchangeCode({
           data: {
             code,
