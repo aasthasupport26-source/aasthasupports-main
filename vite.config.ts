@@ -21,6 +21,7 @@ export default defineConfig({
     plugins: [mcpPlugin()],
     build: {
       rollupOptions: {
+        external: ['cloudflare:workers'],
         output: {
           manualChunks: (id) => {
             if (id.includes('lucide-react')) return 'lucide';
