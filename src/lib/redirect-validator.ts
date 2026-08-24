@@ -1,4 +1,6 @@
 const ALLOWED_DOMAINS = [
+  "aasthasupport.com",
+  "www.aasthasupport.com",
   "aasthasupports.com",
   "www.aasthasupports.com",
   "localhost",
