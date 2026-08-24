@@ -18,6 +18,10 @@ function getStoreDomain(): string {
 function getAllowedRedirectUris(): string[] {
   return [
     process.env.VITE_SHOPIFY_REDIRECT_URI,
+    "https://aasthasupport.com/auth/callback",
+    "https://www.aasthasupport.com/auth/callback",
+    "https://aasthasupports.com/auth/callback",
+    "https://www.aasthasupports.com/auth/callback",
     "http://localhost:3000/auth/callback",
     "http://localhost:5173/auth/callback",
     "http://localhost:8082/auth/callback",
