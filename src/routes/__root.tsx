@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -38,6 +39,20 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const msg = error?.message || String(error) || "";
+    if (msg.includes('Failed to fetch dynamically imported module') || msg.includes('Importing a module script failed') || msg.includes('520')) {
+      const lastReload = sessionStorage.getItem('chunk_reload_time');
+      if (!lastReload || (Date.now() - parseInt(lastReload)) > 5000) {
+        sessionStorage.setItem('chunk_reload_time', Date.now().toString());
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('v', Date.now().toString());
+        window.location.href = newUrl.toString();
+      }
+    }
+  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-4">
