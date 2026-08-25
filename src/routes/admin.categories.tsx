@@ -6,12 +6,6 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/categories")({
   component: CategoriesPage,
-  beforeLoad: async ({ context }) => {
-    const { isAdmin } = context.auth || {};
-    if (!isAdmin) {
-      throw new Error("Unauthorized");
-    }
-  },
 });
 
 type Category = {

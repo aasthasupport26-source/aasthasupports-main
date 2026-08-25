@@ -17,12 +17,6 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/pujas")({
   component: AdminPujas,
-  beforeLoad: async ({ context }) => {
-    const { isAdmin } = context.auth || {};
-    if (!isAdmin) {
-      throw new Error("Unauthorized");
-    }
-  },
 });
 
 function AdminPujas() {

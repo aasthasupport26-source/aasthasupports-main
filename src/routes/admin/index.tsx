@@ -4,12 +4,6 @@ import { Users, Calendar, Package, Settings } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
-  beforeLoad: async ({ context }) => {
-    const { isAdmin } = context.auth || {};
-    if (!isAdmin) {
-      throw new Error("Unauthorized");
-    }
-  },
 });
 
 function AdminDashboard() {

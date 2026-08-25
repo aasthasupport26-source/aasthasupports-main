@@ -12,12 +12,6 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/customers")({
   component: AdminCustomers,
-  beforeLoad: async ({ context }) => {
-    const { isAdmin } = context.auth || {};
-    if (!isAdmin) {
-      throw new Error("Unauthorized");
-    }
-  },
 });
 
 function AdminCustomers() {

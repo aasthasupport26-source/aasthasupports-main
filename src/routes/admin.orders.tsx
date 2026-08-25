@@ -3,12 +3,6 @@ import { ExternalLink, ShoppingBag } from "lucide-react";
 
 export const Route = createFileRoute("/admin/orders")({
   component: OrdersPage,
-  beforeLoad: async ({ context }) => {
-    const { isAdmin } = context.auth || {};
-    if (!isAdmin) {
-      throw new Error("Unauthorized");
-    }
-  },
 });
 
 function OrdersPage() {

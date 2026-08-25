@@ -6,12 +6,6 @@ import { Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/leads")({
   component: LeadsPage,
-  beforeLoad: async ({ context }) => {
-    const { isAdmin } = context.auth || {};
-    if (!isAdmin) {
-      throw new Error("Unauthorized");
-    }
-  },
 });
 
 function LeadsPage() {
