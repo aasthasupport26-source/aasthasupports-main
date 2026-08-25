@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getCookie, setCookie, deleteCookie } from "@tanstack/react-start/server";
+import { getCookie, setCookie, deleteCookie, getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 const SessionSchema = z.object({
@@ -19,7 +19,7 @@ type Session = z.infer<typeof SessionSchema>;
 const COOKIE_NAME = "aastha_session";
 const COOKIE_MAX_AGE = 24 * 60 * 60; // 24 hours
 
-function getSessionCookieOptions(isProd: boolean) {
+function getSessionCookieOptions(_isProd: boolean) {
   return {
     httpOnly: true,
     secure: true,
@@ -31,7 +31,8 @@ function getSessionCookieOptions(isProd: boolean) {
 
 export const setSession = createServerFn({ method: "POST" })
   .validator(SessionSchema)
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
     const isNode = typeof process !== "undefined";
@@ -59,7 +60,8 @@ export const getSession = createServerFn({ method: "GET" }).handler(async () => 
   }
 });
 
-export const clearSession = createServerFn({ method: "POST" }).handler(async ({ request }) => {
+export const clearSession = createServerFn({ method: "POST" }).handler(async () => {
+  const request = getRequest();
   const { validateCSRF } = await import("./csrf-protection");
   validateCSRF(request);
   deleteCookie(COOKIE_NAME);

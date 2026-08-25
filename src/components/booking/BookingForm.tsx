@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { DayPicker } from "react-day-picker";
-import format from "date-fns/format";
-import addDays from "date-fns/addDays";
+import { format, addDays } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -246,7 +245,7 @@ export function BookingForm({
           },
         };
 
-        const rzp = new window.Razorpay(options);
+        const rzp = new window.Razorpay!(options);
         rzp.on("payment.failed", (resp: { error?: { description?: string } }) => {
           toast.error("Payment failed: " + (resp.error?.description || "Unknown error"));
           reject(new Error("payment_failed"));

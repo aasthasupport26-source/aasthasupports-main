@@ -5,9 +5,7 @@ interface AuditLogEntry {
   action: string;
   resource_type: string;
   resource_id?: string;
-  details?: Record<string, any>;
-  ip_address?: string;
-  user_agent?: string;
+  changes?: Record<string, any>;
 }
 
 export async function logAdminAction(entry: AuditLogEntry): Promise<void> {
@@ -17,9 +15,7 @@ export async function logAdminAction(entry: AuditLogEntry): Promise<void> {
       action: entry.action,
       resource_type: entry.resource_type,
       resource_id: entry.resource_id,
-      details: entry.details,
-      ip_address: entry.ip_address,
-      user_agent: entry.user_agent,
+      changes: entry.changes ? JSON.stringify(entry.changes) : null,
     });
   } catch (error) {
     console.error("Failed to log admin action:", error);

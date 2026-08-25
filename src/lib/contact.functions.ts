@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 const ContactFormSchema = z.object({
@@ -10,9 +11,10 @@ const ContactFormSchema = z.object({
 
 export const submitContactForm = createServerFn({ method: "POST" })
   .validator(ContactFormSchema)
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { checkRateLimit } = await import("./rate-limit");
-    const rateCheck = checkRateLimit(request, "auth");
+    const rateCheck = checkRateLimit(request, "contact");
     if (!rateCheck.allowed) {
       throw new Error(`Too many requests. Try again in ${rateCheck.retryAfter} seconds.`);
     }
@@ -21,7 +23,7 @@ export const submitContactForm = createServerFn({ method: "POST" })
     validateCSRF(request);
 
     const { supabaseAdmin } = await import("./auth/shopify-customer");
-    
+
     const { error } = await supabaseAdmin.from("contact_submissions").insert({
       name: data.name,
       phone: data.phone,

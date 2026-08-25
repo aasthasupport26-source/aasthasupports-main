@@ -21,8 +21,8 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as ListAllProductsRouteImport } from './routes/list-all-products'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as MyAccountRouteImport } from './routes/my-account'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
-import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as ReturnsPolicyRouteImport } from './routes/returns-policy'
 import { Route as ShippingPolicyRouteImport } from './routes/shipping-policy'
@@ -114,14 +114,14 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MyAccountRoute = MyAccountRouteImport.update({
+  id: '/my-account',
+  path: '/my-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   id: '/privacy-policy',
   path: '/privacy-policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RefundPolicyRoute = RefundPolicyRouteImport.update({
@@ -291,8 +291,8 @@ export interface FileRoutesByFullPath {
   '/health': typeof HealthRoute
   '/list-all-products': typeof ListAllProductsRoute
   '/mcp': typeof McpRoute
+  '/my-account': typeof MyAccountRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
-  '/profile': typeof ProfileRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/returns-policy': typeof ReturnsPolicyRoute
   '/shipping-policy': typeof ShippingPolicyRoute
@@ -336,8 +336,8 @@ export interface FileRoutesByTo {
   '/health': typeof HealthRoute
   '/list-all-products': typeof ListAllProductsRoute
   '/mcp': typeof McpRoute
+  '/my-account': typeof MyAccountRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
-  '/profile': typeof ProfileRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/returns-policy': typeof ReturnsPolicyRoute
   '/shipping-policy': typeof ShippingPolicyRoute
@@ -383,8 +383,8 @@ export interface FileRoutesById {
   '/health': typeof HealthRoute
   '/list-all-products': typeof ListAllProductsRoute
   '/mcp': typeof McpRoute
+  '/my-account': typeof MyAccountRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
-  '/profile': typeof ProfileRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/returns-policy': typeof ReturnsPolicyRoute
   '/shipping-policy': typeof ShippingPolicyRoute
@@ -431,8 +431,8 @@ export interface FileRouteTypes {
     | '/health'
     | '/list-all-products'
     | '/mcp'
+    | '/my-account'
     | '/privacy-policy'
-    | '/profile'
     | '/refund-policy'
     | '/returns-policy'
     | '/shipping-policy'
@@ -476,8 +476,8 @@ export interface FileRouteTypes {
     | '/health'
     | '/list-all-products'
     | '/mcp'
+    | '/my-account'
     | '/privacy-policy'
-    | '/profile'
     | '/refund-policy'
     | '/returns-policy'
     | '/shipping-policy'
@@ -522,8 +522,8 @@ export interface FileRouteTypes {
     | '/health'
     | '/list-all-products'
     | '/mcp'
+    | '/my-account'
     | '/privacy-policy'
-    | '/profile'
     | '/refund-policy'
     | '/returns-policy'
     | '/shipping-policy'
@@ -569,8 +569,8 @@ export interface RootRouteChildren {
   HealthRoute: typeof HealthRoute
   ListAllProductsRoute: typeof ListAllProductsRoute
   McpRoute: typeof McpRoute
+  MyAccountRoute: typeof MyAccountRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
-  ProfileRoute: typeof ProfileRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   ReturnsPolicyRoute: typeof ReturnsPolicyRoute
   ShippingPolicyRoute: typeof ShippingPolicyRoute
@@ -677,18 +677,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/my-account': {
+      id: '/my-account'
+      path: '/my-account'
+      fullPath: '/my-account'
+      preLoaderRoute: typeof MyAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy-policy': {
       id: '/privacy-policy'
       path: '/privacy-policy'
       fullPath: '/privacy-policy'
       preLoaderRoute: typeof PrivacyPolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/refund-policy': {
@@ -949,8 +949,8 @@ const rootRouteChildren: RootRouteChildren = {
   HealthRoute: HealthRoute,
   ListAllProductsRoute: ListAllProductsRoute,
   McpRoute: McpRoute,
+  MyAccountRoute: MyAccountRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
-  ProfileRoute: ProfileRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   ReturnsPolicyRoute: ReturnsPolicyRoute,
   ShippingPolicyRoute: ShippingPolicyRoute,

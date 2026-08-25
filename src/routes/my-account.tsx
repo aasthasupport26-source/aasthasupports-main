@@ -121,7 +121,7 @@ function ProfilePage() {
   useEffect(() => {
     if (customer?.id && accessToken) {
       fetchPujaBookings({ data: { accessToken } })
-        .then((data) => setPujaBookings(data || []))
+        .then((result) => setPujaBookings(result?.bookings || []))
         .catch((err) => {
           console.error("Failed to load bookings:", err);
           setPujaBookings([]);

@@ -13,15 +13,14 @@ import {
   deletePackage,
 } from "@/lib/admin.functions";
 import { Loader2, Plus, Edit2, Trash2, Save, X, Settings2, PackagePlus } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { useAuth as useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/pujas")({
   component: AdminPujas,
 });
-import { useAuth } from "@/contexts/AuthContext";
 function AdminPujas() {
-  const { accessToken } = useAuth();
+  const { accessToken } = useAuthContext();
   const fetchTemples = useServerFn(getAdminTemples);
   const fetchPujas = useServerFn(getAdminPujas);
   const doCreatePuja = useServerFn(createPuja);

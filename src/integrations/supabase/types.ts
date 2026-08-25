@@ -362,6 +362,375 @@ export type Database = {
         };
         Relationships: [];
       };
+      users: {
+        Row: {
+          id: string;
+          email: string;
+          full_name: string | null;
+          phone: string | null;
+          is_admin: boolean;
+          password_hash: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          full_name?: string | null;
+          phone?: string | null;
+          is_admin?: boolean;
+          password_hash?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          full_name?: string | null;
+          phone?: string | null;
+          is_admin?: boolean;
+          password_hash?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      temples: {
+        Row: {
+          id: string;
+          name: string;
+          city: string | null;
+          state: string | null;
+          description: string | null;
+          image_url: string | null;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          city?: string | null;
+          state?: string | null;
+          description?: string | null;
+          image_url?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          city?: string | null;
+          state?: string | null;
+          description?: string | null;
+          image_url?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      pujas: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          temple_id: string | null;
+          description: string | null;
+          short_description: string | null;
+          duration: string | null;
+          deity: string | null;
+          benefits: string[] | null;
+          includes: string[] | null;
+          image_url: string | null;
+          gallery: string[] | null;
+          is_active: boolean;
+          is_featured: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          temple_id?: string | null;
+          description?: string | null;
+          short_description?: string | null;
+          duration?: string | null;
+          deity?: string | null;
+          benefits?: string[] | null;
+          includes?: string[] | null;
+          image_url?: string | null;
+          gallery?: string[] | null;
+          is_active?: boolean;
+          is_featured?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          temple_id?: string | null;
+          description?: string | null;
+          short_description?: string | null;
+          duration?: string | null;
+          deity?: string | null;
+          benefits?: string[] | null;
+          includes?: string[] | null;
+          image_url?: string | null;
+          gallery?: string[] | null;
+          is_active?: boolean;
+          is_featured?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      packages: {
+        Row: {
+          id: string;
+          puja_id: string;
+          name: string;
+          description: string | null;
+          price: number;
+          includes: string[] | null;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          puja_id: string;
+          name: string;
+          description?: string | null;
+          price: number;
+          includes?: string[] | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          puja_id?: string;
+          name?: string;
+          description?: string | null;
+          price?: number;
+          includes?: string[] | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      sevas: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          price: number;
+          temple_id: string | null;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          price: number;
+          temple_id?: string | null;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          price?: number;
+          temple_id?: string | null;
+          active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      settings: {
+        Row: {
+          key: string;
+          value: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          key: string;
+          value?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          key?: string;
+          value?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      revoked_tokens: {
+        Row: {
+          id: string;
+          token_hash: string;
+          revoked_at: string;
+          expires_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          token_hash: string;
+          revoked_at?: string;
+          expires_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          token_hash?: string;
+          revoked_at?: string;
+          expires_at?: string | null;
+        };
+        Relationships: [];
+      };
+      webhook_events: {
+        Row: {
+          id: string;
+          event_id: string;
+          event_type: string;
+          processed_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          event_type: string;
+          processed_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          event_type?: string;
+          processed_at?: string;
+        };
+        Relationships: [];
+      };
+      admin_audit_log: {
+        Row: {
+          id: string;
+          admin_email: string;
+          action: string;
+          resource_type: string | null;
+          resource_id: string | null;
+          changes: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          admin_email: string;
+          action: string;
+          resource_type?: string | null;
+          resource_id?: string | null;
+          changes?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          admin_email?: string;
+          action?: string;
+          resource_type?: string | null;
+          resource_id?: string | null;
+          changes?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      security_events: {
+        Row: {
+          id: string;
+          event_type: string;
+          severity: string;
+          ip: string | null;
+          endpoint: string | null;
+          details: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_type: string;
+          severity: string;
+          ip?: string | null;
+          endpoint?: string | null;
+          details?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_type?: string;
+          severity?: string;
+          ip?: string | null;
+          endpoint?: string | null;
+          details?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      booking_payments: {
+        Row: {
+          id: string;
+          booking_id: string;
+          razorpay_order_id: string | null;
+          razorpay_payment_id: string | null;
+          amount: number;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          booking_id: string;
+          razorpay_order_id?: string | null;
+          razorpay_payment_id?: string | null;
+          amount: number;
+          status?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          booking_id?: string;
+          razorpay_order_id?: string | null;
+          razorpay_payment_id?: string | null;
+          amount?: number;
+          status?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      contact_submissions: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          phone: string | null;
+          message: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          email: string;
+          phone?: string | null;
+          message: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          email?: string;
+          phone?: string | null;
+          message?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -375,6 +744,9 @@ export type Database = {
         Returns: boolean;
       };
       is_admin_or_staff: { Args: { _user_id: string }; Returns: boolean };
+      begin_transaction: { Args: Record<string, never>; Returns: void };
+      commit_transaction: { Args: Record<string, never>; Returns: void };
+      rollback_transaction: { Args: Record<string, never>; Returns: void };
     };
     Enums: {
       app_role: "admin" | "staff" | "customer";

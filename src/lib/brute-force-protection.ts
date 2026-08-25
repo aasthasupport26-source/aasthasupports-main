@@ -56,10 +56,15 @@ export function recordFailedAttempt(identifier: string): void {
     // Log to database for persistent tracking
     supabaseAdmin.from("security_events").insert({
       event_type: "brute_force_lockout",
-      identifier,
-      attempts: entry.attempts,
-      locked_until: new Date(entry.lockedUntil).toISOString(),
-    }).catch(err => console.error("Failed to log brute force event:", err));
+      severity: "high",
+      details: {
+        identifier,
+        attempts: entry.attempts,
+        locked_until: new Date(entry.lockedUntil).toISOString(),
+      },
+    }).then(({ error }) => {
+      if (error) console.error("Failed to log brute force event:", error);
+    });
   }
 }
 

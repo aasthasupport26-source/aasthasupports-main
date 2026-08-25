@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { setCookie, getCookie, deleteCookie } from "@tanstack/react-start/server";
+import { setCookie, getCookie, deleteCookie, getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 // Schema for registration
 const RegisterSchema = z.object({
@@ -32,7 +32,8 @@ const VerifyTokenSchema = z.object({
  */
 export const registerUser = createServerFn({ method: "POST" })
   .validator(RegisterSchema)
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { validateCSRF } = await import("./csrf-protection");
     await validateCSRF(request);
     
@@ -77,7 +78,8 @@ export const registerUser = createServerFn({ method: "POST" })
  */
 export const loginUser = createServerFn({ method: "POST" })
   .validator(LoginSchema)
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { validateCSRF } = await import("./csrf-protection");
     await validateCSRF(request);
     
@@ -134,7 +136,7 @@ export const loginUser = createServerFn({ method: "POST" })
         // Successful login - reset attempts
         resetAttempts(identifier);
 
-        const { token, expiresAt } = signAdminToken(adminUser.email);
+        const { token, expiresAt } = await signAdminToken(adminUser.email);
 
         return {
           success: true,
@@ -180,7 +182,7 @@ export const verifyAccessToken = createServerFn({ method: "POST" })
 
       // Check if this is an admin JWT token
       if (isAdminToken(data.accessToken)) {
-        const payload = verifyAdminToken(data.accessToken);
+        const payload = await verifyAdminToken(data.accessToken);
 
         // Fetch the admin user by the email embedded in the JWT
         const { data: adminUser } = await supabaseAdmin

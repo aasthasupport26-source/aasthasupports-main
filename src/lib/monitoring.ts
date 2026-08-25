@@ -1,4 +1,4 @@
-import { logError, logWarning } from "./error-capture";
+import { captureError, captureMessage } from "./sentry";
 
 interface HealthCheck {
   status: "healthy" | "degraded" | "unhealthy";
@@ -31,7 +31,7 @@ export async function performHealthCheck(): Promise<HealthCheck> {
   };
 
   if (status !== "healthy") {
-    logWarning(`Health check ${status}`, checks);
+    captureMessage(`Health check ${status}`, "warning");
   }
 
   lastHealthCheck = result;
@@ -44,7 +44,7 @@ async function checkDatabase(): Promise<boolean> {
     const { data, error } = await supabaseAdmin.from("users").select("id").limit(1);
     return !error;
   } catch (e) {
-    logError(e as Error, { service: "database" });
+    captureError(e as Error, { service: "database" });
     return false;
   }
 }
@@ -62,5 +62,5 @@ export function getLastHealthCheck(): HealthCheck | null {
 }
 
 setInterval(() => {
-  performHealthCheck().catch(e => logError(e, { context: "health-check-interval" }));
+  performHealthCheck().catch(e => captureError(e, { context: "health-check-interval" }));
 }, 5 * 60 * 1000);

@@ -17,7 +17,6 @@ function getStorefrontClient(): GraphQLClient {
       "X-Shopify-Storefront-Access-Token": token,
       "Content-Type": "application/json",
     },
-    timeout: 10000,
   });
 }
 
@@ -34,7 +33,6 @@ function getAdminClient(): GraphQLClient {
       "X-Shopify-Access-Token": token,
       "Content-Type": "application/json",
     },
-    timeout: 10000,
   });
 }
 

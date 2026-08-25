@@ -133,7 +133,7 @@ export function DirectBookingModal({
           },
         };
 
-        const rzp = new window.Razorpay(options);
+        const rzp = new window.Razorpay!(options);
         rzp.on("payment.failed", (resp: { error?: { description?: string } }) => {
           toast.error("Payment failed: " + (resp.error?.description || "Unknown error"));
           reject(new Error("payment_failed"));

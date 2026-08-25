@@ -16,7 +16,7 @@ function UsersPage() {
 
   const load = async () => {
     const { data: profs } = await supabase
-      .from("profiles")
+      .from("users")
       .select("*")
       .order("created_at", { ascending: false });
     const { data: roles } = await supabase.from("user_roles").select("user_id, role");

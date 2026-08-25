@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { sanitizeLimit, sanitizeOffset } from "./db-validator";
 import { uuidSchema } from "./uuid-validator";
+import { logAdminAction } from "./admin-audit";
 
 const requireAdmin = async (token: string) => {
   const { verifyAdminToken, isAdminToken } = await import("./admin-guard");
@@ -19,7 +21,8 @@ export const getAdminBookings = createServerFn({ method: "POST" })
     limit: z.number().int().min(1).max(100).default(50),
     offset: z.number().int().min(0).default(0)
   }))
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -53,7 +56,8 @@ export const getAdminCustomers = createServerFn({ method: "POST" })
     limit: z.number().int().min(1).max(100).default(50),
     offset: z.number().int().min(0).default(0)
   }))
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -89,6 +93,7 @@ export const updateBookingStatus = createServerFn({ method: "POST" })
     accessToken: z.string()
   }))
   .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const adminEmail = await requireAdmin(data.accessToken);
     
@@ -116,7 +121,8 @@ export const updateBookingStatus = createServerFn({ method: "POST" })
 
 export const deleteTemple = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string(), id: uuidSchema }))
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -153,7 +159,8 @@ export const deleteTemple = createServerFn({ method: "POST" })
  */
 export const getAdminTemples = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string() }))
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -185,7 +192,8 @@ export const createTemple = createServerFn({ method: "POST" })
       active: z.boolean(),
     }),
   )
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -197,7 +205,7 @@ export const createTemple = createServerFn({ method: "POST" })
     validateCSRF(request);
     
     const adminEmail = await requireAdmin(data.accessToken);
-    const { image_url, ...insertData } = data;
+    const { image_url, accessToken, ...insertData } = data;
     const { error } = await supabaseAdmin.from("temples").insert(insertData);
     if (error) {
       console.error("Failed to create temple:", error);
@@ -208,9 +216,9 @@ export const createTemple = createServerFn({ method: "POST" })
       admin_email: adminEmail,
       action: "create",
       resource_type: "temple",
-      details: { name: data.name, city: data.city },
-      ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
-      user_agent: request.headers.get("user-agent") || undefined,
+      changes: { name: data.name, city: data.city },
+      
+      
     });
     
     return { success: true };
@@ -229,7 +237,8 @@ export const updateTemple = createServerFn({ method: "POST" })
       active: z.boolean(),
     }),
   )
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -240,7 +249,7 @@ export const updateTemple = createServerFn({ method: "POST" })
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
     requireAdmin(data.accessToken);
-    const { id, image_url, ...updateData } = data;
+    const { id, image_url, accessToken, ...updateData } = data;
     const { error } = await supabaseAdmin.from("temples").update(updateData).eq("id", id);
     if (error) {
       console.error("Failed to update temple:", error);
@@ -265,7 +274,8 @@ export const updateTemple = createServerFn({ method: "POST" })
  */
 export const getAdminPujas = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string(), templeId: uuidSchema.optional() }))
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -298,7 +308,8 @@ export const createPuja = createServerFn({ method: "POST" })
       active: z.boolean(),
     }),
   )
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -309,7 +320,8 @@ export const createPuja = createServerFn({ method: "POST" })
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
     requireAdmin(data.accessToken);
-    const { error } = await supabaseAdmin.from("pujas").insert(data);
+    const { accessToken, active, duration_minutes, ...rest } = data; const insertData = { ...rest, is_active: active, duration: duration_minutes?.toString() };
+    const { error } = await supabaseAdmin.from("pujas").insert(insertData);
     if (error) {
       console.error("Failed to create puja:", error);
       throw new Error("Failed to create puja. Please try again.");
@@ -332,7 +344,8 @@ export const updatePuja = createServerFn({ method: "POST" })
       active: z.boolean(),
     }),
   )
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -343,7 +356,7 @@ export const updatePuja = createServerFn({ method: "POST" })
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
     requireAdmin(data.accessToken);
-    const { id, ...updateData } = data;
+    const { id, accessToken, active, duration_minutes, ...rest } = data; const updateData = { ...rest, is_active: active, duration: duration_minutes?.toString() };
     const { error } = await supabaseAdmin.from("pujas").update(updateData).eq("id", id);
     if (error) {
       console.error("Failed to update puja:", error);
@@ -354,7 +367,8 @@ export const updatePuja = createServerFn({ method: "POST" })
 
 export const deletePuja = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string(), id: uuidSchema }))
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -380,7 +394,8 @@ export const deletePuja = createServerFn({ method: "POST" })
  */
 export const getAdminPackages = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string(), pujaId: uuidSchema.optional() }))
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -411,7 +426,8 @@ export const createPackage = createServerFn({ method: "POST" })
       active: z.boolean(),
     }),
   )
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -422,7 +438,8 @@ export const createPackage = createServerFn({ method: "POST" })
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
     requireAdmin(data.accessToken);
-    const { error } = await supabaseAdmin.from("packages").insert(data);
+    const { accessToken, ...insertData } = data;
+    const { error } = await supabaseAdmin.from("packages").insert(insertData);
     if (error) {
       console.error("Failed to create package:", error);
       throw new Error("Failed to create package. Please try again.");
@@ -443,7 +460,8 @@ export const updatePackage = createServerFn({ method: "POST" })
       active: z.boolean(),
     }),
   )
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");
@@ -453,22 +471,22 @@ export const updatePackage = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
+    const adminEmail = await requireAdmin(data.accessToken);
     
     const { logAdminAction } = await import("./admin-audit");
     
-    const { id, image_url, ...updateData } = data;
-    const { error } = await supabaseAdmin.from("temples").update(updateData).eq("id", id);
+    const { id, accessToken, ...updateData } = data;
+    const { error } = await supabaseAdmin.from("packages").update(updateData).eq("id", id);
     if (error) {
-      console.error("Failed to update temple:", error);
-      throw new Error("Failed to update temple. Please try again.");
+      console.error("Failed to update package:", error);
+      throw new Error("Failed to update package. Please try again.");
     }
     
     await logAdminAction({
-      adminEmail: "admin",
-      action: "update_temple",
-      resourceType: "temple",
-      resourceId: id,
+      admin_email: adminEmail,
+      action: "update",
+      resource_type: "package",
+      resource_id: id,
       changes: updateData,
     });
     
@@ -477,7 +495,8 @@ export const updatePackage = createServerFn({ method: "POST" })
 
 export const deletePackage = createServerFn({ method: "POST" })
   .validator(z.object({ accessToken: z.string(), id: uuidSchema }))
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "admin");

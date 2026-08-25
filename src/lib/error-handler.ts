@@ -60,7 +60,7 @@ export function handleError(error: unknown, context?: ErrorContext): { message: 
     if (error.statusCode >= 500) {
       captureError(error, { ...error.context, ...context });
     } else {
-      captureMessage(error.message, "warning", { ...error.context, ...context });
+      captureMessage(`${error.message} | context: ${JSON.stringify({ ...error.context, ...context })}`, "warning");
     }
     
     return {

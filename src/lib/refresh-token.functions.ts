@@ -1,10 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 
 export const refreshToken = createServerFn({ method: "POST" })
   .validator(z.object({ refreshToken: z.string() }))
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "auth");
     if (!rateCheck.allowed) {

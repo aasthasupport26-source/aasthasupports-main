@@ -122,7 +122,7 @@ function ProductPage() {
 
   const buyNow = () => {
     addToCart();
-    navigate({ to: "/cart" });
+    navigate({ to: "/cart" as any });
   };
 
   return (

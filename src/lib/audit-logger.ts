@@ -31,8 +31,6 @@ export async function logAdminAction(
       resource_type: resourceType,
       resource_id: resourceId,
       changes: changes ? JSON.stringify(changes) : null,
-      ip_address: ip,
-      user_agent: userAgent,
     });
   } catch (error) {
     // Don't fail the operation if audit logging fails

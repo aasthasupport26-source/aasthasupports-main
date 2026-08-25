@@ -12,7 +12,7 @@ export async function revokeAllUserTokens(userId: string): Promise<void> {
     
     await supabaseAdmin
       .from("revoked_tokens")
-      .insert({ user_id: userId, revoked_at: new Date().toISOString() });
+      .insert({ token_hash: userId, revoked_at: new Date().toISOString() });
   } catch (error) {
     console.error("Failed to revoke user tokens:", error);
     throw new Error("Failed to revoke user tokens");

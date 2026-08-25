@@ -19,14 +19,10 @@ export const POST = createServerFn({ method: "POST" })
     const report = data["csp-report"];
     
     // Log CSP violation to monitoring
-    captureMessage("CSP Violation", "warning", {
-      documentUri: report["document-uri"],
-      violatedDirective: report["violated-directive"],
-      blockedUri: report["blocked-uri"],
-      sourceFile: report["source-file"],
-      lineNumber: report["line-number"],
-      columnNumber: report["column-number"],
-    });
+    captureMessage(
+      `CSP Violation: ${report["violated-directive"]} on ${report["document-uri"]} blocked ${report["blocked-uri"] || "unknown"}`,
+      "warning",
+    );
 
     return new Response("OK", { status: 204 });
   });

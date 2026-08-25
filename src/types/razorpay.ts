@@ -1,5 +1,6 @@
 export interface RazorpayOptions {
   key: string;
+  image?: string;
   amount: number;
   currency: string;
   name: string;
@@ -7,15 +8,10 @@ export interface RazorpayOptions {
   order_id: string;
   prefill: {
     name: string;
-    email: string;
+    email?: string;
     contact: string;
   };
-  notes: {
-    booking_id: string;
-    temple_id: string;
-    puja_id: string;
-    package_id: string;
-  };
+  notes: Record<string, string>;
   theme: {
     color: string;
   };
@@ -33,7 +29,7 @@ export interface RazorpayResponse {
 
 export interface RazorpayInstance {
   open(): void;
-  on(event: string, callback: (response: RazorpayResponse) => void): void;
+  on(event: string, callback: (response: any) => void): void;
 }
 
 declare global {

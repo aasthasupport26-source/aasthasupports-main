@@ -25,37 +25,20 @@ export function logSecurityEvent(event: SecurityEvent): void {
   const count = (eventCounts.get(key) || 0) + 1;
   eventCounts.set(key, count);
 
-  // Log to monitoring
+  const level = event.severity === "critical" ? "error" : event.severity === "high" ? "warning" : "info";
+
+  // Log to monitoring (captureMessage takes 2 args: message, level)
   captureMessage(
-    `Security Event: ${event.type}`,
-    event.severity === "critical" ? "error" : event.severity === "high" ? "warning" : "info",
-    {
-      ...event.details,
-      type: event.type,
-      severity: event.severity,
-      userId: event.userId,
-      ip: event.ip,
-      endpoint: event.endpoint,
-      count,
-    }
+    `Security Event: ${event.type} | ip=${event.ip} endpoint=${event.endpoint} count=${count}`,
+    level,
   );
 
   // Check if we should alert
   const threshold = ALERT_THRESHOLDS[event.type];
   if (count >= threshold) {
     captureMessage(
-      `SECURITY ALERT: ${event.type} threshold exceeded (${count}/${threshold})`,
+      `SECURITY ALERT: ${event.type} threshold exceeded (${count}/${threshold}) | ip=${event.ip} endpoint=${event.endpoint}`,
       "error",
-      {
-        ...event.details,
-        type: event.type,
-        severity: event.severity,
-        userId: event.userId,
-        ip: event.ip,
-        endpoint: event.endpoint,
-        count,
-        threshold,
-      }
     );
   }
 }

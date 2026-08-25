@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { uuidSchema } from "./uuid-validator";
 import { getServerEnv } from "./env";
+import Razorpay from "razorpay";
+import crypto from "crypto";
 
 import { TEMPLES_CATALOG, PUJAS_CATALOG } from "@/data/pooja-catalog";
 
@@ -31,13 +34,14 @@ export const getTemples = createServerFn({ method: "GET" }).handler(async () => 
 export const getPujasByTemple = createServerFn({ method: "GET" })
   .validator(z.object({ templeId: uuidSchema }))
   .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     try {
       const { data: pujas, error } = await supabaseAdmin
         .from("pujas")
         .select("*, packages(*)")
         .eq("temple_id", data.templeId)
-        .eq("active", true)
+        .eq("is_active", true)
         .order("name");
       if (!error && pujas && pujas.length > 0) return pujas;
     } catch (err) {
@@ -50,6 +54,7 @@ export const getPujasByTemple = createServerFn({ method: "GET" })
 export const getPujaDetails = createServerFn({ method: "GET" })
   .validator(z.object({ slug: z.string() }))
   .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     try {
       const { data: puja, error } = await supabaseAdmin
@@ -111,7 +116,8 @@ const CreateBookingSchema = z.object({
 
 export const createPujaBooking = createServerFn({ method: "POST" })
   .validator(CreateBookingSchema)
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "payment");
@@ -154,13 +160,13 @@ export const createPujaBooking = createServerFn({ method: "POST" })
       const totalAmount = baseAmount + processingFee;
 
       // 3. Check availability before creating booking
-      const preferredDate = new Date(data.preferredDate);
+      const preferredDate = new Date(data.bookingDate);
       const { data: existingBookings, error: availError } = await (supabaseAdmin as any)
         .from("pooja_bookings")
         .select("id")
         .eq("temple_id", data.templeId)
         .eq("preferred_date", preferredDate.toISOString().split('T')[0])
-        .eq("preferred_time", data.preferredTime)
+        .eq("preferred_time", data.timeSlot)
         .in("status", ["pending", "confirmed"]);
       
       if (availError) throw new Error("Failed to check availability");
@@ -252,7 +258,8 @@ export const createPujaBooking = createServerFn({ method: "POST" })
 
 const CreateDirectBookingSchema = z.object({
   userId: z.string().optional(),
-  sevaId: uuidSchema,
+  sevaName: z.string(),
+  amount: z.number().positive(),
   customerName: z.string().min(1),
   phone: z.string().min(7),
   sankalpNotes: z.string().optional(),
@@ -260,7 +267,8 @@ const CreateDirectBookingSchema = z.object({
 
 export const createDirectPujaBooking = createServerFn({ method: "POST" })
   .validator(CreateDirectBookingSchema)
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "payment");
@@ -272,18 +280,7 @@ export const createDirectPujaBooking = createServerFn({ method: "POST" })
     validateCSRF(request);
 
     try {
-      // Fetch seva pricing from database ONLY
-      const { data: seva, error: sevaError } = await (supabaseAdmin as any)
-        .from("sevas")
-        .select("name, price")
-        .eq("id", data.sevaId)
-        .single();
-      
-      if (sevaError || !seva?.price) {
-        throw new Error("Seva not found or price unavailable");
-      }
-      
-      const baseAmount = parseFloat(seva.price);
+      const baseAmount = data.amount;
       if (!baseAmount || baseAmount <= 0) throw new Error("Invalid seva price");
 
       // Fetch processing fee (fallback 2% silently)
@@ -315,7 +312,7 @@ export const createDirectPujaBooking = createServerFn({ method: "POST" })
           userId: data.userId || "",
           customerName: data.customerName,
           phone: data.phone,
-          pooja_type: seva.name,
+          pooja_type: data.sevaName,
           sankalpNotes: data.sankalpNotes || "",
           totalAmount: totalAmount.toString(),
         },
@@ -328,7 +325,7 @@ export const createDirectPujaBooking = createServerFn({ method: "POST" })
           user_id: data.userId || null,
           devotee_name: data.customerName,
           phone: data.phone,
-          pooja_type: seva.name,
+          pooja_type: data.sevaName,
           sankalp: data.sankalpNotes || null,
           amount: totalAmount,
         },
@@ -373,7 +370,8 @@ const VerifyPaymentSchema = z.object({
 
 export const verifyPujaPayment = createServerFn({ method: "POST" })
   .validator(VerifyPaymentSchema)
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
     const rateCheck = checkRateLimit(request, "payment");
@@ -390,7 +388,7 @@ export const verifyPujaPayment = createServerFn({ method: "POST" })
     const { data: existingPayment } = await supabaseAdmin
       .from("booking_payments")
       .select("id, booking_id")
-      .eq("gateway_payment_id", data.razorpay_payment_id)
+      .eq("razorpay_payment_id", data.razorpay_payment_id)
       .single();
 
     if (existingPayment) {
@@ -398,10 +396,13 @@ export const verifyPujaPayment = createServerFn({ method: "POST" })
     }
 
     // 1. Verify Signature
-    const body = `${data.razorpay_order_id}|${data.razorpay_payment_id}`;
-    const expected = crypto.createHmac("sha256", env.RAZORPAY_KEY_SECRET).update(body).digest("hex");
+    const signString = `${data.razorpay_order_id}|${data.razorpay_payment_id}`;
+    const generatedSignature = crypto
+      .createHmac("sha256", env.RAZORPAY_KEY_SECRET)
+      .update(signString)
+      .digest("hex");
 
-    const a = Buffer.from(expected);
+    const a = Buffer.from(generatedSignature);
     const b = Buffer.from(data.razorpay_signature);
     if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
       const { logSecurityEvent } = await import("./security-monitor");
@@ -422,7 +423,7 @@ export const verifyPujaPayment = createServerFn({ method: "POST" })
       throw new Error("Payment not successful");
     }
     
-    const paidAmount = payment.amount / 100;
+    const paidAmount = Number(payment.amount) / 100;
     if (Math.abs(paidAmount - data.bookingPayload.amount) > 0.01) {
       throw new Error("Payment amount mismatch");
     }
@@ -468,6 +469,7 @@ export const getUserBookings = createServerFn({ method: "GET" })
     offset: z.number().int().min(0).default(0)
   }))
   .handler(async ({ data }) => {
+    const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     // Verify token and extract userId from authenticated session
     const { verifyAccessToken } = await import("./auth/shopify-customer");

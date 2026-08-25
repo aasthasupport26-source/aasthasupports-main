@@ -58,7 +58,7 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
           available: node.variants.edges[0]?.node.availableForSale || false,
           category: metafieldsMap.get("category") || node.productType || "",
           productType: node.productType || "",
-          benefits: metafieldsMap.get("benefits") ? JSON.parse(metafieldsMap.get("benefits")!) : [],
+          benefits: metafieldsMap.get("benefits") ? JSON.parse(String(metafieldsMap.get("benefits"))) : [],
           certified: metafieldsMap.get("certified") === "true",
           tags: node.tags || [],
         };
@@ -146,7 +146,7 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
           available: e.node.availableForSale,
           stock: e.node.quantityAvailable,
         })),
-        benefits: metafieldsMap.get("benefits") ? JSON.parse(metafieldsMap.get("benefits")!) : [],
+        benefits: metafieldsMap.get("benefits") ? JSON.parse(String(metafieldsMap.get("benefits"))) : [],
         certified: metafieldsMap.get("certified") === "true",
         category: metafieldsMap.get("category") || "",
         tags: node.tags || [],
