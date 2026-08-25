@@ -119,7 +119,7 @@ export function DirectBookingModal({
                 },
               });
               toast.success("🙏 Booking confirmed! Redirecting to profile...");
-              window.location.href = "/profile";
+              window.location.href = "/my-account";
               resolve();
             } catch (err: unknown) {
               reject(err);

@@ -301,7 +301,7 @@ function BookPoojaPage() {
                     pkg={selectedPackage}
                     userId={userId}
                     onSuccess={() => {
-                      window.location.href = "/profile";
+                      window.location.href = "/my-account";
                     }}
                   />
                 </div>

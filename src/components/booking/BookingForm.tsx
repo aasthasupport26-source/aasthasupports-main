@@ -344,7 +344,7 @@ export function BookingForm({
           track your booking from your profile.
         </p>
         <button
-          onClick={() => (window.location.href = "/profile")}
+          onClick={() => (window.location.href = "/my-account")}
           className="inline-flex items-center gap-2 px-7 py-3 rounded-full text-sm font-semibold text-white transition"
           style={{ background: "linear-gradient(135deg, #8B2020 0%, #6b1a1a 100%)" }}
         >

@@ -76,7 +76,7 @@ function AuthPage() {
       if (isAdminUser) {
         navigate({ to: "/admin" });
       } else {
-        navigate({ to: "/profile" });
+        navigate({ to: "/my-account" });
       }
     } catch (err: any) {
       toast.error(err?.message || "Invalid email or password");

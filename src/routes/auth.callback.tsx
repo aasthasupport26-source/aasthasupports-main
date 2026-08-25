@@ -48,7 +48,7 @@ function AuthCallbackPage() {
         toast.success(isAdmin ? "Welcome, Admin!" : "Successfully signed in!");
 
         setTimeout(() => {
-          navigate({ to: isAdmin ? "/admin" : "/profile" });
+          navigate({ to: isAdmin ? "/admin" : "/my-account" });
         }, 1000);
       } catch (error: any) {
         console.error("Auth callback error:", error);

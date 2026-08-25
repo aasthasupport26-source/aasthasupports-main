@@ -32,7 +32,7 @@ import {
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 
-export const Route = createFileRoute("/profile")({
+export const Route = createFileRoute("/my-account")({
   head: () => ({
     meta: [
       { title: "My Profile — Aastha Support" },
