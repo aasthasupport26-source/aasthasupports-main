@@ -11,3 +11,11 @@ export const checkIsAdmin = createServerFn({ method: "POST" })
     const user = await getUserWithAdminStatus(data.email);
     return { isAdmin: user?.is_admin || false };
   });
+
+export const revokeAdminTokenFn = createServerFn({ method: "POST" })
+  .validator(z.object({ token: z.string() }))
+  .handler(async ({ data }) => {
+    const { revokeAdminToken } = await import("./admin-guard");
+    await revokeAdminToken(data.token);
+    return { success: true };
+  });

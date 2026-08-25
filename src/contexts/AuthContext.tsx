@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useRef, useMemo, useCallback } from "react";
 import { verifyAccessToken } from "@/lib/auth.functions";
-import { checkIsAdmin } from "@/lib/admin-auth.functions";
+import { checkIsAdmin, revokeAdminTokenFn } from "@/lib/admin-auth.functions";
 import { getSession, setSession, clearSession } from "@/lib/session.functions";
 import { useServerFn } from "@tanstack/react-start";
 
@@ -97,12 +97,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [checkAdmin, setSessionFn]);
 
   const clearSessionFn = useServerFn(clearSession);
+  const revokeAdminToken = useServerFn(revokeAdminTokenFn);
 
   const logout = useCallback(async () => {
     if (accessToken && isAdmin) {
       try {
-        const { revokeAdminToken } = await import("@/lib/admin-guard");
-        await revokeAdminToken(accessToken);
+        await revokeAdminToken({ data: { token: accessToken } });
       } catch (error) {
         console.error("Failed to revoke admin token:", error);
       }
