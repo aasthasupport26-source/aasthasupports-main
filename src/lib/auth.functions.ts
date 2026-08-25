@@ -110,7 +110,7 @@ export const loginUser = createServerFn({ method: "POST" })
         .select("email, full_name, is_admin, password_hash")
         .eq("email", data.email)
         .eq("is_admin", true)
-        .single();
+        .maybeSingle();
 
       if (adminUser) {
         const storedHash = (adminUser as any)?.password_hash;
