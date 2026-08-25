@@ -286,7 +286,7 @@ export const getShopifyOAuthUrl = createServerFn({ method: "POST" })
         nonce: authData.nonce 
       });
 
-      setCookie("shopify_oauth_session", oauthSession, {
+      setCookie("shopify_oauth_session", encodeURIComponent(oauthSession), {
         httpOnly: true,
         secure: isProd,
         sameSite: "lax",
@@ -327,7 +327,7 @@ export const exchangeOAuthCode = createServerFn({ method: "POST" })
 
       if (sessionStr) {
         try {
-          const session = JSON.parse(sessionStr);
+          const session = JSON.parse(decodeURIComponent(sessionStr));
           verifier = session.verifier;
           savedState = session.state;
           savedNonce = session.nonce;
