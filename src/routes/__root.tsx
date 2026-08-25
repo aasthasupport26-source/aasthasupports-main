@@ -152,9 +152,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
               window.onerror = function(msg, url, line, col, err) {
                 var fullMsg = msg + (err ? err.message : '');
                 if (fullMsg.includes('Failed to fetch dynamically imported module') || fullMsg.includes('Importing a module script failed')) {
-                  if (!sessionStorage.getItem('chunk_reload')) {
-                    sessionStorage.setItem('chunk_reload', '1');
-                    window.location.reload();
+                  var lastReload = sessionStorage.getItem('chunk_reload_time');
+                  if (!lastReload || (Date.now() - parseInt(lastReload)) > 5000) {
+                    sessionStorage.setItem('chunk_reload_time', Date.now().toString());
+                    var newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('v', Date.now().toString());
+                    window.location.href = newUrl.toString();
                     return true;
                   }
                 }
@@ -166,9 +169,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
                 var r = e.reason;
                 var msg = r && r.message ? r.message : String(r);
                 if (msg.includes('Failed to fetch dynamically imported module') || msg.includes('Importing a module script failed')) {
-                  if (!sessionStorage.getItem('chunk_reload')) {
-                    sessionStorage.setItem('chunk_reload', '1');
-                    window.location.reload();
+                  var lastReload = sessionStorage.getItem('chunk_reload_time');
+                  if (!lastReload || (Date.now() - parseInt(lastReload)) > 5000) {
+                    sessionStorage.setItem('chunk_reload_time', Date.now().toString());
+                    var newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('v', Date.now().toString());
+                    window.location.href = newUrl.toString();
                     return true;
                   }
                 }
