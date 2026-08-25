@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 // All env vars are read lazily inside getters so the module can be safely
 // imported on the client without throwing. The actual values are only needed
@@ -30,22 +31,22 @@ function getShopifyStorefrontToken(): string {
   return val;
 }
 
-let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
-let _supabase: ReturnType<typeof createClient> | null = null;
+let _supabaseAdmin: ReturnType<typeof createClient<Database>> | null = null;
+let _supabase: ReturnType<typeof createClient<Database>> | null = null;
 
-export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient>, {
+export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient<Database>>, {
   get(target, prop) {
     if (!_supabaseAdmin) {
-      _supabaseAdmin = createClient(getSupabaseUrl(), getSupabaseServiceKey());
+      _supabaseAdmin = createClient<Database>(getSupabaseUrl(), getSupabaseServiceKey());
     }
     return Reflect.get(_supabaseAdmin, prop);
   }
 });
 
-export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+export const supabase = new Proxy({} as ReturnType<typeof createClient<Database>>, {
   get(target, prop) {
     if (!_supabase) {
-      _supabase = createClient(getSupabaseUrl(), getSupabaseAnonKey());
+      _supabase = createClient<Database>(getSupabaseUrl(), getSupabaseAnonKey());
     }
     return Reflect.get(_supabase, prop);
   }
@@ -376,7 +377,7 @@ export async function getUserWithAdminStatus(email: string): Promise<{ is_admin:
     .from("users")
     .select("is_admin")
     .eq("email", email)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("Failed to get user admin status:", error);

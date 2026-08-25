@@ -30,8 +30,8 @@ function AdminBookings() {
     if (!accessToken) return;
     setIsLoading(true);
     try {
-      const data = await getAdminBookings({ data: { accessToken } });
-      setBookings(data);
+      const { bookings } = await getAdminBookings({ data: { accessToken } });
+      setBookings(bookings);
     } catch (err) {
       console.error("Failed to load bookings:", err);
       toast.error("Failed to load bookings");
@@ -48,7 +48,7 @@ function AdminBookings() {
 
   const handleStatusChange = async (
     bookingId: string,
-    newStatus: "draft" | "confirmed" | "completed" | "cancelled",
+    newStatus: "pending" | "confirmed" | "completed" | "cancelled",
   ) => {
     if (!accessToken) return;
     try {

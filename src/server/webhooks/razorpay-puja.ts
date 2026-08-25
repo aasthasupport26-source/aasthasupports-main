@@ -56,7 +56,7 @@ export async function handleRazorpayPujaWebhook(request: Request) {
     .from("webhook_events")
     .select("id")
     .eq("event_id", eventId)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     console.info("[Razorpay Webhook] Duplicate event ignored:", eventId);

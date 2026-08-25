@@ -94,7 +94,7 @@ export async function verifyAdminToken(
       .from("revoked_tokens")
       .select("id")
       .eq("token_hash", tokenHash)
-      .single();
+      .maybeSingle();
 
     if (revoked) {
       throw new Error("Token has been revoked");

@@ -4,12 +4,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { getAdminTemples, createTemple, updateTemple, deleteTemple } from "@/lib/admin.functions";
 import { Loader2, Plus, Edit2, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/admin/temples")({
   component: AdminTemples,
 });
 
 function AdminTemples() {
+  const { accessToken } = useAuth();
   const fetchTemples = useServerFn(getAdminTemples);
   const doCreate = useServerFn(createTemple);
   const doUpdate = useServerFn(updateTemple);
@@ -24,7 +26,7 @@ function AdminTemples() {
   const loadTemples = async () => {
     setLoading(true);
     try {
-      const data = await fetchTemples({ data: {} });
+      const data = await fetchTemples({ data: { accessToken: accessToken! } });
       setTemples(data);
     } catch (err: any) {
       toast.error(err.message || "Failed to load temples");
@@ -64,10 +66,10 @@ function AdminTemples() {
   const handleSave = async () => {
     try {
       if (isCreating) {
-        await doCreate({ data: formData });
+        await doCreate({ data: { ...formData, accessToken: accessToken! } });
         toast.success("Temple created successfully");
       } else {
-        await doUpdate({ data: formData });
+        await doUpdate({ data: { ...formData, accessToken: accessToken! } });
         toast.success("Temple updated successfully");
       }
       handleCancel();
@@ -85,7 +87,7 @@ function AdminTemples() {
     )
       return;
     try {
-      await doDelete({ data: { id } });
+      await doDelete({ data: { id, accessToken: accessToken! } });
       toast.success("Temple deleted successfully");
       loadTemples();
     } catch (err: any) {

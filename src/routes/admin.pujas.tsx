@@ -13,13 +13,15 @@ import {
   deletePackage,
 } from "@/lib/admin.functions";
 import { Loader2, Plus, Edit2, Trash2, Save, X, Settings2, PackagePlus } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/pujas")({
   component: AdminPujas,
 });
-
+import { useAuth } from "@/contexts/AuthContext";
 function AdminPujas() {
+  const { accessToken } = useAuth();
   const fetchTemples = useServerFn(getAdminTemples);
   const fetchPujas = useServerFn(getAdminPujas);
   const doCreatePuja = useServerFn(createPuja);
@@ -39,8 +41,8 @@ function AdminPujas() {
     setLoading(true);
     try {
       const [tData, pData] = await Promise.all([
-        fetchTemples({ data: {} }),
-        fetchPujas({ data: {} }),
+        fetchTemples({ data: { accessToken: accessToken! } }),
+        fetchPujas({ data: { accessToken: accessToken! } }),
       ]);
       setTemples(tData);
       setPujas(pData);
@@ -115,13 +117,12 @@ function AdminPujas() {
         benefits,
       };
 
-      if (!isCreating) {
-        payload.id = editingId;
-        await doUpdatePuja({ data: payload });
-        toast.success("Puja updated successfully with gallery images!");
+      if (isCreating) {
+        await doCreatePuja({ data: { ...payload, accessToken: accessToken! } });
+        toast.success("Puja created successfully");
       } else {
-        await doCreatePuja({ data: payload });
-        toast.success("Puja created successfully with gallery images!");
+        await doUpdatePuja({ data: { ...payload, id: editingId, accessToken: accessToken! } });
+        toast.success("Puja updated successfully");
       }
       handleCancel();
       loadData();
@@ -134,7 +135,7 @@ function AdminPujas() {
     if (!confirm("Are you sure you want to delete this puja? All its packages will be lost!"))
       return;
     try {
-      await doDeletePuja({ data: { id } });
+      await doDeletePuja({ data: { id, accessToken: accessToken! } });
       toast.success("Puja deleted successfully");
       loadData();
     } catch (err: any) {
@@ -453,6 +454,7 @@ function AdminPujas() {
         <PackagesManagerModal
           puja={managingPackagesFor}
           onClose={() => setManagingPackagesFor(null)}
+          accessToken={accessToken}
         />
       )}
     </div>
@@ -460,7 +462,7 @@ function AdminPujas() {
 }
 
 // Sub-component for managing packages of a specific puja
-function PackagesManagerModal({ puja, onClose }: { puja: any; onClose: () => void }) {
+function PackagesManagerModal({ puja, onClose, accessToken }: { puja: any; onClose: () => void; accessToken: string | null }) {
   const fetchPackages = useServerFn(getAdminPackages);
   const doCreate = useServerFn(createPackage);
   const doUpdate = useServerFn(updatePackage);
@@ -475,7 +477,7 @@ function PackagesManagerModal({ puja, onClose }: { puja: any; onClose: () => voi
   const loadPackages = async () => {
     setLoading(true);
     try {
-      const data = await fetchPackages({ data: { pujaId: puja.id } });
+      const data = await fetchPackages({ data: { pujaId: puja.id, accessToken: accessToken! } });
       setPackages(data);
     } catch (err: any) {
       toast.error(err.message || "Failed to load packages");
@@ -490,10 +492,10 @@ function PackagesManagerModal({ puja, onClose }: { puja: any; onClose: () => voi
   const handleSave = async () => {
     try {
       if (isCreating) {
-        await doCreate({ data: formData });
+        await doCreate({ data: { ...formData, accessToken: accessToken! } });
         toast.success("Package added");
       } else {
-        await doUpdate({ data: formData });
+        await doUpdate({ data: { ...formData, accessToken: accessToken! } });
         toast.success("Package updated");
       }
       setEditingId(null);
@@ -506,7 +508,7 @@ function PackagesManagerModal({ puja, onClose }: { puja: any; onClose: () => voi
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this package?")) return;
     try {
-      await doDelete({ data: { id } });
+      await doDelete({ data: { id, accessToken: accessToken! } });
       toast.success("Package deleted");
       loadPackages();
     } catch (err: any) {

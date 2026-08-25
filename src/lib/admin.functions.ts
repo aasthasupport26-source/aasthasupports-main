@@ -104,11 +104,11 @@ export const updateBookingStatus = createServerFn({ method: "POST" })
     if (error) throw new Error("Failed to update booking status");
     
     await logAdminAction({
-      admin_email: "admin",
-      action: "update_temple",
-      resource_type: "temple",
-      resource_id: id,
-      changes: updateData,
+      admin_email: adminEmail,
+      action: "update_booking_status",
+      resource_type: "pooja_booking",
+      resource_id: data.bookingId,
+      changes: { status: data.status },
     });
     
     return { success: true };
