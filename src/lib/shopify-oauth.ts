@@ -180,7 +180,7 @@ export async function fetchCustomerAccountData(accessToken: string) {
   const res = await fetch(url, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: accessToken.startsWith("shcat_") ? accessToken : `shcat_${accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ query }),

@@ -229,7 +229,7 @@ export async function getShopifyCustomer(accessToken: string): Promise<ShopifyCu
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: accessToken.startsWith("shcat_") ? accessToken : `shcat_${accessToken}`,
       },
       body: JSON.stringify({ query }),
     });
