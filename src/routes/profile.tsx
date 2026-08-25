@@ -119,8 +119,8 @@ function ProfilePage() {
   }, [accessToken, authLoading]);
 
   useEffect(() => {
-    if (customer?.id) {
-      fetchPujaBookings({ data: { userId: customer.id } })
+    if (customer?.id && accessToken) {
+      fetchPujaBookings({ data: { accessToken } })
         .then((data) => setPujaBookings(data || []))
         .catch((err) => {
           console.error("Failed to load bookings:", err);
@@ -130,7 +130,7 @@ function ProfilePage() {
     } else if (!authLoading) {
       setLoadingPujas(false);
     }
-  }, [customer?.id, authLoading]);
+  }, [customer?.id, accessToken, authLoading]);
 
   const handleLogout = async () => {
     if (accessToken) {

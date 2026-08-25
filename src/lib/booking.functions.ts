@@ -471,8 +471,9 @@ export const getUserBookings = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     // Verify token and extract userId from authenticated session
     const { verifyAccessToken } = await import("./auth/shopify-customer");
-    const customer = await verifyAccessToken({ accessToken: data.accessToken });
-    const userId = customer.customer.id;
+    const customer = await verifyAccessToken(data.accessToken);
+    if (!customer) throw new Error("Unauthorized");
+    const userId = customer.id;
     
     const { data: bookings, error, count } = await supabaseAdmin
       .from("pooja_bookings")
