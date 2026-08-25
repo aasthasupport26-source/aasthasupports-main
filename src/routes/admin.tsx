@@ -58,15 +58,15 @@ function AdminLayout() {
     <div className="min-h-screen flex bg-cream">
       <aside className="w-64 bg-maroon-deep text-cream flex flex-col">
         <div className="p-5 border-b border-gold/20">
-          <Link to="/" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Logo variant="light" compact />
-            <div>
-              <div className="font-display text-lg leading-tight text-gold">Aastha Support</div>
+            <Link to="/admin" className="flex flex-col">
+              <div className="font-display text-lg leading-tight text-gold">Aastha Supports</div>
               <div className="text-[10px] tracking-[0.25em] uppercase text-cream/60">
                 Admin Panel
               </div>
-            </div>
-          </Link>
+            </Link>
+          </div>
         </div>
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {nav.map((item) => {
