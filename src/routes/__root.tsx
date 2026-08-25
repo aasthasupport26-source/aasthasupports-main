@@ -150,12 +150,28 @@ function RootShell({ children }: { children: React.ReactNode }) {
                 __errDiv.textContent = '❌ JS ERROR (open DevTools → Console for full trace):\\n\\n' + __errs.join('\\n\\n---\\n\\n');
               }
               window.onerror = function(msg, url, line, col, err) {
+                var fullMsg = msg + (err ? err.message : '');
+                if (fullMsg.includes('Failed to fetch dynamically imported module') || fullMsg.includes('Importing a module script failed')) {
+                  if (!sessionStorage.getItem('chunk_reload')) {
+                    sessionStorage.setItem('chunk_reload', '1');
+                    window.location.reload();
+                    return true;
+                  }
+                }
                 __showErr(msg + '\\n  at ' + url + ':' + line + ':' + col + (err ? '\\n  ' + err.stack : ''));
                 console.error('Client Error:', msg, err);
                 return false;
               };
               window.onunhandledrejection = function(e) {
                 var r = e.reason;
+                var msg = r && r.message ? r.message : String(r);
+                if (msg.includes('Failed to fetch dynamically imported module') || msg.includes('Importing a module script failed')) {
+                  if (!sessionStorage.getItem('chunk_reload')) {
+                    sessionStorage.setItem('chunk_reload', '1');
+                    window.location.reload();
+                    return true;
+                  }
+                }
                 __showErr('Unhandled Promise: ' + (r && r.stack ? r.stack : String(r)));
                 console.error('Promise Rejection:', r);
               };
