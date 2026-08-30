@@ -60,7 +60,7 @@ const faqCategories = [
       },
       {
         q: "Can I modify or cancel my order after placing it?",
-        a: "Orders can be modified or cancelled within 2 hours of placement, provided they haven't been dispatched or the pooja hasn't started. Contact our care team immediately at care@aasthasupport.com or WhatsApp us.",
+        a: "Orders can be modified or cancelled within 2 hours of placement, provided they haven't been dispatched or the pooja hasn't started. Contact our care team immediately at aastha.support.26@gmail.com or WhatsApp us.",
       },
     ],
   },
@@ -128,7 +128,7 @@ const faqCategories = [
       },
       {
         q: "How do I initiate a return?",
-        a: "Contact our support team via WhatsApp or email care@aasthasupport.com with your order ID. We will arrange a reverse pickup within 48 hours. Refunds are processed to your original payment method within 5–7 business days after product receipt.",
+        a: "Contact our support team via WhatsApp or email aastha.support.26@gmail.com with your order ID. We will arrange a reverse pickup within 48 hours. Refunds are processed to your original payment method within 5–7 business days after product receipt.",
       },
       {
         q: "What if I receive a damaged or wrong product?",
@@ -215,7 +215,7 @@ function FaqPage() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3 justify-center">
             <a
-              href="mailto:care@aasthasupport.com"
+              href="mailto:aastha.support.26@gmail.com"
               className="bg-gold text-maroon-deep px-8 py-3.5 rounded-md tracking-widest text-xs uppercase font-medium hover:bg-gold-soft transition shadow-gold"
             >
               Email Us

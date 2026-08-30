@@ -24,10 +24,14 @@ out/
 .env
 .env.*
 !.env.example
+_env
 *.local
 *.pem
 *.key
 *.cert
+test_fetch.ts
+test-*.js
+test-*.cjs
 
 # ─── Logs ──────────────────────────────────────────────────────────────────────
 logs/

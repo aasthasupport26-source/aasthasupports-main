@@ -81,6 +81,8 @@ function ProductPage() {
   const { add } = useCart();
   const navigate = useNavigate();
   const [activeImage, setActiveImage] = useState(0);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
 
   const { data: product } = useQuery({
     queryKey: ['product', slug],
@@ -97,9 +99,11 @@ function ProductPage() {
     throw notFound();
   }
 
-  const price = product.price;
-  const mrp = product.mrp || price;
+  const currentVariant = product.variants?.[selectedVariantIndex] || product.variants?.[0] || {};
+  const price = currentVariant.price !== undefined ? currentVariant.price : product.price;
+  const mrp = currentVariant.compareAtPrice || product.mrp || price;
   const off = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
+  const isAvailable = currentVariant.available !== undefined ? currentVariant.available : true;
 
   // Find category details if product has a category metafield
   const cat = getCategory(product.category?.trim().toLowerCase()) || {
@@ -108,21 +112,26 @@ function ProductPage() {
   };
 
   const addToCart = () => {
+    if (!isAvailable) {
+      toast.error("This variant is currently out of stock");
+      return;
+    }
+    const variantTitle = currentVariant.title && currentVariant.title !== "Default Title" ? ` (${currentVariant.title})` : "";
     add({
       slug: product.slug,
-      name: product.name,
-      image: product.images[0],
+      name: `${product.name}${variantTitle}`,
+      image: product.images[activeImage] || product.images[0] || "",
       price,
       mrp,
       categoryName: cat.name,
-      variantId: product.variants[0]?.id,
-    });
-    toast.success(`${product.name} added to cart`);
+      variantId: currentVariant.id || product.shopifyId,
+    }, quantity);
+    toast.success(`${product.name} (x${quantity}) added to cart`);
   };
 
   const buyNow = () => {
     addToCart();
-    navigate({ to: "/cart" as any });
+    navigate({ to: "/cart", search: { cleared: undefined } });
   };
 
   return (
@@ -150,7 +159,7 @@ function ProductPage() {
           <div className="space-y-4">
             <div className="aspect-square rounded-2xl overflow-hidden bg-cream border border-gold/30 shadow-royal">
               <img
-                src={product.images[activeImage] || ""}
+                src={product.images[activeImage] || product.images[0] || ""}
                 alt={product.name}
                 width={800}
                 height={800}
@@ -210,6 +219,60 @@ function ProductPage() {
               )}
             </div>
 
+            {/* Variant selector if multiple variants exist */}
+            {product.variants && product.variants.length > 1 && (
+              <div className="mt-6">
+                <label className="text-xs font-semibold uppercase tracking-wider text-maroon-deep block mb-2">
+                  Select Option:
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map((v: any, idx: number) => {
+                    const isSelected = selectedVariantIndex === idx;
+                    return (
+                      <button
+                        key={v.id || idx}
+                        type="button"
+                        onClick={() => setSelectedVariantIndex(idx)}
+                        className={`px-4 py-2 rounded-lg text-xs font-medium border transition ${
+                          isSelected
+                            ? "bg-maroon-deep text-cream border-gold ring-1 ring-gold"
+                            : "bg-cream/50 text-maroon-deep border-gold/30 hover:bg-cream"
+                        } ${!v.available ? "opacity-60 line-through" : ""}`}
+                      >
+                        {v.title} · ₹{Number(v.price).toLocaleString("en-IN")}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity Selector */}
+            <div className="flex items-center gap-4 mt-6">
+              <span className="text-xs font-semibold uppercase tracking-wider text-maroon-deep">
+                Quantity:
+              </span>
+              <div className="flex items-center border border-gold/40 rounded-lg bg-cream">
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="px-3 py-1.5 text-maroon-deep hover:bg-gold/10 font-bold"
+                  aria-label="Decrease quantity"
+                >
+                  -
+                </button>
+                <span className="px-4 text-sm font-medium">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="px-3 py-1.5 text-maroon-deep hover:bg-gold/10 font-bold"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
             {/* Trust badges */}
             <div className="grid grid-cols-2 gap-3 mt-7">
               {[
@@ -234,24 +297,18 @@ function ProductPage() {
             <div className="flex gap-3 mt-7">
               <button
                 onClick={addToCart}
-                disabled={!product.variants[0]?.available}
+                disabled={!isAvailable}
                 className="flex-1 bg-royal text-cream px-6 py-4 rounded-md font-medium tracking-widest text-xs uppercase hover:opacity-90 transition shadow-royal flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <ShoppingBag className="w-4 h-4" />{" "}
-                {product.variants[0]?.available ? "Add to Cart" : "Out of Stock"}
+                {isAvailable ? "Add to Cart" : "Out of Stock"}
               </button>
               <button
                 onClick={buyNow}
-                disabled={!product.variants[0]?.available}
+                disabled={!isAvailable}
                 className="flex-1 bg-gold text-maroon-deep px-6 py-4 rounded-md font-medium tracking-widest text-xs uppercase hover:bg-gold-soft transition shadow-gold disabled:opacity-50"
               >
                 Buy Now
-              </button>
-              <button
-                className="w-14 border border-maroon/40 rounded-md flex items-center justify-center hover:bg-maroon hover:text-cream transition"
-                aria-label="Wishlist"
-              >
-                <Heart className="w-5 h-5" />
               </button>
             </div>
 

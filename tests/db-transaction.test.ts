@@ -1,5 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+vi.mock("@supabase/supabase-js", () => {
+  const mockRpc = vi.fn().mockResolvedValue({ data: null, error: null });
+  return {
+    createClient: vi.fn(() => ({
+      rpc: mockRpc,
+    })),
+  };
+});
+
 describe("withTransaction", () => {
   beforeEach(() => {
     process.env.SUPABASE_URL = "https://test.supabase.co";

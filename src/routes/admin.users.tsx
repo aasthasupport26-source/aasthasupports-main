@@ -12,38 +12,44 @@ type Role = (typeof ROLES)[number];
 
 function UsersPage() {
   const [users, setUsers] = useState<any[]>([]);
-  const [rolesMap, setRolesMap] = useState<Record<string, Role[]>>({});
+  const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const { data: profs } = await supabase
-      .from("users")
-      .select("*")
-      .order("created_at", { ascending: false });
-    const { data: roles } = await supabase.from("user_roles").select("user_id, role");
-    const map: Record<string, Role[]> = {};
-    (roles ?? []).forEach((r: any) => {
-      map[r.user_id] = [...(map[r.user_id] ?? []), r.role];
-    });
-    setRolesMap(map);
-    setUsers(profs ?? []);
+    try {
+      setLoading(true);
+      const { data: profs, error } = await supabase
+        .from("users")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast.error("Failed to load users: " + error.message);
+      } else {
+        setUsers(profs ?? []);
+      }
+    } catch (err: any) {
+      toast.error("Error fetching users");
+    } finally {
+      setLoading(false);
+    }
   };
+
   useEffect(() => {
     load();
   }, []);
 
-  const toggleRole = async (userId: string, role: Role, has: boolean) => {
-    if (has) {
-      const { error } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", userId)
-        .eq("role", role);
-      if (error) return toast.error(error.message);
-    } else {
-      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
-      if (error) return toast.error(error.message);
-    }
-    toast.success("Role updated");
+  const toggleRole = async (userId: string, role: Role, currentRole: string) => {
+    const isNewRole = currentRole !== role;
+    const targetRole = isNewRole ? role : "customer";
+    const isAdmin = targetRole === "admin";
+
+    const { error } = await supabase
+      .from("users")
+      .update({ role: targetRole, is_admin: isAdmin })
+      .eq("id", userId);
+
+    if (error) return toast.error(error.message);
+    toast.success(`Role updated to ${targetRole}`);
     load();
   };
 
@@ -68,21 +74,25 @@ function UsersPage() {
           </thead>
           <tbody>
             {users.map((u) => {
-              const userRoles = rolesMap[u.id] ?? [];
+              const currentRole = u.is_admin ? "admin" : (u.role || "customer");
               return (
                 <tr key={u.id} className="border-t">
-                  <td className="p-3">{u.full_name || "—"}</td>
+                  <td className="p-3 font-medium">{u.full_name || "—"}</td>
                   <td className="p-3 text-xs">{u.email}</td>
                   <td className="p-3 text-xs">{u.phone || "—"}</td>
                   <td className="p-3">
                     <div className="flex gap-1.5 flex-wrap">
                       {ROLES.map((r) => {
-                        const has = userRoles.includes(r);
+                        const isCurrent = currentRole === r;
                         return (
                           <button
                             key={r}
-                            onClick={() => toggleRole(u.id, r, has)}
-                            className={`text-xs px-2 py-1 rounded-full border ${has ? "bg-maroon text-cream border-maroon" : "border-gold/40 text-muted-foreground"}`}
+                            onClick={() => toggleRole(u.id, r, currentRole)}
+                            className={`text-xs px-2.5 py-1 rounded-full border transition ${
+                              isCurrent
+                                ? "bg-maroon-deep text-cream border-maroon-deep font-semibold"
+                                : "border-gold/40 text-muted-foreground hover:bg-cream"
+                            }`}
                           >
                             {r}
                           </button>

@@ -35,7 +35,7 @@ const policySections = [
       },
       {
         heading: "How to Return",
-        text: "Contact us via WhatsApp or email care@aasthasupport.com with your order ID. We will arrange a free reverse pickup from your address. Once the product is received and inspected, your refund is initiated within 48 hours.",
+        text: "Contact us via WhatsApp or email aastha.support.26@gmail.com with your order ID. We will arrange a free reverse pickup from your address. Once the product is received and inspected, your refund is initiated within 48 hours.",
       },
       {
         heading: "Refund Timeline",
@@ -228,7 +228,7 @@ function ReturnsPolicyPage() {
               Call Now
             </a>
             <a
-              href="mailto:care@aasthasupport.com"
+              href="mailto:aastha.support.26@gmail.com"
               className="border border-gold/60 px-8 py-3.5 rounded-md tracking-widest text-xs uppercase hover:bg-gold/15 transition"
             >
               Email Support

@@ -49,7 +49,7 @@ describe("MCP tools", () => {
   describe("getProduct", () => {
     it("has correct schema", () => {
       expect(getProduct.name).toBe("get_product");
-      expect(getProduct.inputSchema.required).toContain("slug");
+      expect(getProduct.inputSchema.slug).toBeDefined();
     });
 
     it("returns product by slug", async () => {

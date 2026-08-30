@@ -27,7 +27,7 @@ BEGIN
   )
   VALUES (
     (booking_data->>'booking_number')::TEXT,
-    NULLIF(booking_data->>'user_id', '')::UUID,
+    NULLIF(booking_data->>'user_id', '')::TEXT,
     (booking_data->>'devotee_name')::TEXT,
     (booking_data->>'phone')::TEXT,
     NULLIF(booking_data->>'email', ''),

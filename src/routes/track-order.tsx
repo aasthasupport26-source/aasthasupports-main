@@ -58,30 +58,76 @@ function TrackOrderPage() {
       return;
     }
     setLoading(true);
-    const { data, error: err } = await supabase
-      .from("orders")
-      .select("*")
-      .eq("order_number", orderNumber.trim().toUpperCase())
-      .eq("customer_phone", phone.trim())
-      .maybeSingle();
+    try {
+      // 1. Try finding in pooja_bookings
+      const cleanOrderNo = orderNumber.trim();
+      const cleanPhone = phone.trim();
 
-    if (err) {
-      setError("Something went wrong. Please try again.");
+      const { data: pujaBooking } = await supabase
+        .from("pooja_bookings")
+        .select("*")
+        .eq("booking_number", cleanOrderNo)
+        .eq("phone", cleanPhone)
+        .maybeSingle();
+
+      if (pujaBooking) {
+        const pujaStatus = (pujaBooking.status || "confirmed").toLowerCase();
+        setOrder({
+          id: pujaBooking.id,
+          order_number: pujaBooking.booking_number,
+          status: pujaStatus === "confirmed" ? "confirmed" : (pujaStatus === "completed" ? "delivered" : "pending"),
+          total_amount: pujaBooking.amount,
+          created_at: pujaBooking.created_at,
+          customer_name: pujaBooking.devotee_name,
+          customer_phone: pujaBooking.phone,
+          customer_email: pujaBooking.email,
+          payment_status: "Paid",
+          payment_method: "Razorpay (Online)",
+          shipping_address: pujaBooking.sankalp ? `Sankalp: ${pujaBooking.sankalp}` : "Vedic Pooja Service",
+        });
+        setItems([
+          {
+            id: pujaBooking.id,
+            product_name: `${pujaBooking.pooja_type} (${pujaBooking.gotra ? `Gotra: ${pujaBooking.gotra}` : 'Vedic Ritual'})`,
+            quantity: 1,
+            unit_price: pujaBooking.amount,
+          },
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Try finding in physical merchandise orders
+      const { data, error: err } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("order_number", cleanOrderNo.toUpperCase())
+        .eq("customer_phone", cleanPhone)
+        .maybeSingle();
+
+      if (err) {
+        setError("Unable to retrieve order details. Please verify your info or contact care.");
+        setLoading(false);
+        return;
+      }
+      if (!data) {
+        setError(
+          "No order or puja booking found with these details. For live assistance, contact support via WhatsApp or email.",
+        );
+        setLoading(false);
+        return;
+      }
+      setOrder(data);
+      const { data: itemRows } = await supabase
+        .from("order_items")
+        .select("*")
+        .eq("order_id", data.id);
+      setItems(itemRows ?? []);
+    } catch (e: any) {
+      setError("An error occurred while tracking. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-    if (!data) {
-      setError("No order found with these details. Please check and try again.");
-      setLoading(false);
-      return;
-    }
-    setOrder(data);
-    const { data: itemRows } = await supabase
-      .from("order_items")
-      .select("*")
-      .eq("order_id", data.id);
-    setItems(itemRows ?? []);
-    setLoading(false);
   };
 
   const status = (order?.status as string) ?? "pending";
@@ -284,8 +330,8 @@ function TrackOrderPage() {
                   +91 99999 99999
                 </a>{" "}
                 or email{" "}
-                <a href="mailto:info@aasthasupports.com" className="text-maroon underline">
-                  info@aasthasupports.com
+                <a href="mailto:aastha.support.26@gmail.com" className="text-maroon underline">
+                  aastha.support.26@gmail.com
                 </a>
               </p>
             </div>

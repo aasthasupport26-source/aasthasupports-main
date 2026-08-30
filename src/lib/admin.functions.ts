@@ -32,7 +32,7 @@ export const getAdminBookings = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
+    await requireAdmin(data.accessToken);
 
     const { data: bookings, error, count } = await (supabaseAdmin as any)
       .from("pooja_bookings")
@@ -67,7 +67,7 @@ export const getAdminCustomers = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
+    await requireAdmin(data.accessToken);
     const { data: customers, error, count } = await supabaseAdmin
       .from("users")
       .select("*", { count: 'exact' })
@@ -132,7 +132,7 @@ export const deleteTemple = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
+    await requireAdmin(data.accessToken);
     
     const { logAdminAction } = await import("./admin-audit");
     
@@ -154,7 +154,7 @@ export const deleteTemple = createServerFn({ method: "POST" })
 
 /**
  * ---------------------------------------------------------
- * PUJAS MANAGEMENT
+ * TEMPLES MANAGEMENT
  * ---------------------------------------------------------
  */
 export const getAdminTemples = createServerFn({ method: "POST" })
@@ -170,11 +170,11 @@ export const getAdminTemples = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
+    await requireAdmin(data.accessToken);
     
     const { data: temples, error } = await supabaseAdmin
       .from("temples")
-      .select("id, name, city, state, description, active, created_at, updated_at")
+      .select("*")
       .order("name");
     if (error) throw new Error("Failed to fetch temples");
     return temples || [];
@@ -205,7 +205,7 @@ export const createTemple = createServerFn({ method: "POST" })
     validateCSRF(request);
     
     const adminEmail = await requireAdmin(data.accessToken);
-    const { image_url, accessToken, ...insertData } = data;
+    const { accessToken, ...insertData } = data;
     const { error } = await supabaseAdmin.from("temples").insert(insertData);
     if (error) {
       console.error("Failed to create temple:", error);
@@ -216,9 +216,8 @@ export const createTemple = createServerFn({ method: "POST" })
       admin_email: adminEmail,
       action: "create",
       resource_type: "temple",
-      changes: { name: data.name, city: data.city },
-      
-      
+      resource_id: insertData.name,
+      changes: insertData,
     });
     
     return { success: true };
@@ -248,22 +247,13 @@ export const updateTemple = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
-    const { id, image_url, accessToken, ...updateData } = data;
+    await requireAdmin(data.accessToken);
+    const { id, accessToken, ...updateData } = data;
     const { error } = await supabaseAdmin.from("temples").update(updateData).eq("id", id);
     if (error) {
       console.error("Failed to update temple:", error);
       throw new Error("Failed to update temple. Please try again.");
     }
-    
-    await logAdminAction({
-      admin_email: "admin",
-      action: "update_temple",
-      resource_type: "temple",
-      resource_id: id,
-      changes: updateData,
-    });
-    
     return { success: true };
   });
 
@@ -285,7 +275,7 @@ export const getAdminPujas = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
+    await requireAdmin(data.accessToken);
     let query = supabaseAdmin.from("pujas").select("*, temple:temples(name)").order("name");
     if (data.templeId) query = query.eq("temple_id", data.templeId);
 
@@ -319,8 +309,13 @@ export const createPuja = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
-    const { accessToken, active, duration_minutes, ...rest } = data; const insertData = { ...rest, is_active: active, duration: duration_minutes?.toString() };
+    await requireAdmin(data.accessToken);
+    const { accessToken, benefits, ...rest } = data;
+    const insertData = {
+      ...rest,
+      benefits: benefits ? JSON.stringify(benefits) : null,
+      base_price: 0,
+    };
     const { error } = await supabaseAdmin.from("pujas").insert(insertData);
     if (error) {
       console.error("Failed to create puja:", error);
@@ -355,8 +350,12 @@ export const updatePuja = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
-    const { id, accessToken, active, duration_minutes, ...rest } = data; const updateData = { ...rest, is_active: active, duration: duration_minutes?.toString() };
+    await requireAdmin(data.accessToken);
+    const { id, accessToken, benefits, ...rest } = data;
+    const updateData = {
+      ...rest,
+      benefits: benefits ? JSON.stringify(benefits) : null,
+    };
     const { error } = await supabaseAdmin.from("pujas").update(updateData).eq("id", id);
     if (error) {
       console.error("Failed to update puja:", error);
@@ -378,7 +377,7 @@ export const deletePuja = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
+    await requireAdmin(data.accessToken);
     const { error } = await supabaseAdmin.from("pujas").delete().eq("id", data.id);
     if (error) {
       console.error("Failed to delete puja:", error);
@@ -405,7 +404,7 @@ export const getAdminPackages = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
+    await requireAdmin(data.accessToken);
     let query = supabaseAdmin.from("packages").select("*, puja:pujas(name)").order("price");
     if (data.pujaId) query = query.eq("puja_id", data.pujaId);
 
@@ -437,7 +436,7 @@ export const createPackage = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
+    await requireAdmin(data.accessToken);
     const { accessToken, ...insertData } = data;
     const { error } = await supabaseAdmin.from("packages").insert(insertData);
     if (error) {
@@ -506,7 +505,7 @@ export const deletePackage = createServerFn({ method: "POST" })
     
     const { validateCSRF } = await import("./csrf-protection");
     validateCSRF(request);
-    requireAdmin(data.accessToken);
+    await requireAdmin(data.accessToken);
     const { error } = await supabaseAdmin.from("packages").delete().eq("id", data.id);
     if (error) {
       console.error("Failed to delete package:", error);

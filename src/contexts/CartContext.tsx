@@ -45,31 +45,44 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const add = useCallback((item: Omit<CartItem, "quantity">, qty = 1) => {
     if (qty <= 0) return;
     setItems((prev) => {
-      const ex = prev.find((p) => p.variantId === item.variantId);
-      if (ex)
+      const matchKey = item.variantId || item.slug;
+      const ex = prev.find(
+        (p) => (item.variantId && p.variantId === item.variantId) || (p.slug && p.slug === item.slug),
+      );
+      if (ex) {
         return prev.map((p) =>
-          p.variantId === item.variantId ? { ...p, quantity: p.quantity + qty } : p,
+          ((item.variantId && p.variantId === item.variantId) || (p.slug && p.slug === item.slug))
+            ? { ...p, quantity: p.quantity + qty }
+            : p,
         );
+      }
       return [...prev, { ...item, quantity: qty }];
     });
   }, []);
 
-  const update = useCallback((variantId: string, qty: number) => {
+  const update = useCallback((idOrSlug: string, qty: number) => {
     setItems((prev) =>
       qty <= 0
-        ? prev.filter((p) => p.variantId !== variantId)
-        : prev.map((p) => (p.variantId === variantId ? { ...p, quantity: qty } : p)),
+        ? prev.filter((p) => p.variantId !== idOrSlug && p.slug !== idOrSlug)
+        : prev.map((p) =>
+            p.variantId === idOrSlug || p.slug === idOrSlug
+              ? { ...p, quantity: qty }
+              : p,
+          ),
     );
   }, []);
 
-  const remove = useCallback((variantId: string) => {
-    setItems((prev) => prev.filter((p) => p.variantId !== variantId));
+  const remove = useCallback((idOrSlug: string) => {
+    setItems((prev) => prev.filter((p) => p.variantId !== idOrSlug && p.slug !== idOrSlug));
   }, []);
 
   const clear = useCallback(() => setItems([]), []);
 
-  const count = useMemo(() => items.reduce((s, i) => s + i.quantity, 0), [items]);
-  const subtotal = useMemo(() => items.reduce((s, i) => s + i.quantity * i.price, 0), [items]);
+  const count = useMemo(() => items.reduce((s, i) => s + (Number(i.quantity) || 0), 0), [items]);
+  const subtotal = useMemo(
+    () => items.reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.price) || 0), 0),
+    [items],
+  );
 
   const value = useMemo<CartCtx>(
     () => ({ items, count, subtotal, add, update, remove, clear }),

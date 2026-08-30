@@ -66,21 +66,24 @@ describe("multi-tab-sync", () => {
       cleanup();
     });
 
-    it("should poll for sync data", (done) => {
-      const onSync = vi.fn(() => {
-        cleanup();
-        done();
-      });
-      
-      const cleanup = initAuthSync(onSync);
+    it("should poll for sync data", async () => {
+      await new Promise<void>((resolve) => {
+        let cleanup: () => void;
+        const onSync = vi.fn(() => {
+          cleanup();
+          resolve();
+        });
+        
+        cleanup = initAuthSync(onSync);
 
-      const syncData = {
-        customer: { id: "1" },
-        accessToken: "token123",
-        expiresAt: "2026-12-31T23:59:59Z",
-        timestamp: Date.now(),
-      };
-      localStorage.setItem("auth_sync", JSON.stringify(syncData));
+        const syncData = {
+          customer: { id: "1" },
+          accessToken: "token123",
+          expiresAt: "2026-12-31T23:59:59Z",
+          timestamp: Date.now(),
+        };
+        localStorage.setItem("auth_sync", JSON.stringify(syncData));
+      });
     });
 
     it("should cleanup on return", () => {

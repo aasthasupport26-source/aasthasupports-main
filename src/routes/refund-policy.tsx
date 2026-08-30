@@ -102,7 +102,7 @@ function RefundPolicy() {
             <h2 className="font-display text-2xl text-maroon-deep mb-3">Contact for Refunds</h2>
             <p>To initiate a refund, contact us at:</p>
             <ul className="list-none space-y-1">
-              <li>Email: refunds@aasthasupport.com</li>
+              <li>Email: aastha.support.26@gmail.com</li>
               <li>Phone: +91-99999-99999</li>
               <li>WhatsApp: +91-99999-99999</li>
             </ul>

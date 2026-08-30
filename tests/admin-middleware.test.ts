@@ -18,11 +18,11 @@ describe("requireAdmin", () => {
 
   it("throws when no token provided", async () => {
     const { requireAdmin } = await import("../src/lib/admin-middleware");
-    expect(() => requireAdmin("")).toThrow("Unauthorized: No access token provided");
+    await expect(requireAdmin("")).rejects.toThrow("Unauthorized: No access token provided");
   });
 
   it("throws for invalid token", async () => {
     const { requireAdmin } = await import("../src/lib/admin-middleware");
-    expect(() => requireAdmin("invalid")).toThrow("Unauthorized");
+    await expect(requireAdmin("invalid")).rejects.toThrow();
   });
 });

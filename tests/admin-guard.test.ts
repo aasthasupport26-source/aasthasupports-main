@@ -14,7 +14,7 @@ describe("admin-guard", () => {
   describe("signAdminToken", () => {
     it("should create valid admin token", async () => {
       const { signAdminToken } = await import("../src/lib/admin-guard");
-      const { token, expiresAt } = signAdminToken("admin@test.com");
+      const { token, expiresAt } = await signAdminToken("admin@test.com");
       
       expect(token).toBeTruthy();
       expect(typeof token).toBe("string");
@@ -26,7 +26,7 @@ describe("admin-guard", () => {
     it("should include email in token", async () => {
       const jwt = await import("jsonwebtoken");
       const { signAdminToken } = await import("../src/lib/admin-guard");
-      const { token } = signAdminToken("admin@test.com");
+      const { token } = await signAdminToken("admin@test.com");
       
       const payload = jwt.verify(token, process.env.ADMIN_JWT_SECRET!, {
         issuer: "aastha-admin"
@@ -41,7 +41,7 @@ describe("admin-guard", () => {
     it("should verify valid admin token", async () => {
       const jwt = await import("jsonwebtoken");
       const { signAdminToken } = await import("../src/lib/admin-guard");
-      const { token } = signAdminToken("admin@test.com");
+      const { token } = await signAdminToken("admin@test.com");
       
       const payload = jwt.verify(token, process.env.ADMIN_JWT_SECRET!, {
         issuer: "aastha-admin"
@@ -65,7 +65,7 @@ describe("admin-guard", () => {
   describe("isAdminToken", () => {
     it("should identify admin JWT tokens", async () => {
       const mod = await import("../src/lib/admin-guard");
-      const { token } = mod.signAdminToken("admin@test.com");
+      const { token } = await mod.signAdminToken("admin@test.com");
       expect(mod.isAdminToken(token)).toBe(true);
     });
 

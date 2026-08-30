@@ -37,7 +37,9 @@ let _supabase: ReturnType<typeof createClient<Database>> | null = null;
 export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient<Database>>, {
   get(target, prop) {
     if (!_supabaseAdmin) {
-      _supabaseAdmin = createClient<Database>(getSupabaseUrl(), getSupabaseServiceKey());
+      _supabaseAdmin = createClient<Database>(getSupabaseUrl(), getSupabaseServiceKey(), {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
     }
     return Reflect.get(_supabaseAdmin, prop);
   }
@@ -46,7 +48,9 @@ export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient<Data
 export const supabase = new Proxy({} as ReturnType<typeof createClient<Database>>, {
   get(target, prop) {
     if (!_supabase) {
-      _supabase = createClient<Database>(getSupabaseUrl(), getSupabaseAnonKey());
+      _supabase = createClient<Database>(getSupabaseUrl(), getSupabaseAnonKey(), {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
     }
     return Reflect.get(_supabase, prop);
   }

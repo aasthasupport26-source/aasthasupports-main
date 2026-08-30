@@ -33,7 +33,7 @@ export const Route = createFileRoute("/contact")({
           image: "https://aasthasupport.com/og-image.jpg",
           url: "https://aasthasupport.com/contact",
           telephone: "+91-99999-99999",
-          email: "care@aasthasupport.com",
+          email: "aastha.support.26@gmail.com",
           address: {
             "@type": "PostalAddress",
             streetAddress: "Aastha Bhawan",
@@ -183,7 +183,7 @@ function ContactPage() {
               {
                 icon: Mail,
                 title: "Email Us",
-                v1: "care@aasthasupport.com",
+                v1: "aastha.support.26@gmail.com",
                 v2: "Replied within 24 hours",
               },
               {

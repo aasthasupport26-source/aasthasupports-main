@@ -81,63 +81,66 @@ function CartPage() {
         ) : (
           <div className="mt-8 grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-3">
-              {items.map((it) => (
-                <div
-                  key={it.slug}
-                  className="flex gap-4 p-4 bg-white border border-gold/20 rounded-xl"
-                >
-                  <img
-                    src={it.image}
-                    alt={it.name}
-                    className="w-24 h-24 rounded-md object-cover border border-gold/30"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      to="/product/$slug"
-                      params={{ slug: it.slug }}
-                      className="font-display text-lg text-maroon-deep hover:text-maroon"
-                    >
-                      {it.name}
-                    </Link>
-                    {it.categoryName && (
-                      <p className="text-[11px] tracking-widest uppercase text-gold mt-0.5">
-                        {it.categoryName}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between mt-3 flex-wrap gap-3">
-                      <div className="flex items-center border border-gold/40 rounded">
-                        <button
-                          onClick={() => update(it.slug, it.quantity - 1)}
-                          className="p-1.5 hover:bg-cream"
-                          aria-label="Decrease"
-                        >
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="px-3 text-sm font-medium">{it.quantity}</span>
-                        <button
-                          onClick={() => update(it.slug, it.quantity + 1)}
-                          className="p-1.5 hover:bg-cream"
-                          aria-label="Increase"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className="font-numeric text-lg text-maroon-deep">
-                          ₹{(it.price * it.quantity).toLocaleString("en-IN")}
-                        </span>
-                        <button
-                          onClick={() => remove(it.slug)}
-                          className="text-muted-foreground hover:text-destructive"
-                          aria-label="Remove"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+              {items.map((it) => {
+                const itemKey = it.variantId || it.slug;
+                return (
+                  <div
+                    key={itemKey}
+                    className="flex gap-4 p-4 bg-white border border-gold/20 rounded-xl"
+                  >
+                    <img
+                      src={it.image}
+                      alt={it.name}
+                      className="w-24 h-24 rounded-md object-cover border border-gold/30"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        to="/product/$slug"
+                        params={{ slug: it.slug }}
+                        className="font-display text-lg text-maroon-deep hover:text-maroon"
+                      >
+                        {it.name}
+                      </Link>
+                      {it.categoryName && (
+                        <p className="text-[11px] tracking-widest uppercase text-gold mt-0.5">
+                          {it.categoryName}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between mt-3 flex-wrap gap-3">
+                        <div className="flex items-center border border-gold/40 rounded">
+                          <button
+                            onClick={() => update(itemKey, it.quantity - 1)}
+                            className="p-1.5 hover:bg-cream"
+                            aria-label="Decrease quantity"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="px-3 text-sm font-medium">{it.quantity}</span>
+                          <button
+                            onClick={() => update(itemKey, it.quantity + 1)}
+                            className="p-1.5 hover:bg-cream"
+                            aria-label="Increase quantity"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="font-numeric text-lg text-maroon-deep">
+                            ₹{(it.price * it.quantity).toLocaleString("en-IN")}
+                          </span>
+                          <button
+                            onClick={() => remove(itemKey)}
+                            className="text-muted-foreground hover:text-destructive"
+                            aria-label="Remove from cart"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <aside className="bg-cream border border-gold/30 rounded-xl p-6 h-fit sticky top-32">
