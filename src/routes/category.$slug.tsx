@@ -6,8 +6,6 @@ import { getTemples, getPujasByTemple } from "@/lib/booking.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import {
-  Star,
-  StarHalf,
   Sparkles,
   ShieldCheck,
   Loader2,
@@ -20,36 +18,8 @@ import {
 } from "lucide-react";
 import { DirectBookingModal } from "@/components/booking/DirectBookingModal";
 import { toast } from "sonner";
-
-function getShortProductName(name: string) {
-  const mukhi = name.match(/(\d+)\s*mukhi/i);
-
-  const lowerName = name.toLowerCase();
-  const origin =
-    lowerName.includes("indo") || lowerName.includes("indonesian")
-      ? "Indo"
-      : lowerName.includes("nepali")
-        ? "Nepali"
-        : lowerName.includes("indian")
-          ? "Indian"
-          : "";
-  const suffix = lowerName.includes("mala") ? " Mala" : " Rudraksha";
-
-  if (mukhi) return `${mukhi[1]} Mukhi${origin ? ` ${origin}` : ""}${suffix}`;
-
-  const descriptor = name
-    .split("|")[0]
-    .replace(/^Natural\s+/i, "")
-    .replace(/\s+Rudraksha.*$/i, "")
-    .replace(/\s+Bead.*$/i, "")
-    .trim();
-  return `${descriptor}${origin ? ` ${origin}` : ""}${suffix}`.trim();
-}
-
-function getProductRating(slug: string) {
-  const seed = [...slug].reduce((total, character) => total + character.charCodeAt(0), 0);
-  return 4 + (seed % 2) * 0.5;
-}
+import { getShortProductName, getProductRating } from "@/lib/product-display";
+import { ProductRating } from "@/components/ProductRating";
 
 export const Route = createFileRoute("/category/$slug")({
   loader: ({ params }) => {
@@ -263,13 +233,9 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
                       />
                     </div>
                     <div className="p-4 flex flex-col flex-1">
-                      <div className="flex items-center gap-0.5 text-gold mb-1.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-current" />
-                        ))}
-                      </div>
-                      <h3 className="font-display text-lg text-maroon-deep group-hover:text-maroon leading-tight">
-                        {item.name}
+                      <ProductRating rating={getProductRating(item.slug || item.name)} />
+                      <h3 className="font-display text-lg font-bold text-maroon-deep group-hover:text-maroon leading-tight">
+                        {getShortProductName(item.name)}
                       </h3>
                       {item.desc && (
                         <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 flex-1">
@@ -320,9 +286,7 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                     {sectionProducts.map((item: any) =>
                       (() => {
-                        const rating = getProductRating(item.slug);
-                        const fullStars = Math.floor(rating);
-                        const hasHalfStar = rating % 1 === 0.5;
+                        const rating = getProductRating(item.slug || item.name);
 
                         return (
                           <Link
@@ -343,15 +307,7 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
                               />
                             </div>
                             <div className="p-4 flex flex-col flex-1">
-                              <div
-                                className="flex items-center gap-0.5 text-gold mb-1.5"
-                                aria-label={`${rating} out of 5 stars`}
-                              >
-                                {[...Array(fullStars)].map((_, i) => (
-                                  <Star key={`full-${i}`} className="w-3 h-3 fill-current" />
-                                ))}
-                                {hasHalfStar && <StarHalf className="w-3 h-3 fill-current" />}
-                              </div>
+                              <ProductRating rating={rating} />
                               <h3 className="font-display text-lg font-bold text-maroon-deep group-hover:text-maroon leading-tight">
                                 {getShortProductName(item.name)}
                               </h3>
@@ -676,12 +632,8 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
 
                         {/* Content */}
                         <div className="p-4 flex-1 flex flex-col">
-                          <div className="flex items-center gap-0.5 text-gold mb-2">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="w-3 h-3 fill-current" />
-                            ))}
-                          </div>
-                          <h3 className="font-display text-lg text-maroon-deep leading-tight line-clamp-2 group-hover:text-maroon">
+                          <ProductRating rating={getProductRating(puja.slug || puja.name)} />
+                          <h3 className="font-display text-lg font-bold text-maroon-deep leading-tight line-clamp-2 group-hover:text-maroon">
                             {puja.name}
                           </h3>
                           {puja.description && (

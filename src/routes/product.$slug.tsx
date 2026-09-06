@@ -17,11 +17,13 @@ import {
   Heart,
   Loader2,
 } from "lucide-react";
+import { getProductRating } from "@/lib/product-display";
+import { ProductRating } from "@/components/ProductRating";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: async ({ params, context }) => {
     const product = await context.queryClient.ensureQueryData({
-      queryKey: ['product', params.slug],
+      queryKey: ["product", params.slug],
       queryFn: async () => {
         const fn = getShopifyProduct as any;
         return fn({ data: { handle: params.slug } });
@@ -33,10 +35,11 @@ export const Route = createFileRoute("/product/$slug")({
   head: ({ loaderData }) => {
     const product = loaderData?.product;
     const title = product ? `${product.name} — Aastha Support` : `Product — Aastha Support`;
-    const description = product?.description?.slice(0, 160) || "Authentic certified spiritual products";
+    const description =
+      product?.description?.slice(0, 160) || "Authentic certified spiritual products";
     const url = `https://aasthasupport.com/product/${loaderData?.slug}`;
     const image = product?.images?.[0] || "https://aasthasupport.com/og-image.jpg";
-    
+
     return {
       meta: [
         { title },
@@ -53,24 +56,28 @@ export const Route = createFileRoute("/product/$slug")({
         { rel: "canonical", href: url },
         { rel: "preload", href: image, as: "image" },
       ],
-      scripts: product ? [
-        {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Product",
-            name: product.name,
-            description: product.description,
-            image: product.images,
-            offers: {
-              "@type": "Offer",
-              price: product.price,
-              priceCurrency: "INR",
-              availability: product.variants?.[0]?.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      scripts: product
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Product",
+                name: product.name,
+                description: product.description,
+                image: product.images,
+                offers: {
+                  "@type": "Offer",
+                  price: product.price,
+                  priceCurrency: "INR",
+                  availability: product.variants?.[0]?.available
+                    ? "https://schema.org/InStock"
+                    : "https://schema.org/OutOfStock",
+                },
+              }),
             },
-          }),
-        },
-      ] : [],
+          ]
+        : [],
     };
   },
   component: ProductPage,
@@ -85,7 +92,7 @@ function ProductPage() {
   const [quantity, setQuantity] = useState(1);
 
   const { data: product } = useQuery({
-    queryKey: ['product', slug],
+    queryKey: ["product", slug],
     queryFn: async () => {
       const fn = getShopifyProduct as any;
       return fn({ data: { handle: slug } });
@@ -116,16 +123,22 @@ function ProductPage() {
       toast.error("This variant is currently out of stock");
       return;
     }
-    const variantTitle = currentVariant.title && currentVariant.title !== "Default Title" ? ` (${currentVariant.title})` : "";
-    add({
-      slug: product.slug,
-      name: `${product.name}${variantTitle}`,
-      image: product.images[activeImage] || product.images[0] || "",
-      price,
-      mrp,
-      categoryName: cat.name,
-      variantId: currentVariant.id || product.shopifyId,
-    }, quantity);
+    const variantTitle =
+      currentVariant.title && currentVariant.title !== "Default Title"
+        ? ` (${currentVariant.title})`
+        : "";
+    add(
+      {
+        slug: product.slug,
+        name: `${product.name}${variantTitle}`,
+        image: product.images[activeImage] || product.images[0] || "",
+        price,
+        mrp,
+        categoryName: cat.name,
+        variantId: currentVariant.id || product.shopifyId,
+      },
+      quantity,
+    );
     toast.success(`${product.name} (x${quantity}) added to cart`);
   };
 
@@ -191,12 +204,15 @@ function ProductPage() {
             </h1>
 
             <div className="flex items-center gap-3 mt-4">
-              <div className="flex items-center gap-0.5 text-gold">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-current" />
-                ))}
-              </div>
-              <span className="text-sm text-muted-foreground">4.9 · 1,284 reviews</span>
+              <ProductRating
+                rating={getProductRating(slug || product.name)}
+                size="md"
+                showScore={false}
+                className="mb-0"
+              />
+              <span className="text-sm text-muted-foreground">
+                {getProductRating(slug || product.name).toFixed(1)} · 1,284 reviews
+              </span>
             </div>
 
             {product.description && (
@@ -300,8 +316,7 @@ function ProductPage() {
                 disabled={!isAvailable}
                 className="flex-1 bg-royal text-cream px-6 py-4 rounded-md font-medium tracking-widest text-xs uppercase hover:opacity-90 transition shadow-royal flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <ShoppingBag className="w-4 h-4" />{" "}
-                {isAvailable ? "Add to Cart" : "Out of Stock"}
+                <ShoppingBag className="w-4 h-4" /> {isAvailable ? "Add to Cart" : "Out of Stock"}
               </button>
               <button
                 onClick={buyNow}

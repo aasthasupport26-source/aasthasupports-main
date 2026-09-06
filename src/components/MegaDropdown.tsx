@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getShopifyProducts } from "@/lib/shopify.functions";
 import type { Category } from "@/data/catalog";
+import { getShortProductName } from "@/lib/product-display";
 
 export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => void }) {
   const fetchProducts = useServerFn(getShopifyProducts);
@@ -194,7 +195,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {product.name}
+                            {getShortProductName(product.name)}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             ₹{product.price.toLocaleString("en-IN")}
@@ -226,7 +227,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {product.name}
+                            {getShortProductName(product.name)}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             {product.price
@@ -258,7 +259,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {product.name}
+                            {getShortProductName(product.name)}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             {product.price
@@ -294,7 +295,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {product.name}
+                            {getShortProductName(product.name)}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             ₹{product.price.toLocaleString("en-IN")}
@@ -312,7 +313,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         <img src={item.image} alt={item.name} loading="lazy" className="hidden" />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {item.name}
+                            {getShortProductName(item.name)}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             {item.desc || "Consult Pandit Ji"}
