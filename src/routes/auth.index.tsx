@@ -39,7 +39,8 @@ function AuthPage() {
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-      const redirectUri = `${window.location.origin}/auth/callback`;
+      const redirectUri =
+        import.meta.env.VITE_SHOPIFY_REDIRECT_URI || `${window.location.origin}/auth/callback`;
       const res = await getOAuthUrl({ data: { redirectUri } });
 
       if (res?.authorizeUrl) {
