@@ -7,6 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import {
   Star,
+  StarHalf,
   Sparkles,
   ShieldCheck,
   Loader2,
@@ -19,6 +20,36 @@ import {
 } from "lucide-react";
 import { DirectBookingModal } from "@/components/booking/DirectBookingModal";
 import { toast } from "sonner";
+
+function getShortProductName(name: string) {
+  const mukhi = name.match(/(\d+)\s*mukhi/i);
+
+  const lowerName = name.toLowerCase();
+  const origin =
+    lowerName.includes("indo") || lowerName.includes("indonesian")
+      ? "Indo"
+      : lowerName.includes("nepali")
+        ? "Nepali"
+        : lowerName.includes("indian")
+          ? "Indian"
+          : "";
+  const suffix = lowerName.includes("mala") ? " Mala" : " Rudraksha";
+
+  if (mukhi) return `${mukhi[1]} Mukhi${origin ? ` ${origin}` : ""}${suffix}`;
+
+  const descriptor = name
+    .split("|")[0]
+    .replace(/^Natural\s+/i, "")
+    .replace(/\s+Rudraksha.*$/i, "")
+    .replace(/\s+Bead.*$/i, "")
+    .trim();
+  return `${descriptor}${origin ? ` ${origin}` : ""}${suffix}`.trim();
+}
+
+function getProductRating(slug: string) {
+  const seed = [...slug].reduce((total, character) => total + character.charCodeAt(0), 0);
+  return 4 + (seed % 2) * 0.5;
+}
 
 export const Route = createFileRoute("/category/$slug")({
   loader: ({ params }) => {
@@ -69,11 +100,20 @@ function CategoryPage() {
 function ShopifyProductsPage({ cat }: { cat: any }) {
   const fetchProducts = useServerFn(getShopifyProducts);
   const [products, setProducts] = useState<any[]>([]);
+  const [inventoryProducts, setInventoryProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchProducts({ data: { category: cat.slug, limit: 250 } })
-      .then((data) => setProducts(data?.products || []))
+    const requests = [fetchProducts({ data: { category: cat.slug, limit: 250 } })];
+    if (cat.slug === "gemstones") {
+      requests.push(fetchProducts({ data: { category: "all", limit: 250 } }));
+    }
+
+    Promise.all(requests)
+      .then(([categoryData, inventoryData]) => {
+        setProducts(categoryData?.products || []);
+        setInventoryProducts(inventoryData?.products || []);
+      })
       .catch((err) => {
         console.error("Failed to load products:", err);
         toast.error("Failed to load products");
@@ -81,17 +121,63 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
       .finally(() => setLoading(false));
   }, [cat.slug]);
 
-  const groupedProducts = products.reduce((acc: any, item: any) => {
-    let catName = (item.category || cat.name).trim().replace(/\s+/g, ' ');
+  const displayProducts =
+    cat.slug === "rudraksha"
+      ? products.filter((item: any) => {
+          const searchable =
+            `${item.name} ${item.category || ""} ${item.productType || ""}`.toLowerCase();
+          return !searchable.includes("mala");
+        })
+      : products;
+
+  const gemstoneNames = [
+    "ruby",
+    "manik",
+    "pearl",
+    "moti",
+    "coral",
+    "moonga",
+    "emerald",
+    "panna",
+    "sapphire",
+    "neelam",
+    "pukhraj",
+    "topaz",
+    "opal",
+    "amethyst",
+    "garnet",
+    "navratna",
+  ];
+  const inventoryGemstones = inventoryProducts.filter((product: any) => {
+    const searchable =
+      `${product.name} ${product.category || ""} ${product.productType || ""} ${(product.tags || []).join(" ")}`.toLowerCase();
+    return (
+      gemstoneNames.some((name) => searchable.includes(name)) && !searchable.includes("bracelet")
+    );
+  });
+  const productsForDisplay =
+    cat.slug === "gemstones" && displayProducts.length === 0 ? inventoryGemstones : displayProducts;
+  const gemstoneImages = new Map(
+    inventoryGemstones.flatMap((product: any) => {
+      const searchable = product.name.toLowerCase();
+      return gemstoneNames
+        .filter((name) => searchable.includes(name))
+        .map((name) => [name, product.image]);
+    }),
+  );
+
+  const groupedProducts = productsForDisplay.reduce((acc: any, item: any) => {
+    let catName = (item.category || cat.name).trim().replace(/\s+/g, " ");
     catName = catName.toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase());
-    
+
     // Smart grouping based on page slug and titles to match mega-menu expectations
     if (cat.slug === "rudraksha") {
       const name = item.name.toLowerCase();
       if (name.includes("nepali")) catName = "Nepali Rudraksha";
-      else if (name.includes("indonesian")) catName = "Indonesian Rudraksha";
+      else if (name.includes("indonesian") || name.includes("indo"))
+        catName = "Indonesian Rudraksha";
       else if (name.includes("indian")) catName = "Indian Rudraksha";
-      else catName = "Premium Rudraksha";
+      else catName = "Indonesian Rudraksha";
     } else if (cat.slug === "mala") {
       if (item.name.toLowerCase().includes("rudraksha")) catName = "Rudraksha Malas";
       else catName = "Premium Malas";
@@ -104,13 +190,13 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
 
   return (
     <Layout>
-      <section className="relative h-[420px] overflow-hidden flex items-center">
+      <section className="relative aspect-[3/1] w-full overflow-hidden flex items-center bg-cream">
         <img
           src={cat.hero}
           alt={cat.name}
           width={1920}
           height={800}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
         />
       </section>
 
@@ -125,7 +211,10 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl border border-gold/10 p-4 animate-pulse">
+                <div
+                  key={i}
+                  className="bg-white rounded-xl border border-gold/10 p-4 animate-pulse"
+                >
                   <div className="aspect-square bg-cream rounded-lg mb-4" />
                   <div className="w-20 h-3 bg-gold/20 rounded mb-3" />
                   <div className="w-full h-5 bg-maroon-deep/10 rounded mb-2" />
@@ -136,16 +225,79 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
             </div>
           </div>
         </section>
-      ) : products.length === 0 ? (
-        <section className="py-16 bg-cream">
-          <div className="container mx-auto px-4 text-center">
-            <div className="bg-white rounded-xl border border-gold/10 p-12 shadow-sm max-w-md mx-auto">
-              <p className="text-muted-foreground">
-                No products available in this category currently.
-              </p>
+      ) : productsForDisplay.length === 0 ? (
+        cat.slug === "gemstones" && cat.sections && cat.sections.length > 0 ? (
+          <section className="py-16 bg-cream">
+            <div className="container mx-auto px-4">
+              <div className="flex items-end justify-between mb-10 flex-wrap gap-3">
+                <div>
+                  <p className="text-gold tracking-[0.3em] text-xs">{cat.name.toUpperCase()}</p>
+                  <h2 className="font-display text-3xl md:text-4xl text-maroon-deep mt-2">
+                    {cat.sections[0].title}
+                  </h2>
+                </div>
+                <div className="divider-gold flex-1 max-w-xs ml-6 mb-2" />
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                {cat.sections[0].items.map((item: any) => (
+                  <Link
+                    key={item.name}
+                    to="/contact"
+                    className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition flex flex-col"
+                  >
+                    <div className="aspect-square overflow-hidden bg-cream">
+                      <img
+                        src={
+                          cat.slug === "gemstones"
+                            ? gemstoneImages.get(
+                                gemstoneNames.find((name) =>
+                                  item.name.toLowerCase().includes(name),
+                                ) || "",
+                              ) || item.image
+                            : item.image
+                        }
+                        alt={item.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                    <div className="p-4 flex flex-col flex-1">
+                      <div className="flex items-center gap-0.5 text-gold mb-1.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 fill-current" />
+                        ))}
+                      </div>
+                      <h3 className="font-display text-lg text-maroon-deep group-hover:text-maroon leading-tight">
+                        {item.name}
+                      </h3>
+                      {item.desc && (
+                        <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 flex-1">
+                          {item.desc}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
+                        <span className="text-[10px] tracking-widest uppercase text-gold">
+                          Consult Pandit Ji
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : (
+          <section className="py-16 bg-cream">
+            <div className="container mx-auto px-4 text-center">
+              <div className="bg-white rounded-xl border border-gold/10 p-12 shadow-sm max-w-md mx-auto">
+                <p className="text-muted-foreground">
+                  No products available in this category currently.
+                </p>
+              </div>
+            </div>
+          </section>
+        )
       ) : (
         <section className="py-16 bg-cream">
           <div className="container mx-auto px-4">
@@ -159,64 +311,78 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
               <div className="divider-gold flex-1 max-w-xs ml-6 mb-2" />
             </div>
 
-            {Object.entries(groupedProducts).map(([sectionTitle, sectionProducts]: [string, any]) => (
-              <div key={sectionTitle} className="mb-14">
-                <h3 className="font-display text-2xl text-maroon-deep mb-6 pb-2 border-b border-gold/20 inline-block">
-                  {sectionTitle}
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                  {sectionProducts.map((item: any) => (
-                    <Link
-                      key={item.slug}
-                      to="/product/$slug"
-                      params={{ slug: item.slug }}
-                      className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition flex flex-col"
-                    >
-                      <div className="aspect-square overflow-hidden bg-cream">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          loading="lazy"
-                          width={400}
-                          height={400}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                      </div>
-                      <div className="p-4 flex flex-col flex-1">
-                        <div className="flex items-center gap-0.5 text-gold mb-1.5">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-3 h-3 fill-current" />
-                          ))}
-                        </div>
-                        <h3 className="font-display text-lg text-maroon-deep group-hover:text-maroon leading-tight">
-                          {item.name}
-                        </h3>
-                        {item.description && (
-                          <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 flex-1">
-                            {item.description}
-                          </p>
-                        )}
-                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
-                          <span className="text-maroon font-medium">
-                            ₹{item.price.toLocaleString("en-IN")}
-                          </span>
-                          <span className="text-[10px] tracking-widest uppercase text-gold">
-                            View
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+            {Object.entries(groupedProducts).map(
+              ([sectionTitle, sectionProducts]: [string, any]) => (
+                <div key={sectionTitle} className="mb-14">
+                  <h3 className="font-display text-2xl text-maroon-deep mb-6 pb-2 border-b border-gold/20 inline-block">
+                    {sectionTitle}
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    {sectionProducts.map((item: any) =>
+                      (() => {
+                        const rating = getProductRating(item.slug);
+                        const fullStars = Math.floor(rating);
+                        const hasHalfStar = rating % 1 === 0.5;
+
+                        return (
+                          <Link
+                            key={item.slug}
+                            to="/product/$slug"
+                            params={{ slug: item.slug }}
+                            title={item.name}
+                            className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition flex flex-col"
+                          >
+                            <div className="aspect-square overflow-hidden bg-cream">
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                loading="lazy"
+                                width={400}
+                                height={400}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                              />
+                            </div>
+                            <div className="p-4 flex flex-col flex-1">
+                              <div
+                                className="flex items-center gap-0.5 text-gold mb-1.5"
+                                aria-label={`${rating} out of 5 stars`}
+                              >
+                                {[...Array(fullStars)].map((_, i) => (
+                                  <Star key={`full-${i}`} className="w-3 h-3 fill-current" />
+                                ))}
+                                {hasHalfStar && <StarHalf className="w-3 h-3 fill-current" />}
+                              </div>
+                              <h3 className="font-display text-lg font-bold text-maroon-deep group-hover:text-maroon leading-tight">
+                                {getShortProductName(item.name)}
+                              </h3>
+                              {item.description && (
+                                <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 flex-1">
+                                  {item.description}
+                                </p>
+                              )}
+                              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
+                                <span className="text-maroon font-medium">
+                                  ₹{item.price.toLocaleString("en-IN")}
+                                </span>
+                                <span className="text-[10px] tracking-widest uppercase text-gold">
+                                  View
+                                </span>
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })(),
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         </section>
       )}
     </Layout>
   );
 }
-
 
 // ─── Online Pooja page — Supabase powered ─────────────────────────
 

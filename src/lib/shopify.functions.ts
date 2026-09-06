@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 // Use TanStack Query's `staleTime` on the client side, but we also add a basic
@@ -17,10 +18,15 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }) => {
     const { shopifyClient } = await import("./shopify/client");
-    const { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY, CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } = await import("./shopify/queries");
+    const {
+      GET_PRODUCTS_QUERY,
+      GET_PRODUCT_BY_HANDLE_QUERY,
+      CREATE_CART_MUTATION,
+      GET_CUSTOMER_ORDERS_QUERY,
+    } = await import("./shopify/queries");
     try {
       let response: any;
-      
+
       // Use cache if available and not paginating
       if (productsCache && Date.now() - productsCacheTime < CACHE_TTL && !data.cursor) {
         response = productsCache;
@@ -29,7 +35,7 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
           first: 250, // Fetch all to filter in-memory due to dirty Shopify data
           after: data.cursor,
         });
-        
+
         // Cache the full response if it's the first page
         if (!data.cursor) {
           productsCache = response;
@@ -39,9 +45,7 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
 
       const products = response.products.edges.map((edge: any) => {
         const node = edge.node;
-        const metafieldsMap = new Map(
-          node.metafields?.map((m: any) => [m?.key, m?.value]) || []
-        );
+        const metafieldsMap = new Map(node.metafields?.map((m: any) => [m?.key, m?.value]) || []);
 
         return {
           slug: node.handle,
@@ -58,7 +62,9 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
           available: node.variants.edges[0]?.node.availableForSale || false,
           category: metafieldsMap.get("category") || node.productType || "",
           productType: node.productType || "",
-          benefits: metafieldsMap.get("benefits") ? JSON.parse(String(metafieldsMap.get("benefits"))) : [],
+          benefits: metafieldsMap.get("benefits")
+            ? JSON.parse(String(metafieldsMap.get("benefits")))
+            : [],
           certified: metafieldsMap.get("certified") === "true",
           tags: node.tags || [],
         };
@@ -72,19 +78,60 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
           const name = p.name.toLowerCase();
           const cat = p.category.toLowerCase();
           const type = p.productType.toLowerCase();
-          
+
           if (target === "rudraksha") {
             // Must be rudraksha but NOT a mala
-            return (name.includes("rudraksha") || cat.includes("rudraksha") || type.includes("rudraksha")) && !name.includes("mala") && !cat.includes("mala");
+            return (
+              (name.includes("rudraksha") ||
+                cat.includes("rudraksha") ||
+                type.includes("rudraksha")) &&
+              !name.includes("mala") &&
+              !cat.includes("mala")
+            );
           }
           if (target === "mala") {
             return name.includes("mala") || cat.includes("mala") || type.includes("mala");
           }
           if (target === "bracelet" || target === "bracelets") {
-            return name.includes("bracelet") || cat.includes("bracelet") || type.includes("bracelet");
+            return (
+              name.includes("bracelet") || cat.includes("bracelet") || type.includes("bracelet")
+            );
           }
           if (target === "gemstone" || target === "gemstones") {
-            return name.includes("gemstone") || cat.includes("gemstone") || type.includes("gemstone");
+            const tags = (p.tags || []).map((tag: string) => tag.toLowerCase()).join(" ");
+            const gemstoneNames = [
+              "ruby",
+              "manik",
+              "pearl",
+              "moti",
+              "coral",
+              "moonga",
+              "emerald",
+              "panna",
+              "sapphire",
+              "neelam",
+              "pukhraj",
+              "topaz",
+              "opal",
+              "amethyst",
+              "garnet",
+              "navratna",
+            ];
+            const isBracelet =
+              name.includes("bracelet") ||
+              cat.includes("bracelet") ||
+              type.includes("bracelet") ||
+              tags.includes("bracelet");
+            const isGemstone =
+              name.includes("gemstone") ||
+              cat.includes("gemstone") ||
+              type.includes("gemstone") ||
+              tags.includes("gemstone") ||
+              gemstoneNames.some(
+                (gemstoneName) => name.includes(gemstoneName) || tags.includes(gemstoneName),
+              );
+
+            return isGemstone && !isBracelet;
           }
           if (target === "yantra") {
             return name.includes("yantra") || cat.includes("yantra") || type.includes("yantra");
@@ -110,7 +157,12 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
   .validator(z.object({ handle: z.string() }))
   .handler(async ({ data }) => {
     const { shopifyClient } = await import("./shopify/client");
-    const { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY, CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } = await import("./shopify/queries");
+    const {
+      GET_PRODUCTS_QUERY,
+      GET_PRODUCT_BY_HANDLE_QUERY,
+      CREATE_CART_MUTATION,
+      GET_CUSTOMER_ORDERS_QUERY,
+    } = await import("./shopify/queries");
     try {
       const response: any = await shopifyClient.request(GET_PRODUCT_BY_HANDLE_QUERY, {
         handle: data.handle,
@@ -121,9 +173,7 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
       }
 
       const node = response.product;
-      const metafieldsMap = new Map(
-        node.metafields?.map((m: any) => [m?.key, m?.value]) || []
-      );
+      const metafieldsMap = new Map(node.metafields?.map((m: any) => [m?.key, m?.value]) || []);
 
       const product = {
         slug: node.handle,
@@ -146,7 +196,9 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
           available: e.node.availableForSale,
           stock: e.node.quantityAvailable,
         })),
-        benefits: metafieldsMap.get("benefits") ? JSON.parse(String(metafieldsMap.get("benefits"))) : [],
+        benefits: metafieldsMap.get("benefits")
+          ? JSON.parse(String(metafieldsMap.get("benefits")))
+          : [],
         certified: metafieldsMap.get("certified") === "true",
         category: metafieldsMap.get("category") || "",
         tags: node.tags || [],
@@ -158,7 +210,6 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
       return null;
     }
   });
-
 
 export const createShopifyCheckout = createServerFn({ method: "POST" })
   .validator(
@@ -180,26 +231,45 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
+    const sessionCookie = getCookie("aastha_session");
+    if (!sessionCookie) {
+      throw new Error("Please sign in before checkout");
+    }
+
+    try {
+      const session = JSON.parse(sessionCookie) as { expiresAt?: string };
+      if (!session.expiresAt || new Date(session.expiresAt).getTime() <= Date.now()) {
+        throw new Error("Please sign in before checkout");
+      }
+    } catch {
+      throw new Error("Please sign in before checkout");
+    }
+
     const { shopifyClient } = await import("./shopify/client");
-    const { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY, CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } = await import("./shopify/queries");
+    const {
+      GET_PRODUCTS_QUERY,
+      GET_PRODUCT_BY_HANDLE_QUERY,
+      CREATE_CART_MUTATION,
+      GET_CUSTOMER_ORDERS_QUERY,
+    } = await import("./shopify/queries");
     const maxRetries = 3;
     let lastError: any;
-    
+
     // Fetch actual prices from Shopify to prevent price manipulation
     const { GET_PRODUCT_BY_VARIANT } = await import("./shopify/queries");
-    const variantIds = data.items.map(item => item.variantId);
-    
+    const variantIds = data.items.map((item) => item.variantId);
+
     // Validate prices server-side
     for (const item of data.items) {
       try {
         const result: any = await shopifyClient.request(GET_PRODUCT_BY_VARIANT, {
-          id: item.variantId
+          id: item.variantId,
         });
-        
+
         if (!result?.node?.price) {
           throw new Error(`Invalid variant: ${item.variantId}`);
         }
-        
+
         // Price validation happens server-side, client prices are ignored
       } catch (err) {
         throw new Error(`Failed to validate product: ${item.variantId}`);
@@ -258,7 +328,12 @@ export const getCustomerOrders = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }) => {
     const { shopifyClient } = await import("./shopify/client");
-    const { GET_PRODUCTS_QUERY, GET_PRODUCT_BY_HANDLE_QUERY, CREATE_CART_MUTATION, GET_CUSTOMER_ORDERS_QUERY } = await import("./shopify/queries");
+    const {
+      GET_PRODUCTS_QUERY,
+      GET_PRODUCT_BY_HANDLE_QUERY,
+      CREATE_CART_MUTATION,
+      GET_CUSTOMER_ORDERS_QUERY,
+    } = await import("./shopify/queries");
     try {
       if (data.customerAccessToken.startsWith("shcat_")) {
         const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID;

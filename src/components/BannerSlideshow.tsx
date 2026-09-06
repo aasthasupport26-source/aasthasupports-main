@@ -33,32 +33,21 @@ export function BannerSlideshow() {
 
   useEffect(() => {
     if (isPaused) return;
-    
+
     const timer = setInterval(next, 5000);
     return () => clearInterval(timer);
   }, [next, isPaused]);
 
   return (
-    <div className="relative h-[500px] overflow-hidden bg-maroon-deep">
+    <div className="relative aspect-[1024/426] w-full overflow-hidden bg-maroon-deep flex items-center justify-center">
       {slides.map((slide, idx) => (
         <div
           key={idx}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            idx === current ? "opacity-100" : "opacity-0"
+          className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
+            idx === current ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
         >
-          <img
-            src={slide.image}
-            alt={slide.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent" />
-          <div className="absolute inset-0 flex items-center">
-            <div className="container mx-auto px-4">
-              <h2 className="font-display text-5xl text-white mb-4">{slide.title}</h2>
-              <p className="text-xl text-gold-soft">{slide.subtitle}</p>
-            </div>
-          </div>
+          <img src={slide.image} alt={slide.title} className="w-full h-full object-contain block" />
         </div>
       ))}
 

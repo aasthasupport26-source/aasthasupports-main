@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search, ShoppingBag, User, Menu, X, Phone } from "lucide-react";
 import { Logo } from "./Logo";
+import { MegaDropdown } from "@/components/MegaDropdown";
 import { categories } from "@/data/catalog";
 import { useCart } from "@/contexts/CartContext";
 
@@ -48,9 +49,9 @@ export function Header() {
       </div>
 
       {/* Main nav */}
-      <div 
+      <div
         className="bg-royal border-b border-gold/30 shadow-royal relative"
-        onMouseLeave={() => setUi(prev => ({ ...prev, openSlug: null }))}
+        onMouseLeave={() => setUi((prev) => ({ ...prev, openSlug: null }))}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between lg:justify-center h-20 relative gap-4">
@@ -59,17 +60,17 @@ export function Header() {
             </div>
 
             {/* Desktop nav - centered */}
-            <nav className="hidden lg:flex items-center gap-3">
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
               {categories.map((cat) => (
-                <div 
-                  key={cat.slug} 
-                  className="relative h-full flex items-center cursor-pointer" 
-                  onMouseEnter={() => setUi(prev => ({ ...prev, openSlug: cat.slug }))}
+                <div
+                  key={cat.slug}
+                  className="relative h-full flex items-center cursor-pointer"
+                  onMouseEnter={() => setUi((prev) => ({ ...prev, openSlug: cat.slug }))}
                 >
                   <Link
                     to="/category/$slug"
                     params={{ slug: cat.slug }}
-                    className="px-3.5 py-2.5 text-[13px] tracking-widest uppercase text-cream/95 hover:text-gold transition-colors font-medium relative whitespace-nowrap flex items-center"
+                    className="px-2.5 xl:px-3 py-2.5 text-[12px] xl:text-[13px] tracking-widest uppercase text-cream/95 hover:text-gold transition-colors font-medium relative whitespace-nowrap flex items-center"
                   >
                     {cat.name}
                     {ui.openSlug === cat.slug && (
@@ -81,9 +82,9 @@ export function Header() {
             </nav>
 
             <div className="lg:absolute lg:right-0 flex items-center gap-3 flex-shrink-0">
-              <button 
-                onClick={() => setUi(prev => ({ ...prev, searchOpen: !prev.searchOpen }))}
-                className="p-2.5 text-cream hover:text-gold transition" 
+              <button
+                onClick={() => setUi((prev) => ({ ...prev, searchOpen: !prev.searchOpen }))}
+                className="p-2.5 text-cream hover:text-gold transition"
                 aria-label="Search"
               >
                 <Search className="w-5 h-5" />
@@ -108,7 +109,7 @@ export function Header() {
               </Link>
               <button
                 className="lg:hidden p-2.5 text-cream hover:text-gold transition"
-                onClick={() => setUi(prev => ({ ...prev, mobileOpen: !prev.mobileOpen }))}
+                onClick={() => setUi((prev) => ({ ...prev, mobileOpen: !prev.mobileOpen }))}
                 aria-label="Menu"
                 aria-expanded={ui.mobileOpen}
               >
@@ -120,80 +121,23 @@ export function Header() {
 
         {/* Mega dropdown */}
         {ui.openSlug && (
-          <div
-            className="absolute top-full left-0 right-0 bg-cream border-t-2 border-gold shadow-2xl hidden lg:block animate-fade-up -mt-px"
-            role="menu"
-          >
-            <div className="container mx-auto px-4 py-8">
-              {(() => {
-                const cat = categories.find((c) => c.slug === ui.openSlug)!;
-                return (
-                  <div className="grid grid-cols-12 gap-8">
-                    <div className="col-span-3 border-r border-gold/30 pr-8 flex flex-col justify-between">
-                      <div>
-                        <p className="text-xs tracking-[0.3em] text-gold uppercase mb-2">
-                          Category
-                        </p>
-                        <h3 className="font-display text-3xl text-maroon-deep mb-3">{cat.name}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                          {cat.tagline}
-                        </p>
-
-                        {/* Trust Badges */}
-                        <div className="space-y-2 mb-6 text-xs text-maroon-deep font-medium bg-white/60 p-3 rounded-xl border border-gold/20">
-                          <div className="flex items-center gap-2">
-                            <span>🛡️</span> <span>100% Certified &amp; Authentic</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span>🕉️</span> <span>Vedic Pandit Energised</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span>🚚</span> <span>Free Express Shipping</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <Link
-                        to="/category/$slug"
-                        params={{ slug: cat.slug }}
-                        className="inline-flex items-center justify-center gap-2 bg-maroon-deep text-cream px-5 py-2.5 rounded-lg text-xs font-semibold tracking-wider uppercase hover:bg-maroon transition shadow-md"
-                      >
-                        View all {cat.name} →
-                      </Link>
-                    </div>
-                    <div
-                      className={`col-span-9 grid gap-8 ${cat.sections.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}
-                    >
-                      {cat.sections.map((section) => (
-                        <div key={section.title} className="space-y-3">
-                          <h4 className="text-xs tracking-[0.3em] text-gold uppercase mb-3">{section.title}</h4>
-                          <div className="grid gap-2">
-                            {section.items.map((item) => (
-                              <Link
-                                key={item.name}
-                                to="/product/$slug"
-                                params={{ slug: item.slug }}
-                                className="text-sm text-maroon-deep hover:text-gold transition-colors"
-                              >
-                                {item.name}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
+          <MegaDropdown
+            cat={categories.find((c) => c.slug === ui.openSlug)!}
+            onClose={() => setUi((prev) => ({ ...prev, openSlug: null }))}
+          />
         )}
       </div>
 
       {/* Search Modal */}
       {ui.searchOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20" onClick={() => setUi(prev => ({ ...prev, searchOpen: false }))}>
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20"
+          onClick={() => setUi((prev) => ({ ...prev, searchOpen: false }))}
+        >
+          <div
+            className="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <form onSubmit={handleSearch} className="p-6">
               <div className="flex items-center gap-3 mb-4">
                 <Search className="w-5 h-5 text-muted-foreground" />
@@ -201,20 +145,23 @@ export function Header() {
                   type="text"
                   placeholder="Search products..."
                   value={ui.searchQuery}
-                  onChange={(e) => setUi(prev => ({ ...prev, searchQuery: e.target.value }))}
+                  onChange={(e) => setUi((prev) => ({ ...prev, searchQuery: e.target.value }))}
                   className="flex-1 text-lg outline-none"
                   autoFocus
                 />
                 <button
                   type="button"
-                  onClick={() => setUi(prev => ({ ...prev, searchOpen: false }))}
+                  onClick={() => setUi((prev) => ({ ...prev, searchOpen: false }))}
                   className="p-2 hover:bg-gray-100 rounded"
                   aria-label="Close search"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <button type="submit" className="w-full bg-maroon text-white py-2 rounded-lg hover:bg-maroon-deep">
+              <button
+                type="submit"
+                className="w-full bg-maroon text-white py-2 rounded-lg hover:bg-maroon-deep"
+              >
                 Search
               </button>
             </form>
@@ -227,58 +174,58 @@ export function Header() {
         <div className="lg:hidden bg-cream border-t border-gold/30 shadow-xl">
           <nav className="container mx-auto px-4 py-4 flex flex-col">
             {categories.map((cat) => (
-                <Link
-                  key={cat.slug}
-                  to="/category/$slug"
-                  params={{ slug: cat.slug }}
-                  onClick={() => setUi(prev => ({ ...prev, mobileOpen: false }))}
-                  className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
-                >
-                  {cat.name}
-                </Link>
-              ))}
               <Link
-                to="/shop"
-                onClick={() => setUi(prev => ({ ...prev, mobileOpen: false }))}
+                key={cat.slug}
+                to="/category/$slug"
+                params={{ slug: cat.slug }}
+                onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
                 className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
               >
-                Shop All
+                {cat.name}
               </Link>
-              <Link
-                to="/track-order"
-                onClick={() => setUi(prev => ({ ...prev, mobileOpen: false }))}
-                className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
-              >
-                Track Order
-              </Link>
-              <Link
-                to="/about"
-                onClick={() => setUi(prev => ({ ...prev, mobileOpen: false }))}
-                className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
-              >
-                About
-              </Link>
-              <Link
-                to="/faq"
-                onClick={() => setUi(prev => ({ ...prev, mobileOpen: false }))}
-                className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
-              >
-                FAQ
-              </Link>
-              <Link
-                to="/returns-policy"
-                onClick={() => setUi(prev => ({ ...prev, mobileOpen: false }))}
-                className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
-              >
-                Returns & Policy
-              </Link>
-              <Link
-                to="/contact"
-                onClick={() => setUi(prev => ({ ...prev, mobileOpen: false }))}
-                className="py-3 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
-              >
-                Contact
-              </Link>
+            ))}
+            <Link
+              to="/shop"
+              onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
+              className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
+            >
+              Shop All
+            </Link>
+            <Link
+              to="/track-order"
+              onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
+              className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
+            >
+              Track Order
+            </Link>
+            <Link
+              to="/about"
+              onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
+              className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
+            >
+              About
+            </Link>
+            <Link
+              to="/faq"
+              onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
+              className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
+            >
+              FAQ
+            </Link>
+            <Link
+              to="/returns-policy"
+              onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
+              className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
+            >
+              Returns & Policy
+            </Link>
+            <Link
+              to="/contact"
+              onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
+              className="py-3 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
+            >
+              Contact
+            </Link>
           </nav>
         </div>
       )}

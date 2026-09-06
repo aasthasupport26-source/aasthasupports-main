@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { useCart } from "@/contexts/CartContext";
 import { Minus, Plus, Trash2, ShoppingBag, Loader2 } from "lucide-react";
@@ -6,6 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { createShopifyCheckout } from "@/lib/shopify.functions";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/cart")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -23,6 +24,8 @@ export const Route = createFileRoute("/cart")({
 
 function CartPage() {
   const { items, update, remove, subtotal, count, clear } = useCart();
+  const { customer, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const search = useSearch({ from: "/cart" }) as any;
 
   const shipping = subtotal > 0 && subtotal < 1500 ? 99 : 0;
@@ -39,6 +42,13 @@ function CartPage() {
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
+    if (authLoading) return;
+    if (!customer) {
+      toast.error("Please sign in before checkout");
+      navigate({ to: "/auth" });
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = items.map((i) => ({
@@ -81,66 +91,63 @@ function CartPage() {
         ) : (
           <div className="mt-8 grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-3">
-              {items.map((it) => {
-                const itemKey = it.variantId || it.slug;
-                return (
-                  <div
-                    key={itemKey}
-                    className="flex gap-4 p-4 bg-white border border-gold/20 rounded-xl"
-                  >
-                    <img
-                      src={it.image}
-                      alt={it.name}
-                      className="w-24 h-24 rounded-md object-cover border border-gold/30"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        to="/product/$slug"
-                        params={{ slug: it.slug }}
-                        className="font-display text-lg text-maroon-deep hover:text-maroon"
-                      >
-                        {it.name}
-                      </Link>
-                      {it.categoryName && (
-                        <p className="text-[11px] tracking-widest uppercase text-gold mt-0.5">
-                          {it.categoryName}
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between mt-3 flex-wrap gap-3">
-                        <div className="flex items-center border border-gold/40 rounded">
-                          <button
-                            onClick={() => update(itemKey, it.quantity - 1)}
-                            className="p-1.5 hover:bg-cream"
-                            aria-label="Decrease quantity"
-                          >
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="px-3 text-sm font-medium">{it.quantity}</span>
-                          <button
-                            onClick={() => update(itemKey, it.quantity + 1)}
-                            className="p-1.5 hover:bg-cream"
-                            aria-label="Increase quantity"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="font-numeric text-lg text-maroon-deep">
-                            ₹{(it.price * it.quantity).toLocaleString("en-IN")}
-                          </span>
-                          <button
-                            onClick={() => remove(itemKey)}
-                            className="text-muted-foreground hover:text-destructive"
-                            aria-label="Remove from cart"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+              {items.map((it) => (
+                <div
+                  key={it.slug}
+                  className="flex gap-4 p-4 bg-white border border-gold/20 rounded-xl"
+                >
+                  <img
+                    src={it.image}
+                    alt={it.name}
+                    className="w-24 h-24 rounded-md object-cover border border-gold/30"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <Link
+                      to="/product/$slug"
+                      params={{ slug: it.slug }}
+                      className="font-display text-lg text-maroon-deep hover:text-maroon"
+                    >
+                      {it.name}
+                    </Link>
+                    {it.categoryName && (
+                      <p className="text-[11px] tracking-widest uppercase text-gold mt-0.5">
+                        {it.categoryName}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between mt-3 flex-wrap gap-3">
+                      <div className="flex items-center border border-gold/40 rounded">
+                        <button
+                          onClick={() => update(it.slug, it.quantity - 1)}
+                          className="p-1.5 hover:bg-cream"
+                          aria-label="Decrease"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="px-3 text-sm font-medium">{it.quantity}</span>
+                        <button
+                          onClick={() => update(it.slug, it.quantity + 1)}
+                          className="p-1.5 hover:bg-cream"
+                          aria-label="Increase"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="font-numeric text-lg text-maroon-deep">
+                          ₹{(it.price * it.quantity).toLocaleString("en-IN")}
+                        </span>
+                        <button
+                          onClick={() => remove(it.slug)}
+                          className="text-muted-foreground hover:text-destructive"
+                          aria-label="Remove"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
 
             <aside className="bg-cream border border-gold/30 rounded-xl p-6 h-fit sticky top-32">
@@ -164,11 +171,17 @@ function CartPage() {
               </div>
               <button
                 onClick={handleCheckout}
-                disabled={loading}
+                disabled={loading || authLoading}
                 className="mt-5 w-full inline-flex items-center justify-center bg-gold text-maroon-deep px-6 py-3.5 rounded-md text-xs tracking-widest uppercase font-medium hover:bg-gold-soft transition shadow-gold disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                {loading ? "Preparing Checkout..." : "Proceed to Checkout"}
+                {loading
+                  ? "Preparing Checkout..."
+                  : authLoading
+                    ? "Checking Sign-In..."
+                    : customer
+                      ? "Proceed to Checkout"
+                      : "Sign In to Checkout"}
               </button>
               <Link
                 to="/shop"

@@ -45,14 +45,20 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
   const nepaliProducts =
     cat.slug === "rudraksha"
       ? products
-          .filter((p: any) => p.productType.toLowerCase() === "rudraksha" && p.name.toLowerCase().includes("nepal"))
+          .filter(
+            (p: any) =>
+              p.productType.toLowerCase() === "rudraksha" && p.name.toLowerCase().includes("nepal"),
+          )
           .sort(sortByMukhi)
           .slice(0, 4)
       : [];
   const indonesianProducts =
     cat.slug === "rudraksha"
       ? products
-          .filter((p: any) => p.productType.toLowerCase() === "rudraksha" && p.name.toLowerCase().includes("indonesian"))
+          .filter((p: any) => {
+            const name = p.name.toLowerCase();
+            return (name.includes("indonesian") || name.includes("indo")) && !name.includes("mala");
+          })
           .sort(sortByMukhi)
           .slice(0, 4)
       : [];
@@ -61,9 +67,14 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
   const showFallback =
     cat.slug === "rudraksha" && nepaliProducts.length + indonesianProducts.length < 4;
 
+  const nepaliDisplay = nepaliProducts.length > 0 ? nepaliProducts : cat.sections[0]?.items || [];
+  const indonesianDisplay =
+    indonesianProducts.length > 0 ? indonesianProducts : cat.sections[1]?.items || [];
+
   return (
     <div
-      className="absolute top-full left-0 right-0 bg-cream border-t-2 border-gold shadow-2xl z-50"
+      className="absolute top-full left-0 right-0 bg-cream border-t-2 border-gold shadow-2xl z-50 hidden lg:block animate-fade-up -mt-px"
+      role="menu"
       onMouseEnter={() => {}}
       onMouseLeave={onClose}
     >
@@ -111,12 +122,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         to="/book-pooja"
                         className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
                       >
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          loading="lazy"
-                          className="w-12 h-12 rounded-lg object-cover border border-gold/40 group-hover:border-gold group-hover:scale-105 transition-all duration-300"
-                        />
+                        <img src={item.image} alt={item.name} loading="lazy" className="hidden" />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
                             {item.name}
@@ -134,45 +140,46 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
               ))}
             </div>
           ) : cat.slug === "rudraksha" ? (
-            showFallback ? (
+            products.length === 0 ? (
+              <div className="col-span-9 grid gap-8 grid-cols-2">
+                {cat.sections.slice(0, 2).map((section) => (
+                  <div key={section.title}>
+                    <h4 className="text-xs tracking-[0.25em] text-gold uppercase mb-4 pb-2 border-b border-gold/20 font-bold">
+                      {section.title}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {section.items.map((item) => (
+                        <Link
+                          key={item.name}
+                          to="/product/$slug"
+                          params={{ slug: item.slug }}
+                          className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
+                        >
+                          <img src={item.image} alt={item.name} loading="lazy" className="hidden" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
+                              {item.name}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                              {item.desc || "Consult Pandit Ji"}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : showFallback ? (
               <div className="col-span-9">
                 <h4 className="text-xs tracking-[0.25em] text-gold uppercase mb-4 pb-2 border-b border-gold/20 font-bold">
                   All Rudraksha Products
                 </h4>
                 <div className="grid grid-cols-4 gap-3">
-                  {products.filter((p: any) => p.productType.toLowerCase() === "rudraksha").slice(0, 8).map((product: any) => (
-                    <Link
-                      key={product.slug}
-                      to="/product/$slug"
-                      params={{ slug: product.slug }}
-                      className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
-                    >
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        loading="lazy"
-                        className="w-12 h-12 rounded-lg object-cover border border-gold/40 group-hover:border-gold group-hover:scale-105 transition-all duration-300"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                          {product.name}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                          ₹{product.price.toLocaleString("en-IN")}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="col-span-9 grid gap-8 grid-cols-2">
-                <div>
-                  <h4 className="text-xs tracking-[0.25em] text-gold uppercase mb-4 pb-2 border-b border-gold/20 font-bold">
-                    Nepali Rudraksha (Collector Beads)
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {nepaliProducts.map((product: any) => (
+                  {products
+                    .filter((p: any) => p.productType.toLowerCase() === "rudraksha")
+                    .slice(0, 8)
+                    .map((product: any) => (
                       <Link
                         key={product.slug}
                         to="/product/$slug"
@@ -183,7 +190,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                           src={product.image}
                           alt={product.name}
                           loading="lazy"
-                          className="w-12 h-12 rounded-lg object-cover border border-gold/40 group-hover:border-gold group-hover:scale-105 transition-all duration-300"
+                          className="hidden"
                         />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
@@ -195,14 +202,16 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         </div>
                       </Link>
                     ))}
-                  </div>
                 </div>
+              </div>
+            ) : (
+              <div className="col-span-9 grid gap-8 grid-cols-2">
                 <div>
                   <h4 className="text-xs tracking-[0.25em] text-gold uppercase mb-4 pb-2 border-b border-gold/20 font-bold">
-                    Indonesian Rudraksha (1-14 Mukhi)
+                    Nepali Rudraksha (Collector Beads)
                   </h4>
                   <div className="grid grid-cols-2 gap-3">
-                    {indonesianProducts.map((product: any) => (
+                    {nepaliDisplay.map((product: any) => (
                       <Link
                         key={product.slug}
                         to="/product/$slug"
@@ -213,14 +222,48 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                           src={product.image}
                           alt={product.name}
                           loading="lazy"
-                          className="w-12 h-12 rounded-lg object-cover border border-gold/40 group-hover:border-gold group-hover:scale-105 transition-all duration-300"
+                          className="hidden"
                         />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
                             {product.name}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                            ₹{product.price.toLocaleString("en-IN")}
+                            {product.price
+                              ? `₹${product.price.toLocaleString("en-IN")}`
+                              : product.desc}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-xs tracking-[0.25em] text-gold uppercase mb-4 pb-2 border-b border-gold/20 font-bold">
+                    Indonesian Rudraksha (1-14 Mukhi)
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {indonesianDisplay.map((product: any) => (
+                      <Link
+                        key={product.slug}
+                        to="/product/$slug"
+                        params={{ slug: product.slug }}
+                        className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
+                      >
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          loading="lazy"
+                          className="hidden"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
+                            {product.name}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                            {product.price
+                              ? `₹${product.price.toLocaleString("en-IN")}`
+                              : product.desc}
                           </p>
                         </div>
                       </Link>
@@ -235,29 +278,48 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                 {cat.sections[0]?.title || "Products"}
               </h4>
               <div className="grid grid-cols-4 gap-3">
-                {products.slice(0, 8).map((product: any) => (
-                  <Link
-                    key={product.slug}
-                    to="/product/$slug"
-                    params={{ slug: product.slug }}
-                    className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      loading="lazy"
-                      className="w-12 h-12 rounded-lg object-cover border border-gold/40 group-hover:border-gold group-hover:scale-105 transition-all duration-300"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                        {product.name}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                        ₹{product.price.toLocaleString("en-IN")}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                {products.length > 0
+                  ? products.slice(0, 8).map((product: any) => (
+                      <Link
+                        key={product.slug}
+                        to="/product/$slug"
+                        params={{ slug: product.slug }}
+                        className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
+                      >
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          loading="lazy"
+                          className="hidden"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
+                            {product.name}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                            ₹{product.price.toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                      </Link>
+                    ))
+                  : cat.sections[0]?.items.slice(0, 8).map((item: any) => (
+                      <Link
+                        key={item.name}
+                        to={item.slug === cat.slug ? "/category/$slug" : "/product/$slug"}
+                        params={{ slug: item.slug }}
+                        className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
+                      >
+                        <img src={item.image} alt={item.name} loading="lazy" className="hidden" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
+                            {item.name}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                            {item.desc || "Consult Pandit Ji"}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
               </div>
             </div>
           )}
