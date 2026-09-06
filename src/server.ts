@@ -110,7 +110,7 @@ export default {
 
       // Intercept webhooks before passing to TanStack Start
       if (request.method === "POST") {
-        if (url.pathname === "/api/webhooks/razorpay-puja") {
+        if (url.pathname === "/api/webhooks/razorpay-puja" || url.pathname === "/api/webhooks/razorpay") {
           const webhookResponse = await handleRazorpayPujaWebhook(request);
           return applySecurityHeaders(webhookResponse);
         }
