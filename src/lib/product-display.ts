@@ -95,7 +95,10 @@ export function getShortProductName(name: string): string {
  */
 export function getProductRating(identifier: string): number {
   if (!identifier) return 4.5;
-  const seed = [...identifier].reduce((total, char) => total + char.charCodeAt(0), 0);
+  let seed = 0;
+  for (let i = 0; i < identifier.length; i++) {
+    seed += identifier.charCodeAt(i);
+  }
   // Produce values between 3.9 and 5.0 in 0.1 increments (12 possible values)
   const offset = (seed % 12) * 0.1;
   const rating = 3.9 + offset;
