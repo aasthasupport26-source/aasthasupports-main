@@ -238,11 +238,11 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
                         {getShortProductName(item.name)}
                       </h3>
                       {item.desc && (
-                        <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 flex-1">
+                        <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
                           {item.desc}
                         </p>
                       )}
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
+                      <div className="flex items-center justify-between mt-auto pt-3 border-t border-gold/15">
                         <span className="text-[10px] tracking-widest uppercase text-gold">
                           Consult Pandit Ji
                         </span>
@@ -312,11 +312,11 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
                                 {getShortProductName(item.name)}
                               </h3>
                               {item.description && (
-                                <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 flex-1">
+                                <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
                                   {item.description}
                                 </p>
                               )}
-                              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gold/15">
+                              <div className="flex items-center justify-between mt-auto pt-3 border-t border-gold/15">
                                 <span className="text-maroon font-medium">
                                   ₹{item.price.toLocaleString("en-IN")}
                                 </span>
@@ -637,7 +637,7 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                             {puja.name}
                           </h3>
                           {puja.description && (
-                            <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed flex-1">
+                            <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
                               {puja.description}
                             </p>
                           )}
@@ -652,7 +652,7 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                           )}
 
                           {/* Price + CTA */}
-                          <div className="mt-3 pt-3 border-t border-gold/15 flex items-center justify-between">
+                          <div className="mt-auto pt-3 border-t border-gold/15 flex items-center justify-between">
                             <div>
                               {minPrice !== null ? (
                                 <>

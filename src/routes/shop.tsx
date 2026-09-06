@@ -299,20 +299,20 @@ function ShopPage() {
                                 <Link
                                   to="/product/$slug"
                                   params={{ slug: product.slug }}
-                                  className="block mb-3 flex-1"
+                                  className="block mb-3"
                                 >
                                   <h3 className="font-display text-lg font-bold text-maroon-deep mb-2 group-hover:text-maroon-darker transition-colors line-clamp-2">
                                     {getShortProductName(product.name)}
                                   </h3>
                                   {product.description && (
-                                    <p className="text-sm text-muted-foreground line-clamp-2">
+                                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                                       {product.description}
                                     </p>
                                   )}
                                 </Link>
 
                                 {/* Price */}
-                                <div className="flex items-center gap-2 mb-4">
+                                <div className="flex items-center gap-2 mb-4 mt-auto">
                                   <span className="text-2xl font-bold text-maroon-deep">
                                     ₹{product.price.toLocaleString("en-IN")}
                                   </span>
