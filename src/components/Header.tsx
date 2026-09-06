@@ -38,10 +38,10 @@ export function Header() {
               Shop All
             </Link>
             <a
-              href="tel:+919999999999"
+              href="tel:+918287670827"
               className="flex items-center gap-1.5 hover:text-gold transition"
             >
-              <Phone className="w-3 h-3" /> +91 99999 99999
+              <Phone className="w-3 h-3" /> +91 82876 70827
             </a>
           </div>
         </div>

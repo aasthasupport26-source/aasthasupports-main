@@ -313,10 +313,10 @@ export const createPuja = createServerFn({ method: "POST" })
     const { accessToken, benefits, ...rest } = data;
     const insertData = {
       ...rest,
-      benefits: benefits ? JSON.stringify(benefits) : null,
+      benefits: benefits || null,
       base_price: 0,
     };
-    const { error } = await supabaseAdmin.from("pujas").insert(insertData);
+    const { error } = await supabaseAdmin.from("pujas").insert(insertData as any);
     if (error) {
       console.error("Failed to create puja:", error);
       throw new Error("Failed to create puja. Please try again.");
@@ -354,9 +354,9 @@ export const updatePuja = createServerFn({ method: "POST" })
     const { id, accessToken, benefits, ...rest } = data;
     const updateData = {
       ...rest,
-      benefits: benefits ? JSON.stringify(benefits) : null,
+      benefits: benefits || null,
     };
-    const { error } = await supabaseAdmin.from("pujas").update(updateData).eq("id", id);
+    const { error } = await supabaseAdmin.from("pujas").update(updateData as any).eq("id", id);
     if (error) {
       console.error("Failed to update puja:", error);
       throw new Error("Failed to update puja. Please try again.");

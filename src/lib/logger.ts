@@ -169,28 +169,40 @@ class Logger {
    * Log API response
    */
   apiResponse(method: string, path: string, statusCode: number, duration: number): void {
-    const level = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
-
-    this[level](`${method} ${path} - ${statusCode}`, {
+    const context = {
       type: 'api_response',
       method,
       path,
       statusCode,
       duration,
-    });
+    };
+
+    if (statusCode >= 500) {
+      this.error(`${method} ${path} - ${statusCode}`, undefined, context);
+    } else if (statusCode >= 400) {
+      this.warn(`${method} ${path} - ${statusCode}`, context);
+    } else {
+      this.info(`${method} ${path} - ${statusCode}`, context);
+    }
   }
 
   /**
    * Log security event
    */
   security(event: string, severity: 'low' | 'medium' | 'high' | 'critical', context?: LogContext): void {
-    const level = severity === 'critical' ? 'critical' : severity === 'high' ? 'error' : 'warn';
-
-    this[level](`Security Event: ${event}`, {
+    const contextObj = {
       type: 'security',
       severity,
       ...context,
-    });
+    };
+
+    if (severity === 'critical') {
+      this.critical(`Security Event: ${event}`, undefined, contextObj);
+    } else if (severity === 'high') {
+      this.error(`Security Event: ${event}`, undefined, contextObj);
+    } else {
+      this.warn(`Security Event: ${event}`, contextObj);
+    }
   }
 
   /**

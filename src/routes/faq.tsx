@@ -221,7 +221,7 @@ function FaqPage() {
               Email Us
             </a>
             <a
-              href="tel:+919999999999"
+              href="tel:+918287670827"
               className="border border-gold/60 px-8 py-3.5 rounded-md tracking-widest text-xs uppercase hover:bg-gold/15 transition"
             >
               Call Support

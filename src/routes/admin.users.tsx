@@ -45,7 +45,7 @@ function UsersPage() {
 
     const { error } = await supabase
       .from("users")
-      .update({ role: targetRole, is_admin: isAdmin })
+      .update({ role: targetRole, is_admin: isAdmin } as any)
       .eq("id", userId);
 
     if (error) return toast.error(error.message);

@@ -32,7 +32,7 @@ export const Route = createFileRoute("/contact")({
           name: "Aastha Support",
           image: "https://aasthasupport.com/og-image.jpg",
           url: "https://aasthasupport.com/contact",
-          telephone: "+91-99999-99999",
+          telephone: "+91-82876-70827",
           email: "aastha.support.26@gmail.com",
           address: {
             "@type": "PostalAddress",
@@ -171,13 +171,13 @@ function ContactPage() {
               {
                 icon: Phone,
                 title: "Call Us",
-                v1: "+91 99999 99999",
+                v1: "+91 82876 70827",
                 v2: "Mon–Sat · 9am – 8pm IST",
               },
               {
                 icon: MessageCircle,
                 title: "WhatsApp",
-                v1: "+91 99999 99999",
+                v1: "+91 82876 70827",
                 v2: "Instant replies for queries",
               },
               {

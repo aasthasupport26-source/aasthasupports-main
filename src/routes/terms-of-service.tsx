@@ -123,7 +123,7 @@ function TermsOfService() {
             <p>For questions about these terms, contact us at:</p>
             <ul className="list-none space-y-1">
               <li>Email: aastha.support.26@gmail.com</li>
-              <li>Phone: +91-99999-99999</li>
+              <li>Phone: +91-82876-70827</li>
               <li>Address: Aastha Bhawan, Haridwar, Uttarakhand 249401, India</li>
             </ul>
           </section>

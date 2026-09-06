@@ -170,7 +170,7 @@ function TrackOrderPage() {
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 99999 99999"
+                placeholder="+91 82876 70827"
                 className="mt-1 w-full px-3 py-2.5 rounded-md border border-gold/30 bg-white text-sm focus:outline-none focus:border-gold"
               />
             </div>
@@ -326,8 +326,8 @@ function TrackOrderPage() {
 
               <p className="text-center text-xs text-muted-foreground">
                 Need help? Call{" "}
-                <a href="tel:+919999999999" className="text-maroon underline">
-                  +91 99999 99999
+                <a href="tel:+918287670827" className="text-maroon underline">
+                  +91 82876 70827
                 </a>{" "}
                 or email{" "}
                 <a href="mailto:aastha.support.26@gmail.com" className="text-maroon underline">
