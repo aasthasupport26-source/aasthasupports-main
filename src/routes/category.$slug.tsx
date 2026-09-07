@@ -31,7 +31,7 @@ export const Route = createFileRoute("/category/$slug")({
   head: ({ params, loaderData }) => {
     const title = `${loaderData?.cat.name ?? "Category"} — Aastha Supports`;
     const desc = loaderData?.cat.tagline ?? "";
-    const url = `https://aasthasupports.com/category/${params.slug}`;
+    const url = `https://www.aasthasupports.com/category/${params.slug}`;
     return {
       meta: [
         { title },
@@ -39,6 +39,7 @@ export const Route = createFileRoute("/category/$slug")({
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
         { property: "og:url", content: url },
+        { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
       ],
       links: [{ rel: "canonical", href: url }],
     };

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { categories } from "@/data/catalog";
 
-const BASE_URL = "https://aasthasupport.com";
+const BASE_URL = "https://www.aasthasupports.com";
 
 interface SitemapEntry {
   path: string;
@@ -16,10 +16,17 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: async () => {
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
+          { path: "/shop", changefreq: "daily", priority: "0.9" },
+          { path: "/book-pooja", changefreq: "weekly", priority: "0.9" },
           { path: "/about", changefreq: "monthly", priority: "0.7" },
           { path: "/contact", changefreq: "monthly", priority: "0.7" },
           { path: "/faq", changefreq: "monthly", priority: "0.6" },
+          { path: "/track-order", changefreq: "monthly", priority: "0.5" },
           { path: "/returns-policy", changefreq: "yearly", priority: "0.4" },
+          { path: "/shipping-policy", changefreq: "yearly", priority: "0.4" },
+          { path: "/privacy-policy", changefreq: "yearly", priority: "0.4" },
+          { path: "/terms-of-service", changefreq: "yearly", priority: "0.4" },
+          { path: "/refund-policy", changefreq: "yearly", priority: "0.4" },
         ];
 
         for (const cat of categories) {

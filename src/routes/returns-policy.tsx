@@ -16,9 +16,9 @@ export const Route = createFileRoute("/returns-policy")({
         property: "og:description",
         content: "7-day easy returns. Free shipping above ₹999. Read our complete policies.",
       },
-      { property: "og:url", content: "https://aasthasupport.com/returns-policy" },
+      { property: "og:url", content: "https://www.aasthasupports.com/returns-policy" },
     ],
-    links: [{ rel: "canonical", href: "https://aasthasupport.com/returns-policy" }],
+    links: [{ rel: "canonical", href: "https://www.aasthasupports.com/returns-policy" }],
   }),
   component: ReturnsPolicyPage,
 });
@@ -127,7 +127,7 @@ const policySections = [
       },
       {
         heading: "Intellectual Property",
-        text: "All content, images, and branding on aasthasupport.com are the property of Aastha Support. Unauthorised reproduction is strictly prohibited.",
+        text: "All content, images, and branding on aasthasupports.com are the property of Aastha Support. Unauthorised reproduction is strictly prohibited.",
       },
       {
         heading: "Governing Law",

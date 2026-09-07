@@ -20,10 +20,10 @@ export const Route = createFileRoute("/")({
         content:
           "Certified rudraksha, gems, malas, bracelets, yantras and live Vedic poojas — energised by learned pandits.",
       },
-      { property: "og:url", content: "https://aasthasupports.com/" },
-      { property: "og:image", content: "https://aasthasupports.com/og-image.jpg" },
+      { property: "og:url", content: "https://www.aasthasupports.com/" },
+      { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
     ],
-    links: [{ rel: "canonical", href: "https://aasthasupports.com/" }],
+    links: [{ rel: "canonical", href: "https://www.aasthasupports.com/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -31,10 +31,10 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Aastha Supports",
-          url: "https://aasthasupports.com",
+          url: "https://www.aasthasupports.com",
           potentialAction: {
             "@type": "SearchAction",
-            target: "https://aasthasupports.com/category/{search_term_string}",
+            target: "https://www.aasthasupports.com/category/{search_term_string}",
             "query-input": "required name=search_term_string",
           },
         }),

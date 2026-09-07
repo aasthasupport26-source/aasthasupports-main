@@ -37,8 +37,8 @@ export const Route = createFileRoute("/product/$slug")({
     const title = product ? `${product.name} — Aastha Support` : `Product — Aastha Support`;
     const description =
       product?.description?.slice(0, 160) || "Authentic certified spiritual products";
-    const url = `https://aasthasupport.com/product/${loaderData?.slug}`;
-    const image = product?.images?.[0] || "https://aasthasupport.com/og-image.jpg";
+    const url = `https://www.aasthasupports.com/product/${loaderData?.slug}`;
+    const image = product?.images?.[0] || "https://www.aasthasupports.com/og-image.jpg";
 
     return {
       meta: [

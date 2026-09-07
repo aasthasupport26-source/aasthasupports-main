@@ -20,9 +20,9 @@ export const Route = createFileRoute("/contact")({
         property: "og:description",
         content: "Speak to our Vedic astrologers and customer care team.",
       },
-      { property: "og:url", content: "https://aasthasupport.com/contact" },
+      { property: "og:url", content: "https://www.aasthasupports.com/contact" },
     ],
-    links: [{ rel: "canonical", href: "https://aasthasupport.com/contact" }],
+    links: [{ rel: "canonical", href: "https://www.aasthasupports.com/contact" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -30,8 +30,8 @@ export const Route = createFileRoute("/contact")({
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
           name: "Aastha Support",
-          image: "https://aasthasupport.com/og-image.jpg",
-          url: "https://aasthasupport.com/contact",
+          image: "https://www.aasthasupports.com/og-image.jpg",
+          url: "https://www.aasthasupports.com/contact",
           telephone: "+91-82876-70827",
           email: "aastha.support.26@gmail.com",
           address: {

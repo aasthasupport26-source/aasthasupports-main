@@ -17,9 +17,9 @@ export const Route = createFileRoute("/about")({
         property: "og:description",
         content: "Our story, pandits, and commitment to authentic Sanatan tradition.",
       },
-      { property: "og:url", content: "https://aasthasupport.com/about" },
+      { property: "og:url", content: "https://www.aasthasupports.com/about" },
     ],
-    links: [{ rel: "canonical", href: "https://aasthasupport.com/about" }],
+    links: [{ rel: "canonical", href: "https://www.aasthasupports.com/about" }],
   }),
   component: AboutPage,
 });

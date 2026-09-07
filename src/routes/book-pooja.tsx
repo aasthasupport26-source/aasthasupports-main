@@ -8,6 +8,25 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/book-pooja")({
+  head: () => ({
+    meta: [
+      { title: "Book Vedic Pooja Online — Kashi, Ujjain & Haridwar | Aastha Support" },
+      {
+        name: "description",
+        content:
+          "Book personalized online Vedic pujas performed live by experienced pandits at holy shrines in Kashi, Ujjain, and Haridwar with Sankalp and Prasad dispatch.",
+      },
+      { property: "og:title", content: "Book Vedic Pooja Online — Aastha Support" },
+      {
+        property: "og:description",
+        content:
+          "Live Vedic pujas performed by experienced pandits with personal Sankalp and Prasad delivered to your home.",
+      },
+      { property: "og:url", content: "https://www.aasthasupports.com/book-pooja" },
+      { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
+    ],
+    links: [{ rel: "canonical", href: "https://www.aasthasupports.com/book-pooja" }],
+  }),
   component: BookPoojaPage,
 });
 

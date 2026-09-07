@@ -23,9 +23,9 @@ export const Route = createFileRoute("/faq")({
         content:
           "Answers on rudraksha, gemstones, online pooja, shipping, returns and Vedic certification.",
       },
-      { property: "og:url", content: "https://aasthasupport.com/faq" },
+      { property: "og:url", content: "https://www.aasthasupports.com/faq" },
     ],
-    links: [{ rel: "canonical", href: "https://aasthasupport.com/faq" }],
+    links: [{ rel: "canonical", href: "https://www.aasthasupports.com/faq" }],
     scripts: [
       {
         type: "application/ld+json",
