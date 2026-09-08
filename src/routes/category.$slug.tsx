@@ -1,13 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { getCategory } from "@/data/catalog";
-import { getShopifyProducts } from "@/lib/shopify.functions";
+import { getShopifyProducts, normalizeShopifyVideoUrl } from "@/lib/shopify.functions";
 import { getTemples, getPujasByTemple } from "@/lib/booking.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import {
   Sparkles,
-  ShieldCheck,
   Loader2,
   ChevronLeft,
   ChevronRight,
@@ -297,15 +296,59 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
                             title={item.name}
                             className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition flex flex-col"
                           >
-                            <div className="aspect-square overflow-hidden bg-cream">
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                loading="lazy"
-                                width={400}
-                                height={400}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                              />
+                            <div className="aspect-square overflow-hidden bg-cream relative">
+                              {(() => {
+                                const cardVideoUrl = normalizeShopifyVideoUrl(
+                                  item.video?.url || "",
+                                );
+                                return cardVideoUrl && item.video?.mimeType !== "video/external" ? (
+                                  <video
+                                    ref={(el) => {
+                                      if (el) {
+                                        el.defaultMuted = true;
+                                        el.muted = true;
+                                        el.volume = 0;
+                                        if (el.paused) {
+                                          el.play().catch(() => {});
+                                        }
+                                      }
+                                    }}
+                                    onLoadedMetadata={(e) => {
+                                      const v = e.currentTarget;
+                                      v.defaultMuted = true;
+                                      v.muted = true;
+                                      v.volume = 0;
+                                      v.play().catch(() => {});
+                                    }}
+                                    onCanPlay={(e) => {
+                                      const v = e.currentTarget;
+                                      v.defaultMuted = true;
+                                      v.muted = true;
+                                      v.volume = 0;
+                                      if (v.paused) v.play().catch(() => {});
+                                    }}
+                                    poster={item.image}
+                                    autoPlay
+                                    muted
+                                    loop
+                                    playsInline
+                                    preload="auto"
+                                    disablePictureInPicture
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                                  >
+                                    <source src={cardVideoUrl} type="video/mp4" />
+                                  </video>
+                                ) : (
+                                  <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    loading="lazy"
+                                    width={400}
+                                    height={400}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                  />
+                                );
+                              })()}
                             </div>
                             <div className="p-4 flex flex-col flex-1">
                               <ProductRating rating={rating} />

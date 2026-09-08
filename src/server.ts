@@ -116,6 +116,24 @@ export default {
         }
       }
 
+      // Stream Shopify videos if requested through custom domain
+      if (url.pathname.startsWith("/cdn/shop/videos/")) {
+        const targetPath = url.pathname.replace(/^\/cdn\/shop\/videos\//, "/videos/");
+        const shopifyCdnUrl = `https://cdn.shopify.com${targetPath}${url.search}`;
+        const headers: Record<string, string> = {};
+        const range = request.headers.get("range");
+        if (range) headers["range"] = range;
+
+        const cdnRes = await fetch(shopifyCdnUrl, { headers });
+        const responseHeaders = new Headers(cdnRes.headers);
+        responseHeaders.set("access-control-allow-origin", "*");
+        return new Response(cdnRes.body, {
+          status: cdnRes.status,
+          statusText: cdnRes.statusText,
+          headers: responseHeaders,
+        });
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       const normalizedResponse = await normalizeCatastrophicSsrResponse(response);

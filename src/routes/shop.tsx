@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import React, { useState, useMemo } from "react";
 import { Layout } from "@/components/Layout";
 import { useServerFn } from "@tanstack/react-start";
-import { getShopifyProducts } from "@/lib/shopify.functions";
+import { getShopifyProducts, normalizeShopifyVideoUrl } from "@/lib/shopify.functions";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -265,17 +265,60 @@ function ShopPage() {
                                 params={{ slug: product.slug }}
                                 className="block relative aspect-square overflow-hidden bg-cream"
                               >
-                                {product.image ? (
-                                  <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                    No image
-                                  </div>
-                                )}
+                                {(() => {
+                                  const cardVideoUrl = normalizeShopifyVideoUrl(
+                                    product.video?.url || "",
+                                  );
+                                  return cardVideoUrl &&
+                                    product.video?.mimeType !== "video/external" ? (
+                                    <video
+                                      ref={(el) => {
+                                        if (el) {
+                                          el.defaultMuted = true;
+                                          el.muted = true;
+                                          el.volume = 0;
+                                          if (el.paused) {
+                                            el.play().catch(() => {});
+                                          }
+                                        }
+                                      }}
+                                      onLoadedMetadata={(e) => {
+                                        const v = e.currentTarget;
+                                        v.defaultMuted = true;
+                                        v.muted = true;
+                                        v.volume = 0;
+                                        v.play().catch(() => {});
+                                      }}
+                                      onCanPlay={(e) => {
+                                        const v = e.currentTarget;
+                                        v.defaultMuted = true;
+                                        v.muted = true;
+                                        v.volume = 0;
+                                        if (v.paused) v.play().catch(() => {});
+                                      }}
+                                      poster={product.image}
+                                      autoPlay
+                                      muted
+                                      loop
+                                      playsInline
+                                      preload="auto"
+                                      disablePictureInPicture
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+                                    >
+                                      <source src={cardVideoUrl} type="video/mp4" />
+                                    </video>
+                                  ) : product.image ? (
+                                    <img
+                                      src={product.image}
+                                      alt={product.name}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                                      No image
+                                    </div>
+                                  );
+                                })()}
                                 {product.certified && (
                                   <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-md">
                                     <ShieldCheck className="w-4 h-4 text-green-600" />

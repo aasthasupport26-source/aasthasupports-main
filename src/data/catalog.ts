@@ -232,9 +232,10 @@ export const categories: Category[] = [
           },
           {
             name: "Yellow Sapphire (Pukhraj)",
-            slug: "gemstones",
-            image: gemstonesImg,
-            desc: "Jupiter · Brihaspati — Wisdom & Fortune",
+            slug: "natural-ceylon-sri-lanka-yellow-sapphire-pukhraj-2-42-carat-2-65-ratti-oval-mixed-certified",
+            image:
+              "https://cdn.shopify.com/s/files/1/1012/2867/5360/files/preview_images/9dfcc4014109480f8312588b9acb54cd.thumbnail.0000000000.jpg?v=1788804658",
+            desc: "Jupiter · Brihaspati — 100% Certified Ceylon",
           },
           {
             name: "Blue Sapphire (Neelam)",

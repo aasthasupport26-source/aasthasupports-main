@@ -35,6 +35,36 @@ export const GET_PRODUCTS_QUERY = gql`
               }
             }
           }
+          media(first: 20) {
+            edges {
+              node {
+                mediaContentType
+                ... on Video {
+                  id
+                  sources {
+                    url
+                    mimeType
+                    format
+                  }
+                  previewImage {
+                    url
+                  }
+                }
+                ... on ExternalVideo {
+                  id
+                  embedUrl
+                  host
+                }
+                ... on MediaImage {
+                  id
+                  image {
+                    url
+                    altText
+                  }
+                }
+              }
+            }
+          }
           variants(first: 1) {
             edges {
               node {
@@ -90,6 +120,38 @@ export const GET_PRODUCT_BY_HANDLE_QUERY = gql`
           node {
             url
             altText
+          }
+        }
+      }
+      media(first: 20) {
+        edges {
+          node {
+            mediaContentType
+            ... on Video {
+              id
+              sources {
+                url
+                mimeType
+                format
+                height
+                width
+              }
+              previewImage {
+                url
+              }
+            }
+            ... on ExternalVideo {
+              id
+              embedUrl
+              host
+            }
+            ... on MediaImage {
+              id
+              image {
+                url
+                altText
+              }
+            }
           }
         }
       }

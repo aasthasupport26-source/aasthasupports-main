@@ -2,9 +2,9 @@ import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-ro
 import { Layout } from "@/components/Layout";
 import { getCategory } from "@/data/catalog";
 import { useCart } from "@/contexts/CartContext";
-import { getShopifyProduct } from "@/lib/shopify.functions";
+import { getShopifyProduct, normalizeShopifyVideoUrl } from "@/lib/shopify.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -16,6 +16,7 @@ import {
   ShoppingBag,
   Heart,
   Loader2,
+  Play,
 } from "lucide-react";
 import { getProductRating } from "@/lib/product-display";
 import { ProductRating } from "@/components/ProductRating";
@@ -87,7 +88,6 @@ function ProductPage() {
   const { slug, product: initialProduct } = Route.useLoaderData();
   const { add } = useCart();
   const navigate = useNavigate();
-  const [activeImage, setActiveImage] = useState(0);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
@@ -105,6 +105,72 @@ function ProductPage() {
   if (!product) {
     throw notFound();
   }
+
+  // Construct unified media gallery list (supporting both images and videos)
+  const galleryItems =
+    product.media && product.media.length > 0
+      ? product.media
+      : (product.images || []).map((url: string, idx: number) => ({
+          type: "image" as const,
+          id: `img-${idx}`,
+          url,
+          altText: product.name,
+        }));
+
+  // If the product has a video, default to showing and playing it immediately
+  const firstVideoIndex = galleryItems.findIndex(
+    (item: any) => item.type === "video" || item.type === "external_video",
+  );
+  const initialMediaIndex = firstVideoIndex !== -1 ? firstVideoIndex : 0;
+  const [activeMediaIndex, setActiveMediaIndex] = useState(initialMediaIndex);
+
+  // Sync if slug changes
+  useEffect(() => {
+    setActiveMediaIndex(initialMediaIndex);
+  }, [product.slug, initialMediaIndex]);
+
+  const activeMedia = galleryItems[activeMediaIndex] || galleryItems[0] || {
+    type: "image" as const,
+    id: "default",
+    url: product.images?.[0] || "",
+  };
+
+  const rawVideoUrl = activeMedia?.type === "video" ? activeMedia.url : "";
+  const videoUrl = normalizeShopifyVideoUrl(rawVideoUrl);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  // Robust autoplay on mount or when active video switches
+  useEffect(() => {
+    if (activeMedia?.type !== "video") return;
+    const v = videoRef.current;
+    if (!v) return;
+    v.defaultMuted = true;
+    v.muted = true;
+    v.volume = 0;
+    v.playsInline = true;
+    const playPromise = v.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false));
+    }
+  }, [videoUrl, activeMedia?.type]);
+
+  const togglePlayPause = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) {
+      v.muted = true;
+      v.play()
+        .then(() => setIsPlaying(true))
+        .catch(() => {});
+    } else {
+      v.pause();
+      setIsPlaying(false);
+    }
+  };
 
   const currentVariant = product.variants?.[selectedVariantIndex] || product.variants?.[0] || {};
   const price = currentVariant.price !== undefined ? currentVariant.price : product.price;
@@ -131,7 +197,7 @@ function ProductPage() {
       {
         slug: product.slug,
         name: `${product.name}${variantTitle}`,
-        image: product.images[activeImage] || product.images[0] || "",
+        image: product.images?.[0] || activeMedia?.preview || activeMedia?.url || "",
         price,
         mrp,
         categoryName: cat.name,
@@ -168,30 +234,110 @@ function ProductPage() {
         </nav>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Image */}
+          {/* Media Player / Gallery */}
           <div className="space-y-4">
-            <div className="aspect-square rounded-2xl overflow-hidden bg-cream border border-gold/30 shadow-royal">
-              <img
-                src={product.images[activeImage] || product.images[0] || ""}
-                alt={product.name}
-                width={800}
-                height={800}
-                className="w-full h-full object-cover transition-opacity duration-300"
-              />
-            </div>
-            {product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-3">
-                {product.images.slice(0, 4).map((img: string, i: number) => (
-                  <div
-                    key={i}
-                    onClick={() => setActiveImage(i)}
-                    className={`aspect-square rounded-lg overflow-hidden border cursor-pointer hover:border-gold transition ${
-                      activeImage === i ? "border-gold ring-2 ring-gold/20" : "border-gold/20"
-                    }`}
+            <div className="aspect-square rounded-2xl overflow-hidden bg-neutral-900 border border-gold/30 shadow-royal relative flex items-center justify-center">
+              {activeMedia?.type === "video" ? (
+                <div
+                  className="relative w-full h-full flex items-center justify-center bg-black cursor-pointer group select-none"
+                  onClick={togglePlayPause}
+                >
+                  <video
+                    key={videoUrl}
+                    ref={videoRef}
+                    poster={activeMedia.preview}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    disablePictureInPicture
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    onLoadedMetadata={(e) => {
+                      const v = e.currentTarget;
+                      v.defaultMuted = true;
+                      v.muted = true;
+                      v.volume = 0;
+                      v.play()
+                        .then(() => setIsPlaying(true))
+                        .catch(() => setIsPlaying(false));
+                    }}
+                    onCanPlay={(e) => {
+                      const v = e.currentTarget;
+                      v.defaultMuted = true;
+                      v.muted = true;
+                      v.volume = 0;
+                      if (v.paused) {
+                        v.play()
+                          .then(() => setIsPlaying(true))
+                          .catch(() => setIsPlaying(false));
+                      }
+                    }}
+                    className="w-full h-full object-contain"
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  </div>
-                ))}
+                    <source src={videoUrl} type="video/mp4" />
+                  </video>
+
+                  {/* Minimal subtle play overlay when paused so user can tap/click to play */}
+                  {!isPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition pointer-events-none">
+                      <div className="w-14 h-14 rounded-full bg-gold/90 text-maroon-deep flex items-center justify-center shadow-lg transition transform group-hover:scale-110">
+                        <Play className="w-6 h-6 fill-current ml-0.5" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : activeMedia?.type === "external_video" ? (
+                <iframe
+                  src={activeMedia.url}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <img
+                  src={activeMedia?.url || product.images?.[0] || ""}
+                  alt={product.name}
+                  width={800}
+                  height={800}
+                  className="w-full h-full object-cover transition-opacity duration-300 bg-cream"
+                />
+              )}
+            </div>
+
+            {/* Thumbnail Row */}
+            {galleryItems.length > 1 && (
+              <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                {galleryItems.map((item: any, i: number) => {
+                  const isVideo = item.type === "video" || item.type === "external_video";
+                  const thumbUrl = isVideo ? item.preview || product.images?.[0] : item.url;
+
+                  return (
+                    <div
+                      key={item.id || i}
+                      onClick={() => setActiveMediaIndex(i)}
+                      className={`relative aspect-square rounded-lg overflow-hidden border cursor-pointer hover:border-gold transition group ${
+                        activeMediaIndex === i
+                          ? "border-gold ring-2 ring-gold/40"
+                          : "border-gold/20"
+                      }`}
+                    >
+                      <img
+                        src={thumbUrl || "/placeholder.jpg"}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                      {isVideo && (
+                        <div className="absolute inset-0 bg-black/45 flex items-center justify-center group-hover:bg-black/25 transition">
+                          <div className="w-7 h-7 rounded-full bg-gold text-maroon-deep flex items-center justify-center shadow-md">
+                            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

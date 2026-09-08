@@ -44,6 +44,13 @@ describe("getSecurityHeaders", () => {
     expect(csp).toContain("https://*.shopify.com");
   });
 
+  it("should allow Shopify CDN in media-src", () => {
+    const headers = getSecurityHeaders();
+    const csp = headers["Content-Security-Policy"];
+    
+    expect(csp).toContain("media-src 'self' https://cdn.shopify.com");
+  });
+
   it("should set HSTS with 1 year max-age", () => {
     const headers = getSecurityHeaders();
     expect(headers["Strict-Transport-Security"]).toBe(

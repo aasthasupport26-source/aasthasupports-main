@@ -8,6 +8,16 @@ let productsCache: any = null;
 let productsCacheTime = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+export function normalizeShopifyVideoUrl(url: string): string {
+  if (!url) return "";
+  // Shopify Storefront API uses the store's primary custom domain (e.g. www.aasthasupports.com/cdn/shop/videos/...)
+  // But on headless deployments, that domain points to the frontend app, resulting in 404s.
+  // The actual media CDN where videos are hosted is cdn.shopify.com.
+  return url
+    .replace(/^http:\/\//, "https://")
+    .replace(/https:\/\/[^/]+\/cdn\/shop\/videos\//, "https://cdn.shopify.com/videos/");
+}
+
 export const getShopifyProducts = createServerFn({ method: "GET" })
   .validator(
     z.object({
@@ -47,6 +57,45 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
         const node = edge.node;
         const metafieldsMap = new Map(node.metafields?.map((m: any) => [m?.key, m?.value]) || []);
 
+        const mediaEdges = node.media?.edges || [];
+        const videoNode = mediaEdges.find(
+          (m: any) =>
+            m.node.mediaContentType === "VIDEO" || m.node.mediaContentType === "EXTERNAL_VIDEO",
+        )?.node;
+
+        let videoData: { id: string; url: string; preview: string; mimeType: string } | null = null;
+        if (videoNode && videoNode.mediaContentType === "VIDEO") {
+          const bestSource =
+            videoNode.sources?.find(
+              (s: any) => s.mimeType === "video/mp4" && s.url.includes("1080p"),
+            ) ||
+            videoNode.sources?.find(
+              (s: any) => s.mimeType === "video/mp4" && s.url.includes("720p"),
+            ) ||
+            videoNode.sources?.find((s: any) => s.mimeType === "video/mp4") ||
+            videoNode.sources?.[0];
+
+          videoData = {
+            id: videoNode.id,
+            url: normalizeShopifyVideoUrl(bestSource?.url || ""),
+            preview: videoNode.previewImage?.url || "",
+            mimeType: bestSource?.mimeType || "video/mp4",
+          };
+        } else if (videoNode && videoNode.mediaContentType === "EXTERNAL_VIDEO") {
+          videoData = {
+            id: videoNode.id,
+            url: videoNode.embedUrl || "",
+            preview: "",
+            mimeType: "video/external",
+          };
+        }
+
+        // Image fallback: if no image in images.edges, use video preview or media image
+        let primaryImage = node.images?.edges?.[0]?.node?.url || "";
+        if (!primaryImage && videoData?.preview) {
+          primaryImage = videoData.preview;
+        }
+
         return {
           slug: node.handle,
           name: node.title,
@@ -54,7 +103,8 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
           mrp: node.compareAtPriceRange?.minVariantPrice?.amount
             ? parseFloat(node.compareAtPriceRange.minVariantPrice.amount)
             : null,
-          image: node.images.edges[0]?.node.url || "",
+          image: primaryImage,
+          video: videoData,
           description: node.description || "",
           shopifyId: node.id,
           variantId: node.variants.edges[0]?.node.id,
@@ -175,6 +225,59 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
       const node = response.product;
       const metafieldsMap = new Map(node.metafields?.map((m: any) => [m?.key, m?.value]) || []);
 
+      const mediaItems = (node.media?.edges || [])
+        .map((e: any) => {
+          const m = e.node;
+          if (m.mediaContentType === "VIDEO") {
+            const bestSource =
+              m.sources?.find((s: any) => s.mimeType === "video/mp4" && s.url.includes("1080p")) ||
+              m.sources?.find((s: any) => s.mimeType === "video/mp4" && s.url.includes("720p")) ||
+              m.sources?.find((s: any) => s.mimeType === "video/mp4") ||
+              m.sources?.[0];
+
+            return {
+              type: "video" as const,
+              id: m.id,
+              url: normalizeShopifyVideoUrl(bestSource?.url || ""),
+              sources: (m.sources || []).map((s: any) => ({
+                ...s,
+                url: normalizeShopifyVideoUrl(s.url),
+              })),
+              preview: m.previewImage?.url || "",
+              mimeType: bestSource?.mimeType || "video/mp4",
+            };
+          } else if (m.mediaContentType === "EXTERNAL_VIDEO") {
+            return {
+              type: "external_video" as const,
+              id: m.id,
+              url: m.embedUrl || "",
+              preview: "",
+              mimeType: "video/external",
+            };
+          } else if (m.mediaContentType === "IMAGE") {
+            return {
+              type: "image" as const,
+              id: m.id,
+              url: m.image?.url || "",
+              altText: m.image?.altText || "",
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      let imageUrls: string[] = node.images?.edges?.map((e: any) => e.node.url) || [];
+      const videos = mediaItems.filter(
+        (m: any) => m.type === "video" || m.type === "external_video",
+      );
+
+      if (imageUrls.length === 0 && videos.length > 0) {
+        const videoPreviews = videos.map((v: any) => v.preview).filter(Boolean);
+        if (videoPreviews.length > 0) {
+          imageUrls = videoPreviews;
+        }
+      }
+
       const product = {
         slug: node.handle,
         name: node.title,
@@ -184,7 +287,9 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
         mrp: node.compareAtPriceRange?.minVariantPrice?.amount
           ? parseFloat(node.compareAtPriceRange.minVariantPrice.amount)
           : null,
-        images: node.images.edges.map((e: any) => e.node.url),
+        images: imageUrls,
+        media: mediaItems,
+        videos,
         shopifyId: node.id,
         variants: node.variants.edges.map((e: any) => ({
           id: e.node.id,

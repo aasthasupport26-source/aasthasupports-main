@@ -32,6 +32,7 @@ function getCSPHeader(): string {
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https: blob:",
+    "media-src 'self' https://cdn.shopify.com https://*.shopify.com https://*.shopifysvc.com blob: data:",
     "font-src 'self' data: https://fonts.gstatic.com",
     "connect-src 'self' https://*.supabase.co https://*.shopify.com https://api.razorpay.com",
     "frame-src 'self' https://api.razorpay.com",
