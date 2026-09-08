@@ -33,8 +33,11 @@ export function WhatsAppWidget() {
             Need Vedic astrological or pooja guidance? Connect with us on WhatsApp!
           </p>
           <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between">
-            <span className="text-[11px] font-mono text-emerald-600 font-bold">wa.me/91</span>
-            <span className="text-[10px] text-emerald-800 font-medium">Online</span>
+            <span className="text-[11px] text-gray-500 font-medium">+91 82876 70827</span>
+            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Online
+            </span>
           </div>
         </div>
       )}
@@ -43,18 +46,15 @@ export function WhatsAppWidget() {
         type="button"
         onClick={openWhatsApp}
         onMouseEnter={() => setShowTooltip(true)}
-        className="flex items-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white shadow-xl hover:shadow-emerald-500/40 px-3.5 py-2.5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 group border-2 border-white/40 cursor-pointer"
-        aria-label="Chat on WhatsApp wa.me/918287670827"
-        title="Chat on WhatsApp (wa.me/918287670827)"
+        className="w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white shadow-2xl hover:shadow-emerald-500/50 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group relative cursor-pointer border-2 border-white/50"
+        aria-label="Chat on WhatsApp (+91 82876 70827)"
+        title="Chat on WhatsApp (+91 82876 70827)"
       >
-        <span className="relative flex h-2.5 w-2.5">
+        <span className="absolute top-0 right-0 flex h-3.5 w-3.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+          <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-white border-2 border-[#25D366]"></span>
         </span>
-        <WhatsAppIcon variant="monochrome" className="w-5 h-5 fill-current shrink-0" />
-        <span className="text-xs font-semibold tracking-wide pr-0.5 hidden sm:inline">
-          wa.me/91
-        </span>
+        <WhatsAppIcon variant="monochrome" className="w-8 h-8 text-white shrink-0 drop-shadow-sm transition-transform group-hover:scale-105" />
       </button>
     </aside>
   );

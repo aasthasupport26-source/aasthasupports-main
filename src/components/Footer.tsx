@@ -193,7 +193,7 @@ export function Footer() {
               title="Click to chat on WhatsApp (+91 82876 70827)"
             >
               <WhatsAppIcon className="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform" />
-              <span>wa.me/91 82876 70827</span>
+              <span>Chat on WhatsApp (+91 82876 70827)</span>
             </button>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2">

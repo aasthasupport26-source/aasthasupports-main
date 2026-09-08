@@ -180,7 +180,7 @@ function ContactPage() {
                 icon: WhatsAppIcon,
                 title: "WhatsApp",
                 v1: "+91 82876 70827",
-                v2: "wa.me/91 · Instant replies",
+                v2: "Instant replies · Direct chat",
                 href: "https://wa.me/918287670827?text=Namaste!%20I%20have%20an%20inquiry%20regarding%20Aastha%20Supports.",
                 isPopup: true,
               },
