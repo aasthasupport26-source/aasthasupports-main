@@ -33,72 +33,6 @@ export interface Category {
 
 export const categories: Category[] = [
   {
-    slug: "online-pooja",
-    name: "Online Pooja",
-    tagline: "Sacred rituals performed by Vedic pandits — live from Kashi, Ujjain & Haridwar.",
-    hero: poojaImg,
-    sections: [
-      {
-        title: "Sawan Special & Most Booked",
-        items: [
-          {
-            name: "सावन सोमवार जल अभिषेक (₹51)",
-            slug: "sawan-jal-abhishek",
-            image: poojaImg,
-            desc: "Sawan Monday Jal Abhishek with Name & Gotra",
-          },
-          {
-            name: "सावन बेलपत्र व जल (₹101)",
-            slug: "sawan-belpatra-jal",
-            image: poojaImg,
-            desc: "108 Belpatra & Jal Abhishek with Video clip",
-          },
-          {
-            name: "Mahamrityunjay Jaap",
-            slug: "mahamrityunjay",
-            image: poojaImg,
-            desc: "1,25,000 mantra jaap for health & long life",
-          },
-          {
-            name: "Rudrabhishek Pooja",
-            slug: "rudrabhishek",
-            image: poojaImg,
-            desc: "Lord Shiva abhishek with panchamrit",
-          },
-        ],
-      },
-      {
-        title: "Dosh Nivaran & Sacred Temples",
-        items: [
-          {
-            name: "Kaal Sarp Dosh Pooja",
-            slug: "kaal-sarp",
-            image: poojaImg,
-            desc: "Trimbakeshwar & Ujjain special",
-          },
-          {
-            name: "Pitra Dosh Nivaran",
-            slug: "pitra-dosh",
-            image: poojaImg,
-            desc: "Tarpan & shraadh for ancestors",
-          },
-          {
-            name: "Mangal Dosh Bhaat Pooja",
-            slug: "mangal-dosh",
-            image: poojaImg,
-            desc: "Mangalnath Temple Ujjain",
-          },
-          {
-            name: "Navgrah Shanti Pooja",
-            slug: "navgrah-shanti",
-            image: poojaImg,
-            desc: "Balance all 9 planetary doshas",
-          },
-        ],
-      },
-    ],
-  },
-  {
     slug: "rudraksha",
     name: "Rudraksha",
     tagline:
@@ -344,6 +278,72 @@ export const categories: Category[] = [
             slug: "rudraaura-shri-sampurna-navgrah-yantra-with-golden-frame-energized-spiritual-wall-frame-for-peace-prosperity-vastu-dosh-nivaran-navgrah-yantra-for-home-office",
             image: yantraImg,
             desc: "Harmonizes all 9 planets",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "online-pooja",
+    name: "Online Pooja",
+    tagline: "Sacred rituals performed by Vedic pandits — live from Kashi, Ujjain & Haridwar.",
+    hero: poojaImg,
+    sections: [
+      {
+        title: "Sawan Special & Most Booked",
+        items: [
+          {
+            name: "सावन सोमवार जल अभिषेक (₹51)",
+            slug: "sawan-jal-abhishek",
+            image: poojaImg,
+            desc: "Sawan Monday Jal Abhishek with Name & Gotra",
+          },
+          {
+            name: "सावन बेलपत्र व जल (₹101)",
+            slug: "sawan-belpatra-jal",
+            image: poojaImg,
+            desc: "108 Belpatra & Jal Abhishek with Video clip",
+          },
+          {
+            name: "Mahamrityunjay Jaap",
+            slug: "mahamrityunjay",
+            image: poojaImg,
+            desc: "1,25,000 mantra jaap for health & long life",
+          },
+          {
+            name: "Rudrabhishek Pooja",
+            slug: "rudrabhishek",
+            image: poojaImg,
+            desc: "Lord Shiva abhishek with panchamrit",
+          },
+        ],
+      },
+      {
+        title: "Dosh Nivaran & Sacred Temples",
+        items: [
+          {
+            name: "Kaal Sarp Dosh Pooja",
+            slug: "kaal-sarp",
+            image: poojaImg,
+            desc: "Trimbakeshwar & Ujjain special",
+          },
+          {
+            name: "Pitra Dosh Nivaran",
+            slug: "pitra-dosh",
+            image: poojaImg,
+            desc: "Tarpan & shraadh for ancestors",
+          },
+          {
+            name: "Mangal Dosh Bhaat Pooja",
+            slug: "mangal-dosh",
+            image: poojaImg,
+            desc: "Mangalnath Temple Ujjain",
+          },
+          {
+            name: "Navgrah Shanti Pooja",
+            slug: "navgrah-shanti",
+            image: poojaImg,
+            desc: "Balance all 9 planetary doshas",
           },
         ],
       },
