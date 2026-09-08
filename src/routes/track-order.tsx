@@ -139,7 +139,7 @@ function TrackOrderPage() {
       <section className="bg-gradient-to-b from-maroon-deep to-maroon py-14">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gold tracking-[0.4em] text-xs">✦ ORDER TRACKING ✦</p>
-          <h1 className="font-display text-4xl md:text-5xl text-cream mt-3">Track Your Order</h1>
+          <h1 className="font-sans font-bold text-3xl md:text-5xl text-cream mt-3 tracking-tight">Track Your Order</h1>
           <p className="text-cream/80 mt-3 max-w-xl mx-auto text-sm">
             Enter your order number and registered phone to see live status.
           </p>
@@ -197,7 +197,7 @@ function TrackOrderPage() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-[11px] tracking-widest uppercase text-gold">Order</p>
-                    <h2 className="font-display text-2xl text-maroon-deep">{order.order_number}</h2>
+                    <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep">{order.order_number}</h2>
                     <p className="text-xs text-muted-foreground mt-1">
                       Placed on {new Date(order.created_at).toLocaleString("en-IN")}
                     </p>
@@ -262,7 +262,7 @@ function TrackOrderPage() {
 
               {/* Items */}
               <div className="bg-white rounded-xl border border-gold/30 shadow-soft p-6">
-                <h3 className="font-display text-lg text-maroon-deep mb-4 flex items-center gap-2">
+                <h3 className="font-sans font-bold text-base md:text-lg text-maroon-deep mb-4 flex items-center gap-2">
                   <Package className="w-4 h-4 text-gold" /> Items
                 </h3>
                 <div className="divide-y divide-gold/15">
@@ -289,7 +289,7 @@ function TrackOrderPage() {
                   <span className="text-xs tracking-widest uppercase text-muted-foreground">
                     Total
                   </span>
-                  <span className="font-display text-2xl text-maroon-deep">
+                  <span className="font-sans font-bold text-2xl text-maroon-deep">
                     ₹{Number(order.total).toLocaleString("en-IN")}
                   </span>
                 </div>

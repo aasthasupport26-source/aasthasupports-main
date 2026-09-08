@@ -344,8 +344,8 @@ function ShopPage() {
                                   params={{ slug: product.slug }}
                                   className="block mb-3"
                                 >
-                                  <h3 className="font-display text-lg font-bold text-maroon-deep mb-2 group-hover:text-maroon-darker transition-colors line-clamp-2">
-                                    {getShortProductName(product.name)}
+                                  <h3 className="font-display text-lg font-semibold text-maroon-deep mb-2 group-hover:text-maroon-darker transition-colors line-clamp-2">
+                                    {getShortProductName(product.name, product)}
                                   </h3>
                                   {product.description && (
                                     <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">

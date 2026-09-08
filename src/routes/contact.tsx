@@ -83,7 +83,7 @@ function ContactPage() {
       <section className="bg-royal py-20 text-cream">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gold tracking-[0.4em] text-xs">✦ संपर्क ✦</p>
-          <h1 className="font-display text-5xl md:text-6xl mt-3">Get in Touch</h1>
+          <h1 className="font-sans font-bold text-4xl md:text-6xl mt-3 tracking-tight">Get in Touch</h1>
           <p className="mt-4 text-cream/80 max-w-xl mx-auto">
             Speak to our Vedic astrologers for free guidance, or reach our care team for any query.
           </p>
@@ -94,7 +94,7 @@ function ContactPage() {
         <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-10">
           {/* Form */}
           <div className="bg-white rounded-2xl p-8 md:p-10 shadow-soft border border-gold/20">
-            <h2 className="font-display text-3xl text-maroon-deep">Send a Message</h2>
+            <h2 className="font-sans font-bold text-2xl md:text-3xl text-maroon-deep tracking-tight">Send a Message</h2>
             <div className="divider-gold w-24 mt-3 mb-6" />
 
             {submitted ? (
@@ -209,7 +209,7 @@ function ContactPage() {
                     <c.icon className="w-5 h-5 text-gold" />
                   </div>
                   <div>
-                    <h3 className="font-display text-xl text-maroon-deep">{c.title}</h3>
+                    <h3 className="font-sans font-bold text-lg md:text-xl text-maroon-deep">{c.title}</h3>
                     <p className="text-maroon mt-1 font-medium">{c.v1}</p>
                     <p className="text-xs text-muted-foreground tracking-wider mt-0.5">{c.v2}</p>
                   </div>

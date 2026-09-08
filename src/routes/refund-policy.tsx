@@ -15,13 +15,13 @@ export const Route = createFileRoute("/refund-policy")({
 function RefundPolicy() {
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="font-display text-4xl text-maroon-deep mb-2">Refund Policy</h1>
+      <div className="container mx-auto px-4 py-12 max-w-4xl text-page font-sans">
+        <h1 className="font-sans font-bold text-3xl md:text-4xl text-maroon-deep mb-2 tracking-tight">Refund Policy</h1>
         <p className="text-sm text-muted-foreground mb-8">Last Updated: August 17, 2026</p>
 
         <div className="prose prose-stone max-w-none space-y-6">
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Refund Eligibility</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Refund Eligibility</h2>
             <p>Refunds are available under the following conditions:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li>Product received is damaged or defective</li>
@@ -32,7 +32,7 @@ function RefundPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Non-Refundable Items</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Non-Refundable Items</h2>
             <ul className="list-disc pl-6 space-y-1">
               <li>Energized products (unless defective)</li>
               <li>Customized or personalized items</li>
@@ -42,7 +42,7 @@ function RefundPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Refund Process</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Refund Process</h2>
             <ol className="list-decimal pl-6 space-y-2">
               <li>Contact our support team within 7 days of delivery</li>
               <li>Provide order number and reason for refund</li>
@@ -53,7 +53,7 @@ function RefundPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Pooja Booking Refunds</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Pooja Booking Refunds</h2>
             <ul className="list-disc pl-6 space-y-1">
               <li><strong>24+ hours before:</strong> 100% refund</li>
               <li><strong>12-24 hours before:</strong> 50% refund</li>
@@ -63,14 +63,14 @@ function RefundPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Return Shipping</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Return Shipping</h2>
             <p>
               For defective or wrong products, we cover return shipping costs. For other returns, customer bears the shipping cost.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Refund Timeline</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Refund Timeline</h2>
             <ul className="list-disc pl-6 space-y-1">
               <li>Credit/Debit Card: 5-7 business days</li>
               <li>UPI/Net Banking: 3-5 business days</li>
@@ -82,7 +82,7 @@ function RefundPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Partial Refunds</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Partial Refunds</h2>
             <p>Partial refunds may be issued for:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li>Products with minor defects that don't affect functionality</li>
@@ -92,14 +92,14 @@ function RefundPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Exchanges</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Exchanges</h2>
             <p>
               We offer exchanges for defective products or wrong items delivered. Exchange requests must be made within 7 days of delivery.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Contact for Refunds</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Contact for Refunds</h2>
             <p>To initiate a refund, contact us at:</p>
             <ul className="list-none space-y-1">
               <li>Email: aastha.support.26@gmail.com</li>

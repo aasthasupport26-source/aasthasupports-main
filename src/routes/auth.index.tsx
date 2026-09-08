@@ -90,7 +90,7 @@ function AuthPage() {
     <Layout>
       <section className="container max-w-md mx-auto py-20">
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-gold/20">
-          <h1 className="font-display text-3xl text-maroon-deep mb-2 text-center">Welcome</h1>
+          <h1 className="font-sans font-bold text-3xl text-maroon-deep mb-2 text-center">Welcome</h1>
           <p className="text-sm text-muted-foreground mb-8 text-center">
             Sign in to book poojas and manage your orders
           </p>

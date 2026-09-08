@@ -154,7 +154,7 @@ function ReturnsPolicyPage() {
         </div>
         <div className="container mx-auto px-4 text-center relative">
           <p className="text-gold tracking-[0.3em] text-xs">|| विश्वास एवं सुरक्षा ||</p>
-          <h1 className="font-display text-4xl md:text-5xl text-cream mt-4">
+          <h1 className="font-sans font-bold text-3xl md:text-5xl text-cream mt-4 tracking-tight">
             Returns, Shipping & Policies
           </h1>
           <p className="mt-4 text-cream/75 max-w-2xl mx-auto">
@@ -192,7 +192,7 @@ function ReturnsPolicyPage() {
                 <div className="w-10 h-10 rounded-full bg-gold/15 flex items-center justify-center">
                   <section.icon className="w-5 h-5 text-gold" />
                 </div>
-                <h2 className="font-display text-2xl md:text-3xl text-maroon-deep">
+                <h2 className="font-sans font-bold text-xl md:text-3xl text-maroon-deep tracking-tight">
                   {section.title}
                 </h2>
               </div>
@@ -202,7 +202,7 @@ function ReturnsPolicyPage() {
                     key={i}
                     className="bg-white rounded-xl p-6 border border-gold/15 hover:border-gold/40 transition shadow-soft"
                   >
-                    <h3 className="font-display text-lg text-maroon-deep mb-2">{block.heading}</h3>
+                    <h3 className="font-sans font-bold text-base md:text-lg text-maroon-deep mb-2">{block.heading}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{block.text}</p>
                   </div>
                 ))}
@@ -215,7 +215,7 @@ function ReturnsPolicyPage() {
       {/* CTA */}
       <section className="py-16 bg-royal text-cream">
         <div className="container mx-auto px-4 text-center max-w-2xl">
-          <h2 className="font-display text-3xl">Need help with an order?</h2>
+          <h2 className="font-sans font-bold text-2xl md:text-3xl tracking-tight">Need help with an order?</h2>
           <p className="mt-4 text-cream/80">
             Our support team is available 24/7. Reach out via WhatsApp, email, or phone — we
             typically respond within minutes.

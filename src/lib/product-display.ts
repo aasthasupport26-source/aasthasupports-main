@@ -2,7 +2,10 @@
  * Product display helpers for title shortening and credible star rating calculation.
  */
 
-export function getShortProductName(name: string): string {
+export function getShortProductName(
+  name: string,
+  extra?: { description?: string; slug?: string } | string,
+): string {
   if (!name) return "";
 
   // Split at pipe or dash delimiters if present (e.g. "Title | Subtitle" or "Title – Subtitle")
@@ -83,7 +86,59 @@ export function getShortProductName(name: string): string {
     return `${descriptor}${origin ? ` ${origin}` : ""} Rudraksha`.trim();
   }
 
-  // Fallback (e.g. Gemstones or other catalog items)
+  // 5. Gemstones (Sapphire, Pukhraj, Ruby, Manik, Emerald, Panna, Pearl, Moti, Coral, Moonga, etc.)
+  const isGemstone =
+    lower.includes("sapphire") ||
+    lower.includes("pukhraj") ||
+    lower.includes("ruby") ||
+    lower.includes("manik") ||
+    lower.includes("emerald") ||
+    lower.includes("panna") ||
+    lower.includes("coral") ||
+    lower.includes("moonga") ||
+    lower.includes("pearl") ||
+    lower.includes("moti") ||
+    lower.includes("neelam") ||
+    lower.includes("gemstone") ||
+    lower.includes("ratti");
+
+  if (isGemstone) {
+    let rattiStr = "";
+    const extraDesc =
+      typeof extra === "object"
+        ? extra?.description || ""
+        : typeof extra === "string"
+          ? extra
+          : "";
+    const extraSlug = typeof extra === "object" ? extra?.slug || "" : "";
+
+    const rattiMatch =
+      cleanName.match(/(\d+(?:\.\d+)?)\s*ratti\b/i) ||
+      name.match(/(\d+(?:\.\d+)?)\s*ratti\b/i) ||
+      extraDesc.match(/(\d+(?:\.\d+)?)\s*ratti\b/i) ||
+      extraSlug.match(/(?:^|-)(\d+)[-_](\d+)[-_]ratti(?:-|$)/i);
+
+    if (rattiMatch) {
+      if (rattiMatch[1] && rattiMatch[2]) {
+        rattiStr = ` (${rattiMatch[1]}.${rattiMatch[2]} Ratti)`;
+      } else {
+        rattiStr = ` (${rattiMatch[1]} Ratti)`;
+      }
+    }
+
+    let g = cleanName
+      .replace(/^Natural\s+/i, "")
+      .replace(/^Original\s+/i, "")
+      .replace(/\(Sri Lanka\)/i, "")
+      .replace(/\s*\(\s*\d+(?:\.\d+)?\s*ratti\s*\)/i, "")
+      .replace(/\s*-\s*\d+(?:\.\d+)?\s*ratti/i, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    return `${g}${rattiStr}`.trim();
+  }
+
+  // Fallback (e.g. other catalog items)
   return cleanName
     .replace(/^Natural\s+/i, "")
     .replace(/^Original\s+/i, "")

@@ -194,8 +194,8 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                           className="hidden"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {getShortProductName(product.name)}
+                          <p className="text-xs font-semibold text-maroon-deep group-hover:text-maroon truncate">
+                            {getShortProductName(product.name, product)}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             ₹{product.price.toLocaleString("en-IN")}
@@ -226,8 +226,8 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                           className="hidden"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {getShortProductName(product.name)}
+                          <p className="text-xs font-semibold text-maroon-deep group-hover:text-maroon truncate">
+                            {getShortProductName(product.name, product)}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             {product.price
@@ -258,8 +258,8 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                           className="hidden"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {getShortProductName(product.name)}
+                          <p className="text-xs font-semibold text-maroon-deep group-hover:text-maroon truncate">
+                            {getShortProductName(product.name, product)}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             {product.price
@@ -294,8 +294,8 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                           className="hidden"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {getShortProductName(product.name)}
+                          <p className="text-xs font-semibold text-maroon-deep group-hover:text-maroon truncate">
+                            {getShortProductName(product.name, product)}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             ₹{product.price.toLocaleString("en-IN")}
@@ -312,8 +312,8 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                       >
                         <img src={item.image} alt={item.name} loading="lazy" className="hidden" />
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {getShortProductName(item.name)}
+                          <p className="text-xs font-semibold text-maroon-deep group-hover:text-maroon truncate">
+                            {getShortProductName(item.name, item)}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             {item.desc || "Consult Pandit Ji"}

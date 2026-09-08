@@ -128,9 +128,10 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Apply premium numeric font to all numbers */
+  /* Apply lining numbers to all numbers for uniform baseline alignment */
   body * {
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric: lining-nums;
+    font-feature-settings: "lnum" 1;
   }
 
   h1,
@@ -139,31 +140,57 @@
   h4,
   h5 {
     font-family: var(--font-display);
+    font-variant-numeric: lining-nums;
+    font-feature-settings: "lnum" 1;
     letter-spacing: -0.01em;
   }
 
-  /* All elements containing numbers get the premium font */
+  /* Content & Policy Text Pages: ensure clean, modern sans-serif bold headings */
+  .text-page,
+  .text-page * {
+    font-family: var(--font-sans);
+  }
+
+  .text-page h1,
+  .text-page h2,
+  .text-page h3,
+  .text-page h4,
+  .text-page h5,
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5 {
+    font-family: var(--font-sans) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.015em;
+  }
+
+  /* All elements containing numbers get lining numbers on a single uniform line */
   [class*="text-"][class*="xl"],
   [class*="text-2"],
   [class*="text-3"],
   [class*="text-4"],
   [class*="text-5"],
   [class*="font-display"] {
-    font-variant-numeric: proportional-nums;
+    font-variant-numeric: lining-nums;
+    font-feature-settings: "lnum" 1;
   }
 }
 
 @layer utilities {
   .font-display {
     font-family: var(--font-display);
+    font-variant-numeric: lining-nums;
+    font-feature-settings: "lnum" 1;
   }
   .font-devanagari {
     font-family: var(--font-devanagari);
   }
   .font-numeric {
     font-family: var(--font-numeric) !important;
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum", "zero", "onum";
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum", "zero", "lnum" 1;
     letter-spacing: -0.01em;
   }
 

@@ -234,8 +234,8 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
                     </div>
                     <div className="p-4 flex flex-col flex-1">
                       <ProductRating rating={getProductRating(item.slug || item.name)} />
-                      <h3 className="font-display text-lg font-bold text-maroon-deep group-hover:text-maroon leading-tight">
-                        {getShortProductName(item.name)}
+                      <h3 className="font-display text-lg font-semibold text-maroon-deep group-hover:text-maroon leading-tight">
+                        {getShortProductName(item.name, item)}
                       </h3>
                       {item.desc && (
                         <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
@@ -352,8 +352,8 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
                             </div>
                             <div className="p-4 flex flex-col flex-1">
                               <ProductRating rating={rating} />
-                              <h3 className="font-display text-lg font-bold text-maroon-deep group-hover:text-maroon leading-tight">
-                                {getShortProductName(item.name)}
+                              <h3 className="font-display text-lg font-semibold text-maroon-deep group-hover:text-maroon leading-tight">
+                                {getShortProductName(item.name, item)}
                               </h3>
                               {item.description && (
                                 <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">

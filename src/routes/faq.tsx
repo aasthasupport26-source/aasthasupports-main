@@ -166,7 +166,7 @@ function FaqPage() {
         <div className="container mx-auto px-4 text-center relative">
           <HelpCircle className="w-12 h-12 text-gold mx-auto mb-5" />
           <p className="text-gold tracking-[0.3em] text-xs">|| ज्ञानं परमं बलम् ||</p>
-          <h1 className="font-display text-4xl md:text-5xl text-cream mt-4">
+          <h1 className="font-sans font-bold text-3xl md:text-5xl text-cream mt-4 tracking-tight">
             Frequently Asked Questions
           </h1>
           <p className="mt-4 text-cream/75 max-w-xl mx-auto">
@@ -181,7 +181,7 @@ function FaqPage() {
         <div className="container mx-auto px-4 max-w-4xl">
           {faqCategories.map((cat) => (
             <div key={cat.title} className="mb-12 last:mb-0">
-              <h2 className="font-display text-2xl text-maroon-deep mb-5 pb-2 border-b border-gold/30">
+              <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-5 pb-2 border-b border-gold/30 tracking-tight">
                 {cat.title}
               </h2>
               <Accordion type="multiple" className="w-full">
@@ -191,7 +191,7 @@ function FaqPage() {
                     value={`${cat.title}-${i}`}
                     className="border-b border-gold/15"
                   >
-                    <AccordionTrigger className="text-maroon-deep hover:text-gold font-medium text-left py-5">
+                    <AccordionTrigger className="text-maroon-deep hover:text-gold font-sans font-bold text-left py-5">
                       {item.q}
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
@@ -208,7 +208,7 @@ function FaqPage() {
       {/* CTA */}
       <section className="py-16 bg-royal text-cream">
         <div className="container mx-auto px-4 text-center max-w-2xl">
-          <h2 className="font-display text-3xl">Still have questions?</h2>
+          <h2 className="font-sans font-bold text-2xl md:text-3xl tracking-tight">Still have questions?</h2>
           <p className="mt-4 text-cream/80">
             Our dedicated support team is here to help. Reach out via WhatsApp, email, or call us
             directly.

@@ -231,11 +231,11 @@ export const categories: Category[] = [
             desc: "Mercury · Budh — Intelligence & Business",
           },
           {
-            name: "Yellow Sapphire (Pukhraj)",
+            name: "Yellow Sapphire (Pukhraj) (2.65 Ratti)",
             slug: "natural-ceylon-sri-lanka-yellow-sapphire-pukhraj-2-42-carat-2-65-ratti-oval-mixed-certified",
             image:
               "https://cdn.shopify.com/s/files/1/1012/2867/5360/files/preview_images/9dfcc4014109480f8312588b9acb54cd.thumbnail.0000000000.jpg?v=1788804658",
-            desc: "Jupiter · Brihaspati — 100% Certified Ceylon",
+            desc: "Jupiter · Brihaspati — 100% Certified Ceylon (2.65 Ratti)",
           },
           {
             name: "Blue Sapphire (Neelam)",

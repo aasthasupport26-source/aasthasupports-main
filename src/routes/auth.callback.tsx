@@ -72,7 +72,7 @@ function AuthCallbackPage() {
           {status === "processing" && (
             <>
               <Loader2 className="h-12 w-12 animate-spin text-maroon mx-auto mb-4" />
-              <h1 className="font-display text-2xl text-maroon-deep mb-2">Completing sign in...</h1>
+              <h1 className="font-sans font-bold text-2xl text-maroon-deep mb-2">Completing sign in...</h1>
               <p className="text-sm text-muted-foreground">Verifying your account with Shopify</p>
             </>
           )}
@@ -94,7 +94,7 @@ function AuthCallbackPage() {
                   />
                 </svg>
               </div>
-              <h1 className="font-display text-2xl text-maroon-deep mb-2">
+              <h1 className="font-sans font-bold text-2xl text-maroon-deep mb-2">
                 Authentication successful!
               </h1>
               <p className="text-sm text-muted-foreground">Redirecting to your account...</p>
@@ -118,7 +118,7 @@ function AuthCallbackPage() {
                   />
                 </svg>
               </div>
-              <h1 className="font-display text-2xl text-maroon-deep mb-2">Authentication failed</h1>
+              <h1 className="font-sans font-bold text-2xl text-maroon-deep mb-2">Authentication failed</h1>
               <p className="text-sm text-muted-foreground">Redirecting back to login...</p>
             </>
           )}

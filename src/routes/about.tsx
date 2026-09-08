@@ -38,7 +38,7 @@ function AboutPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-maroon-deep/90 to-maroon-deep/50" />
         <div className="container relative mx-auto px-4 z-10">
           <p className="text-gold tracking-[0.4em] text-xs">✦ हमारी कहानी ✦</p>
-          <h1 className="font-display text-5xl md:text-6xl text-cream mt-3">
+          <h1 className="font-sans font-bold text-4xl md:text-6xl text-cream mt-3 tracking-tight">
             About Aastha Support
           </h1>
         </div>
@@ -76,7 +76,7 @@ function AboutPage() {
 
       <section className="py-20 bg-maroon-deep text-cream">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-4xl text-center mb-12">Our Sacred Promise</h2>
+          <h2 className="font-sans font-bold text-3xl md:text-4xl text-center mb-12 tracking-tight">Our Sacred Promise</h2>
           <div className="grid md:grid-cols-4 gap-6">
             {[
               { icon: Award, num: "12,000+", label: "Happy Devotees" },
@@ -89,7 +89,7 @@ function AboutPage() {
                 className="text-center border border-gold/30 rounded-xl p-7 bg-maroon/40"
               >
                 <s.icon className="w-8 h-8 text-gold mx-auto" />
-                <p className="font-display text-3xl text-gold mt-3">{s.num}</p>
+                <p className="font-sans font-bold text-3xl text-gold mt-3">{s.num}</p>
                 <p className="text-cream/80 text-sm tracking-widest uppercase mt-1">{s.label}</p>
               </div>
             ))}

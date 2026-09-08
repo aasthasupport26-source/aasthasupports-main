@@ -15,20 +15,20 @@ export const Route = createFileRoute("/terms-of-service")({
 function TermsOfService() {
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="font-display text-4xl text-maroon-deep mb-2">Terms of Service</h1>
+      <div className="container mx-auto px-4 py-12 max-w-4xl text-page font-sans">
+        <h1 className="font-sans font-bold text-3xl md:text-4xl text-maroon-deep mb-2 tracking-tight">Terms of Service</h1>
         <p className="text-sm text-muted-foreground mb-8">Last Updated: August 17, 2026</p>
 
         <div className="prose prose-stone max-w-none space-y-6">
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Acceptance of Terms</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Acceptance of Terms</h2>
             <p>
               By accessing and using Aastha Support's website and services, you accept and agree to be bound by these Terms of Service. If you do not agree, please do not use our services.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Services</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Services</h2>
             <p>Aastha Support provides:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li>Sale of certified spiritual products (rudraksha, gemstones, malas, yantras)</li>
@@ -38,14 +38,14 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Product Authenticity</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Product Authenticity</h2>
             <p>
               All products are certified and energized by Vedic pandits. We guarantee authenticity but spiritual results may vary based on individual faith and circumstances.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Orders and Payment</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Orders and Payment</h2>
             <ul className="list-disc pl-6 space-y-1">
               <li>All prices are in Indian Rupees (INR)</li>
               <li>Payment is processed securely through Razorpay</li>
@@ -55,7 +55,7 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Pooja Bookings</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Pooja Bookings</h2>
             <ul className="list-disc pl-6 space-y-1">
               <li>Bookings must be made at least 48 hours in advance</li>
               <li>Rescheduling is subject to availability</li>
@@ -65,7 +65,7 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Shipping and Delivery</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Shipping and Delivery</h2>
             <ul className="list-disc pl-6 space-y-1">
               <li>We ship pan-India through trusted courier partners</li>
               <li>Delivery typically takes 5-7 business days</li>
@@ -75,12 +75,12 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Returns and Refunds</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Returns and Refunds</h2>
             <p>Please refer to our <a href="/returns-policy" className="text-maroon hover:text-maroon-deep underline">Returns Policy</a> for detailed information.</p>
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">User Conduct</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">User Conduct</h2>
             <p>You agree not to:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li>Use our services for any unlawful purpose</li>
@@ -91,35 +91,35 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Intellectual Property</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Intellectual Property</h2>
             <p>
               All content on this website, including text, images, logos, and designs, is the property of Aastha Support and protected by copyright laws.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Limitation of Liability</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Limitation of Liability</h2>
             <p>
               Aastha Support is not liable for any indirect, incidental, or consequential damages arising from the use of our products or services. Spiritual products are sold for faith-based purposes.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Governing Law</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Governing Law</h2>
             <p>
               These terms are governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in Lucknow, Uttar Pradesh.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Changes to Terms</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Changes to Terms</h2>
             <p>
               We reserve the right to modify these terms at any time. Continued use of our services constitutes acceptance of updated terms.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-2xl text-maroon-deep mb-3">Contact Information</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Contact Information</h2>
             <p>For questions about these terms, contact us at:</p>
             <ul className="list-none space-y-1">
               <li>Email: aastha.support.26@gmail.com</li>

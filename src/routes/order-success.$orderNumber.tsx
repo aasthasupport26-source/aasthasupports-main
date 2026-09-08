@@ -18,14 +18,14 @@ function OrderSuccess() {
           <CheckCircle2 className="w-12 h-12 text-maroon-deep" />
         </div>
         <p className="text-gold tracking-[0.3em] text-xs mt-6">✦ ORDER CONFIRMED ✦</p>
-        <h1 className="font-display text-4xl text-maroon-deep mt-3">Dhanyavaad 🙏</h1>
+        <h1 className="font-sans font-bold text-3xl md:text-4xl text-maroon-deep mt-3 tracking-tight">Dhanyavaad 🙏</h1>
         <p className="mt-4 text-foreground/80">
           Your sacred order has been received and will be energised by our Vedic pandits before
           dispatch.
         </p>
         <div className="mt-6 inline-block bg-cream border border-gold/30 rounded-lg px-6 py-3">
           <p className="text-xs tracking-widest uppercase text-muted-foreground">Order Number</p>
-          <p className="font-display text-2xl text-maroon-deep">{orderNumber}</p>
+          <p className="font-sans font-bold text-xl md:text-2xl text-maroon-deep">{orderNumber}</p>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-3 mt-8 text-left">

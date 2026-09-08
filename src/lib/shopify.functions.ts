@@ -18,6 +18,33 @@ export function normalizeShopifyVideoUrl(url: string): string {
     .replace(/https:\/\/[^/]+\/cdn\/shop\/videos\//, "https://cdn.shopify.com/videos/");
 }
 
+export function formatShopifyProductName(node: {
+  title?: string;
+  productType?: string;
+  tags?: string[];
+  description?: string;
+  handle?: string;
+}): string {
+  let title = node.title || "";
+  const isGemstone =
+    node.productType?.toLowerCase() === "gemstone" ||
+    (node.tags || []).some((t: string) => {
+      const tag = t.toLowerCase();
+      return tag.includes("gemstone") || tag.includes("sapphire") || tag.includes("pukhraj");
+    });
+
+  if (isGemstone && !/ratti/i.test(title)) {
+    const descMatch = (node.description || "").match(/(\d+(?:\.\d+)?)\s*ratti\b/i);
+    const handleMatch = (node.handle || "").match(/(?:^|-)(\d+)[-_](\d+)[-_]ratti(?:-|$)/i);
+    if (descMatch) {
+      title = `${title} (${descMatch[1]} Ratti)`;
+    } else if (handleMatch) {
+      title = `${title} (${handleMatch[1]}.${handleMatch[2]} Ratti)`;
+    }
+  }
+  return title;
+}
+
 export const getShopifyProducts = createServerFn({ method: "GET" })
   .validator(
     z.object({
@@ -98,7 +125,7 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
 
         return {
           slug: node.handle,
-          name: node.title,
+          name: formatShopifyProductName(node),
           price: parseFloat(node.priceRange.minVariantPrice.amount),
           mrp: node.compareAtPriceRange?.minVariantPrice?.amount
             ? parseFloat(node.compareAtPriceRange.minVariantPrice.amount)
@@ -280,7 +307,7 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
 
       const product = {
         slug: node.handle,
-        name: node.title,
+        name: formatShopifyProductName(node),
         description: node.description || "",
         descriptionHtml: node.descriptionHtml || "",
         price: parseFloat(node.priceRange.minVariantPrice.amount),
