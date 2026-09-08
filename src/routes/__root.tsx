@@ -122,10 +122,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             "Authentic, certified, Vedic-energised rudraksha, gemstones, malas, bracelets, yantras and live online poojas.",
           address: {
             "@type": "PostalAddress",
-            streetAddress: "Aastha Bhawan",
-            addressLocality: "Haridwar",
-            addressRegion: "Uttarakhand",
-            postalCode: "249401",
+            streetAddress: "Mampur bana",
+            addressLocality: "Lucknow",
+            addressRegion: "Uttar Pradesh",
+            postalCode: "226201",
             addressCountry: "IN",
           },
           contactPoint: {

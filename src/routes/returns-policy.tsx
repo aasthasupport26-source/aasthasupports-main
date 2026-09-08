@@ -131,7 +131,7 @@ const policySections = [
       },
       {
         heading: "Governing Law",
-        text: "These terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in Haridwar, Uttarakhand.",
+        text: "These terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in Lucknow, Uttar Pradesh.",
       },
     ],
   },

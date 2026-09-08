@@ -13,7 +13,7 @@ export const Route = createFileRoute("/contact")({
       {
         name: "description",
         content:
-          "Speak to our Vedic astrologers and customer care team — phone, WhatsApp, email or visit our Haridwar ashram.",
+          "Speak to our Vedic astrologers and customer care team — phone, WhatsApp, email or visit our Lucknow office.",
       },
       { property: "og:title", content: "Contact — Aastha Support" },
       {
@@ -36,10 +36,10 @@ export const Route = createFileRoute("/contact")({
           email: "aastha.support.26@gmail.com",
           address: {
             "@type": "PostalAddress",
-            streetAddress: "Aastha Bhawan",
-            addressLocality: "Haridwar",
-            addressRegion: "Uttarakhand",
-            postalCode: "249401",
+            streetAddress: "Mampur bana",
+            addressLocality: "Lucknow",
+            addressRegion: "Uttar Pradesh",
+            postalCode: "226201",
             addressCountry: "IN",
           },
           openingHours: "Mo-Sa 09:00-20:00",
@@ -173,40 +173,76 @@ function ContactPage() {
                 title: "Call Us",
                 v1: "+91 82876 70827",
                 v2: "Mon–Sat · 9am – 8pm IST",
+                href: "tel:+918287670827",
               },
               {
                 icon: MessageCircle,
                 title: "WhatsApp",
                 v1: "+91 82876 70827",
-                v2: "Instant replies for queries",
+                v2: "wa.me/91 · Instant replies",
+                href: "https://wa.me/918287670827?text=Namaste!%20I%20have%20an%20inquiry%20regarding%20Aastha%20Supports.",
+                isPopup: true,
               },
               {
                 icon: Mail,
                 title: "Email Us",
                 v1: "aastha.support.26@gmail.com",
                 v2: "Replied within 24 hours",
+                href: "mailto:aastha.support.26@gmail.com",
               },
               {
                 icon: MapPin,
-                title: "Visit Ashram",
-                v1: "Aastha Bhawan, Haridwar",
-                v2: "Uttarakhand, Bharat 249401",
+                title: "Visit Us",
+                v1: "Mampur bana, Lucknow",
+                v2: "Uttar Pradesh, Bharat 226201",
+                href: undefined,
               },
-            ].map((c) => (
-              <div
-                key={c.title}
-                className="bg-white rounded-xl p-6 border border-gold/20 shadow-soft flex gap-5"
-              >
-                <div className="w-12 h-12 rounded-full bg-gold/15 flex items-center justify-center shrink-0">
-                  <c.icon className="w-5 h-5 text-gold" />
+            ].map((c) => {
+              const Content = (
+                <div
+                  className={`bg-white rounded-xl p-6 border border-gold/20 shadow-soft flex gap-5 transition ${
+                    c.href ? "hover:border-gold/50 hover:shadow-md cursor-pointer" : ""
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-full bg-gold/15 flex items-center justify-center shrink-0">
+                    <c.icon className="w-5 h-5 text-gold" />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-xl text-maroon-deep">{c.title}</h3>
+                    <p className="text-maroon mt-1 font-medium">{c.v1}</p>
+                    <p className="text-xs text-muted-foreground tracking-wider mt-0.5">{c.v2}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-display text-xl text-maroon-deep">{c.title}</h3>
-                  <p className="text-maroon mt-1 font-medium">{c.v1}</p>
-                  <p className="text-xs text-muted-foreground tracking-wider mt-0.5">{c.v2}</p>
-                </div>
-              </div>
-            ))}
+              );
+
+              if (c.href) {
+                return (
+                  <a
+                    key={c.title}
+                    href={c.href}
+                    target={c.isPopup ? "_blank" : undefined}
+                    rel={c.isPopup ? "noopener noreferrer" : undefined}
+                    onClick={
+                      c.isPopup
+                        ? (e) => {
+                            e.preventDefault();
+                            window.open(
+                              c.href,
+                              "whatsapp_popup",
+                              "width=600,height=700,scrollbars=yes,resizable=yes"
+                            );
+                          }
+                        : undefined
+                    }
+                    className="block"
+                  >
+                    {Content}
+                  </a>
+                );
+              }
+
+              return <div key={c.title}>{Content}</div>;
+            })}
           </div>
         </div>
       </section>

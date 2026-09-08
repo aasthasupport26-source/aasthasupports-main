@@ -11,6 +11,7 @@ import {
   Truck,
   RotateCcw,
   Flame,
+  MessageCircle,
 } from "lucide-react";
 
 const trustItems = [
@@ -179,16 +180,49 @@ export function Footer() {
           </div>
 
           <div className="md:col-span-3">
-            <h4 className="font-display text-gold text-lg mb-4">Get in Touch</h4>
+            <button
+              type="button"
+              onClick={() => {
+                window.open(
+                  "https://wa.me/918287670827?text=" + encodeURIComponent("Namaste! I have an inquiry regarding Aastha Supports."),
+                  "whatsapp_popup",
+                  "width=600,height=700,scrollbars=yes,resizable=yes"
+                );
+              }}
+              className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 transition text-sm font-medium cursor-pointer group"
+              title="Click to chat on WhatsApp (+91 82876 70827)"
+            >
+              <MessageCircle className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span>wa.me/91 82876 70827</span>
+            </button>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-gold mt-0.5 shrink-0" />
-                <span>Aastha Bhawan, Haridwar, Uttarakhand, India</span>
+                <span>Mampur bana, Lucknow, Uttar Pradesh 226201, India</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-gold shrink-0" />
                 <a href="tel:+918287670827" className="hover:text-gold">
                   +91 82876 70827
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <a
+                  href="https://wa.me/918287670827?text=Namaste!%20I%20have%20an%20inquiry%20regarding%20Aastha%20Supports."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(
+                      "https://wa.me/918287670827?text=" + encodeURIComponent("Namaste! I have an inquiry regarding Aastha Supports."),
+                      "whatsapp_popup",
+                      "width=600,height=700,scrollbars=yes,resizable=yes"
+                    );
+                  }}
+                  className="hover:text-gold text-emerald-400 font-medium"
+                >
+                  Chat on WhatsApp
                 </a>
               </li>
               <li className="flex items-center gap-2">

@@ -107,7 +107,7 @@ function TermsOfService() {
           <section>
             <h2 className="font-display text-2xl text-maroon-deep mb-3">Governing Law</h2>
             <p>
-              These terms are governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in Haridwar, Uttarakhand.
+              These terms are governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in Lucknow, Uttar Pradesh.
             </p>
           </section>
 
@@ -124,7 +124,7 @@ function TermsOfService() {
             <ul className="list-none space-y-1">
               <li>Email: aastha.support.26@gmail.com</li>
               <li>Phone: +91-82876-70827</li>
-              <li>Address: Aastha Bhawan, Haridwar, Uttarakhand 249401, India</li>
+              <li>Address: Mampur bana, Lucknow, Uttar Pradesh 226201, India</li>
             </ul>
           </section>
         </div>
