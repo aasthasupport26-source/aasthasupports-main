@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { MessageCircle, X } from "lucide-react";
+import { X } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 export function WhatsAppWidget() {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -25,7 +26,7 @@ export function WhatsAppWidget() {
             <X className="w-3.5 h-3.5" />
           </button>
           <div className="flex items-center gap-1.5 mb-1 text-emerald-700 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+            <WhatsAppIcon className="w-4 h-4 shrink-0" />
             <span>Aastha Support</span>
           </div>
           <p className="text-gray-600 leading-relaxed text-[11px]">
@@ -50,7 +51,7 @@ export function WhatsAppWidget() {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
         </span>
-        <MessageCircle className="w-5 h-5 fill-current" />
+        <WhatsAppIcon variant="monochrome" className="w-5 h-5 fill-current shrink-0" />
         <span className="text-xs font-semibold tracking-wide pr-0.5 hidden sm:inline">
           wa.me/91
         </span>

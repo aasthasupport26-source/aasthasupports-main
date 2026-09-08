@@ -11,8 +11,8 @@ import {
   Truck,
   RotateCcw,
   Flame,
-  MessageCircle,
 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 const trustItems = [
   { icon: ShieldCheck, title: "100% Authentic", desc: "Lab certified products" },
@@ -189,10 +189,10 @@ export function Footer() {
                   "width=600,height=700,scrollbars=yes,resizable=yes"
                 );
               }}
-              className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 transition text-sm font-medium cursor-pointer group"
+              className="inline-flex items-center gap-2.5 mb-4 px-3.5 py-2 rounded-full bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 transition text-sm font-medium cursor-pointer group"
               title="Click to chat on WhatsApp (+91 82876 70827)"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <WhatsAppIcon className="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform" />
               <span>wa.me/91 82876 70827</span>
             </button>
             <ul className="space-y-3 text-sm">
@@ -207,7 +207,7 @@ export function Footer() {
                 </a>
               </li>
               <li className="flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <WhatsAppIcon className="w-4 h-4 shrink-0" />
                 <a
                   href="https://wa.me/918287670827?text=Namaste!%20I%20have%20an%20inquiry%20regarding%20Aastha%20Supports."
                   target="_blank"

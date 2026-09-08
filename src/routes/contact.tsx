@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
-import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { submitContactForm } from "@/lib/contact.functions";
@@ -176,7 +177,7 @@ function ContactPage() {
                 href: "tel:+918287670827",
               },
               {
-                icon: MessageCircle,
+                icon: WhatsAppIcon,
                 title: "WhatsApp",
                 v1: "+91 82876 70827",
                 v2: "wa.me/91 · Instant replies",
