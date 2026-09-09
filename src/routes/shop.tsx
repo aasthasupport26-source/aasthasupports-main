@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { Layout } from "@/components/Layout";
 import { useServerFn } from "@tanstack/react-start";
 import { getShopifyProducts, normalizeShopifyVideoUrl } from "@/lib/shopify.functions";
@@ -15,7 +15,7 @@ import {
   ShoppingBag,
   Loader2,
 } from "lucide-react";
-import { getShortProductName, getProductRating } from "@/lib/product-display";
+import { getShortProductName, getProductRating, getProductCardDescription } from "@/lib/product-display";
 import { ProductRating } from "@/components/ProductRating";
 
 export const Route = createFileRoute("/shop")({
@@ -252,154 +252,13 @@ function ShopPage() {
                         {sectionTitle}
                       </h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {sectionProducts.map((product: any) => {
-                          const rating = getProductRating(product.slug || product.name);
-                          return (
-                            <div
-                              key={product.shopifyId}
-                              className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-royal transition-all duration-300 border border-gold/10 flex flex-col"
-                            >
-                              {/* Product Image */}
-                              <Link
-                                to="/product/$slug"
-                                params={{ slug: product.slug }}
-                                className="block relative aspect-square overflow-hidden bg-cream"
-                              >
-                                {(() => {
-                                  const cardVideoUrl = normalizeShopifyVideoUrl(
-                                    product.video?.url || "",
-                                  );
-                                  return cardVideoUrl &&
-                                    product.video?.mimeType !== "video/external" ? (
-                                    <video
-                                      ref={(el) => {
-                                        if (el) {
-                                          el.defaultMuted = true;
-                                          el.muted = true;
-                                          el.volume = 0;
-                                          if (el.paused) {
-                                            el.play().catch(() => {});
-                                          }
-                                        }
-                                      }}
-                                      onLoadedMetadata={(e) => {
-                                        const v = e.currentTarget;
-                                        v.defaultMuted = true;
-                                        v.muted = true;
-                                        v.volume = 0;
-                                        v.play().catch(() => {});
-                                      }}
-                                      onCanPlay={(e) => {
-                                        const v = e.currentTarget;
-                                        v.defaultMuted = true;
-                                        v.muted = true;
-                                        v.volume = 0;
-                                        if (v.paused) v.play().catch(() => {});
-                                      }}
-                                      poster={product.image}
-                                      autoPlay
-                                      muted
-                                      loop
-                                      playsInline
-                                      preload="auto"
-                                      disablePictureInPicture
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
-                                    >
-                                      <source src={cardVideoUrl} type="video/mp4" />
-                                    </video>
-                                  ) : product.image ? (
-                                    <img
-                                      src={product.image}
-                                      alt={product.name}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                      No image
-                                    </div>
-                                  );
-                                })()}
-                                {product.certified && (
-                                  <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-md">
-                                    <ShieldCheck className="w-4 h-4 text-green-600" />
-                                    <span className="text-xs font-medium text-green-700">
-                                      Certified
-                                    </span>
-                                  </div>
-                                )}
-                                {!product.available && (
-                                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                    <span className="bg-white px-4 py-2 rounded-lg font-medium">
-                                      Out of Stock
-                                    </span>
-                                  </div>
-                                )}
-                              </Link>
-
-                              {/* Product Info */}
-                              <div className="p-5 flex flex-col flex-1">
-                                <ProductRating rating={rating} />
-                                <Link
-                                  to="/product/$slug"
-                                  params={{ slug: product.slug }}
-                                  className="block mb-3"
-                                >
-                                  <h3 className="font-display text-lg font-semibold text-maroon-deep mb-2 group-hover:text-maroon-darker transition-colors line-clamp-2">
-                                    {getShortProductName(product.name, product)}
-                                  </h3>
-                                  {product.description && (
-                                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                                      {product.description}
-                                    </p>
-                                  )}
-                                </Link>
-
-                                {/* Price */}
-                                <div className="flex items-center gap-2 mb-4 mt-auto">
-                                  <span className="text-2xl font-bold text-maroon-deep">
-                                    ₹{product.price.toLocaleString("en-IN")}
-                                  </span>
-                                  {product.mrp && product.mrp > product.price && (
-                                    <>
-                                      <span className="text-sm text-muted-foreground line-through">
-                                        ₹{product.mrp.toLocaleString("en-IN")}
-                                      </span>
-                                      <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">
-                                        {Math.round(
-                                          ((product.mrp - product.price) / product.mrp) * 100,
-                                        )}
-                                        % OFF
-                                      </span>
-                                    </>
-                                  )}
-                                </div>
-
-                                {/* Add to Cart Button */}
-                                <button
-                                  onClick={() => handleAddToCart(product)}
-                                  disabled={!product.available}
-                                  className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
-                                    product.available
-                                      ? "bg-maroon-deep text-white hover:bg-maroon-darker hover:shadow-md"
-                                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                  }`}
-                                >
-                                  <ShoppingBag className="w-4 h-4" />
-                                  {product.available ? "Buy Now" : "Out of Stock"}
-                                </button>
-
-                                {/* Stock Info */}
-                                {product.available &&
-                                  product.stock !== undefined &&
-                                  product.stock < 10 && (
-                                    <p className="text-xs text-orange-600 mt-2 text-center">
-                                      Only {product.stock} left in stock
-                                    </p>
-                                  )}
-                              </div>
-                            </div>
-                          );
-                        })}
+                        {sectionProducts.map((product: any) => (
+                          <ShopProductCard
+                            key={product.shopifyId}
+                            product={product}
+                            onAddToCart={handleAddToCart}
+                          />
+                        ))}
                       </div>
                     </div>
                   ),
@@ -410,5 +269,142 @@ function ShopPage() {
         </div>
       </section>
     </Layout>
+  );
+}
+
+function ShopProductCard({
+  product,
+  onAddToCart,
+}: {
+  product: any;
+  onAddToCart: (product: any) => void;
+}) {
+  const rating = getProductRating(product.slug || product.name);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const cardVideoUrl = normalizeShopifyVideoUrl(product.video?.url || "");
+  const hasVideo = Boolean(cardVideoUrl && product.video?.mimeType !== "video/external");
+
+  const handleMouseEnter = () => {
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      if (videoRef.current.readyState > 0) {
+        videoRef.current.currentTime = 0;
+      }
+    }
+  };
+
+  return (
+    <div
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-royal transition-all duration-300 border border-gold/10 flex flex-col"
+    >
+      {/* Product Image */}
+      <Link
+        to="/product/$slug"
+        params={{ slug: product.slug }}
+        className="block relative aspect-square overflow-hidden bg-cream"
+      >
+        {hasVideo ? (
+          <video
+            ref={videoRef}
+            poster={product.image}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            disablePictureInPicture
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+          >
+            <source src={cardVideoUrl} type="video/mp4" />
+          </video>
+        ) : product.image ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+            No image
+          </div>
+        )}
+        {product.certified && (
+          <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-md">
+            <ShieldCheck className="w-4 h-4 text-green-600" />
+            <span className="text-xs font-medium text-green-700">Certified</span>
+          </div>
+        )}
+        {!product.available && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <span className="bg-white px-4 py-2 rounded-lg font-medium">Out of Stock</span>
+          </div>
+        )}
+      </Link>
+
+      {/* Product Info */}
+      <div className="p-5 flex flex-col flex-1">
+        <ProductRating rating={rating} />
+        <Link to="/product/$slug" params={{ slug: product.slug }} className="block mb-3">
+          <h3 className="font-display text-lg font-semibold text-maroon-deep mb-2 group-hover:text-maroon-darker transition-colors line-clamp-2">
+            {getShortProductName(product.name, product)}
+          </h3>
+          {product.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+              {getProductCardDescription(product.description)}
+            </p>
+          )}
+        </Link>
+
+        {/* Price */}
+        <div className="flex items-center gap-2 mb-4 mt-auto">
+          <span className="text-2xl font-bold text-maroon-deep">
+            ₹{product.price.toLocaleString("en-IN")}
+          </span>
+          {product.mrp && product.mrp > product.price && (
+            <>
+              <span className="text-sm text-muted-foreground line-through">
+                ₹{product.mrp.toLocaleString("en-IN")}
+              </span>
+              <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">
+                {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Add to Cart Button */}
+        <button
+          onClick={() => onAddToCart(product)}
+          disabled={!product.available}
+          className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+            product.available
+              ? "bg-maroon-deep text-white hover:bg-maroon-darker hover:shadow-md"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+          }`}
+        >
+          <ShoppingBag className="w-4 h-4" />
+          {product.available ? "Buy Now" : "Out of Stock"}
+        </button>
+
+        {/* Stock Info */}
+        {product.available && product.stock !== undefined && product.stock < 10 && (
+          <p className="text-xs text-orange-600 mt-2 text-center">
+            Only {product.stock} left in stock
+          </p>
+        )}
+      </div>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import { getCategory } from "@/data/catalog";
 import { getShopifyProducts, normalizeShopifyVideoUrl } from "@/lib/shopify.functions";
 import { getTemples, getPujasByTemple } from "@/lib/booking.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Sparkles,
   Loader2,
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { DirectBookingModal } from "@/components/booking/DirectBookingModal";
 import { toast } from "sonner";
-import { getShortProductName, getProductRating } from "@/lib/product-display";
+import { getShortProductName, getProductRating, getProductCardDescription } from "@/lib/product-display";
 import { ProductRating } from "@/components/ProductRating";
 
 export const Route = createFileRoute("/category/$slug")({
@@ -284,95 +284,9 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
                     {sectionTitle}
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                    {sectionProducts.map((item: any) =>
-                      (() => {
-                        const rating = getProductRating(item.slug || item.name);
-
-                        return (
-                          <Link
-                            key={item.slug}
-                            to="/product/$slug"
-                            params={{ slug: item.slug }}
-                            title={item.name}
-                            className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition flex flex-col"
-                          >
-                            <div className="aspect-square overflow-hidden bg-cream relative">
-                              {(() => {
-                                const cardVideoUrl = normalizeShopifyVideoUrl(
-                                  item.video?.url || "",
-                                );
-                                return cardVideoUrl && item.video?.mimeType !== "video/external" ? (
-                                  <video
-                                    ref={(el) => {
-                                      if (el) {
-                                        el.defaultMuted = true;
-                                        el.muted = true;
-                                        el.volume = 0;
-                                        if (el.paused) {
-                                          el.play().catch(() => {});
-                                        }
-                                      }
-                                    }}
-                                    onLoadedMetadata={(e) => {
-                                      const v = e.currentTarget;
-                                      v.defaultMuted = true;
-                                      v.muted = true;
-                                      v.volume = 0;
-                                      v.play().catch(() => {});
-                                    }}
-                                    onCanPlay={(e) => {
-                                      const v = e.currentTarget;
-                                      v.defaultMuted = true;
-                                      v.muted = true;
-                                      v.volume = 0;
-                                      if (v.paused) v.play().catch(() => {});
-                                    }}
-                                    poster={item.image}
-                                    autoPlay
-                                    muted
-                                    loop
-                                    playsInline
-                                    preload="auto"
-                                    disablePictureInPicture
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none"
-                                  >
-                                    <source src={cardVideoUrl} type="video/mp4" />
-                                  </video>
-                                ) : (
-                                  <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    loading="lazy"
-                                    width={400}
-                                    height={400}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                  />
-                                );
-                              })()}
-                            </div>
-                            <div className="p-4 flex flex-col flex-1">
-                              <ProductRating rating={rating} />
-                              <h3 className="font-display text-lg font-semibold text-maroon-deep group-hover:text-maroon leading-tight">
-                                {getShortProductName(item.name, item)}
-                              </h3>
-                              {item.description && (
-                                <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-                                  {item.description}
-                                </p>
-                              )}
-                              <div className="flex items-center justify-between mt-auto pt-3 border-t border-gold/15">
-                                <span className="text-maroon font-medium">
-                                  ₹{item.price.toLocaleString("en-IN")}
-                                </span>
-                                <span className="text-[10px] tracking-widest uppercase text-gold">
-                                  View
-                                </span>
-                              </div>
-                            </div>
-                          </Link>
-                        );
-                      })(),
-                    )}
+                    {sectionProducts.map((item: any) => (
+                      <GemstoneProductCard key={item.slug} item={item} />
+                    ))}
                   </div>
                 </div>
               ),
@@ -381,6 +295,89 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
         </section>
       )}
     </Layout>
+  );
+}
+
+function GemstoneProductCard({ item }: { item: any }) {
+  const rating = getProductRating(item.slug || item.name);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const cardVideoUrl = normalizeShopifyVideoUrl(item.video?.url || "");
+  const hasVideo = Boolean(cardVideoUrl && item.video?.mimeType !== "video/external");
+
+  const handleMouseEnter = () => {
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      if (videoRef.current.readyState > 0) {
+        videoRef.current.currentTime = 0;
+      }
+    }
+  };
+
+  return (
+    <Link
+      to="/product/$slug"
+      params={{ slug: item.slug }}
+      title={item.name}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition flex flex-col"
+    >
+      <div className="aspect-square overflow-hidden bg-cream relative">
+        {hasVideo ? (
+          <video
+            ref={videoRef}
+            poster={item.image}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            disablePictureInPicture
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+          >
+            <source src={cardVideoUrl} type="video/mp4" />
+          </video>
+        ) : (
+          <img
+            src={item.image}
+            alt={item.name}
+            loading="lazy"
+            width={400}
+            height={400}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          />
+        )}
+      </div>
+      <div className="p-4 flex flex-col flex-1">
+        <ProductRating rating={rating} />
+        <h3 className="font-display text-lg font-semibold text-maroon-deep group-hover:text-maroon leading-tight">
+          {getShortProductName(item.name, item)}
+        </h3>
+        {item.description && (
+          <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+            {getProductCardDescription(item.description)}
+          </p>
+        )}
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-gold/15">
+          <span className="text-maroon font-medium">
+            ₹{item.price.toLocaleString("en-IN")}
+          </span>
+          <span className="text-[10px] tracking-widest uppercase text-gold">
+            View
+          </span>
+        </div>
+      </div>
+    </Link>
   );
 }
 

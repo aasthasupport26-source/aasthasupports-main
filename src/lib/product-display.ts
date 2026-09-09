@@ -188,3 +188,56 @@ export function getStarDisplay(rating: number): {
     ratingFormatted: rating.toFixed(1),
   };
 }
+
+/**
+ * Trims redundant boilerplate from product descriptions for listing cards,
+ * ensuring each card displays its unique specifications (Carat, Ratti, Cut, Origin)
+ * rather than repetitive introductory phrases.
+ */
+export function getProductCardDescription(desc?: string | null): string {
+  if (!desc) return "";
+  let clean = desc
+    .replace(
+      /^Presenting a(?:n)?\s+100%\s+genuine\s+and\s+certified\s+[^(,]+(?:\s*\([^)]*\))?\s*(?:sourced\s+from\s+[^,]+,)?\s*/i,
+      "",
+    )
+    .trim();
+  if (/^weighing\b/i.test(clean)) {
+    clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+  }
+  clean = clean.replace(/([.!?])([A-Za-z])/g, "$1 $2");
+  return clean || desc;
+}
+
+/**
+ * Shortens and cleans product titles for detail pages, removing SEO pipe/dash keyword delimiters.
+ */
+export function getCleanProductTitle(title?: string | null): string {
+  if (!title) return "";
+  const primary = title.split(/\s+[|–—]\s+|\|/)[0].trim();
+  return primary || title;
+}
+
+/**
+ * Extracts a concise summary from product descriptions for above-the-fold display.
+ */
+export function getProductSummary(description?: string | null, maxSentences = 2): string {
+  if (!description) return "";
+  const clean = description.trim().replace(/([.!?])([A-Za-z])/g, "$1 $2");
+  const sentences = clean.match(/[^.!?]+[.!?]+/g);
+  if (sentences && sentences.length > 0) {
+    const summary = sentences
+      .slice(0, maxSentences)
+      .map((s) => s.trim())
+      .join(" ");
+    if (summary.length <= 260) {
+      return summary;
+    }
+    return sentences[0].trim();
+  }
+  if (clean.length > 160) {
+    return clean.slice(0, 157).replace(/\s+\S*$/, "") + "...";
+  }
+  return clean;
+}
+

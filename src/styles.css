@@ -13,7 +13,7 @@
   --font-display: "Cormorant Garamond", "Playfair Display", Georgia, serif;
   --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
   --font-devanagari: "Tiro Devanagari Sanskrit", "Noto Serif Devanagari", serif;
-  --font-numeric: "Libre Baskerville", "Cormorant Garamond", Georgia, serif;
+  --font-numeric: "Playfair Display", "Libre Baskerville", "Inter", Georgia, serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -189,8 +189,8 @@
   }
   .font-numeric {
     font-family: var(--font-numeric) !important;
-    font-variant-numeric: tabular-nums lining-nums;
-    font-feature-settings: "tnum", "zero", "lnum" 1;
+    font-variant-numeric: tabular-nums lining-nums !important;
+    font-feature-settings: "tnum" 1, "zero" 1, "lnum" 1 !important;
     letter-spacing: -0.01em;
   }
 

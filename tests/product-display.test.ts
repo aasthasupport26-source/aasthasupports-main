@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { getShortProductName, getProductRating } from "../src/lib/product-display";
+import {
+  getShortProductName,
+  getProductRating,
+  getProductCardDescription,
+  getCleanProductTitle,
+  getProductSummary,
+} from "../src/lib/product-display";
 import { formatShopifyProductName } from "../src/lib/shopify.functions";
 
 describe("getShortProductName", () => {
@@ -57,4 +63,65 @@ describe("formatShopifyProductName", () => {
     };
     expect(formatShopifyProductName(node)).toBe("Natural Yellow Sapphire (Pukhraj) (2.65 Ratti)");
   });
+  it("strips pipe delimiters from SEO stuffed titles", () => {
+    const node = {
+      title:
+        "Natural Gauri Shankar Rudraksha Nepali Bead | Original Gauri Shankar Rudraksha | Premium Rudraksha for Harmony, Peace & Relationship",
+      productType: "Rudraksha",
+    };
+    expect(formatShopifyProductName(node)).toBe(
+      "Natural Gauri Shankar Rudraksha Nepali Bead"
+    );
+  });
 });
+
+describe("getProductCardDescription", () => {
+  it("trims boilerplate intro and capitalizes specs", () => {
+    const raw = "Presenting a 100% genuine and certified Yellow Sapphire (Pukhraj) sourced from Ceylon (Sri Lanka), weighing 7.31 Carat (8.12 Ratti).Crafted with an elegant Oval Mixed...";
+    const result = getProductCardDescription(raw);
+    expect(result).toBe("Weighing 7.31 Carat (8.12 Ratti). Crafted with an elegant Oval Mixed...");
+  });
+
+  it("handles descriptions without boilerplate", () => {
+    const raw = "Authentic 5 Mukhi Nepali Rudraksha with natural facets.";
+    expect(getProductCardDescription(raw)).toBe("Authentic 5 Mukhi Nepali Rudraksha with natural facets.");
+  });
+
+  it("handles null or empty descriptions gracefully", () => {
+    expect(getProductCardDescription(null)).toBe("");
+    expect(getProductCardDescription("")).toBe("");
+  });
+});
+
+describe("getCleanProductTitle", () => {
+  it("strips SEO pipes and subtitles", () => {
+    const title = "Natural Gauri Shankar Rudraksha Nepali Bead | Original Gauri Shankar Rudraksha | Premium Rudraksha";
+    expect(getCleanProductTitle(title)).toBe("Natural Gauri Shankar Rudraksha Nepali Bead");
+  });
+
+  it("preserves single clean titles", () => {
+    expect(getCleanProductTitle("5 Mukhi Nepali Rudraksha")).toBe("5 Mukhi Nepali Rudraksha");
+  });
+
+  it("handles empty or null titles", () => {
+    expect(getCleanProductTitle("")).toBe("");
+    expect(getCleanProductTitle(null)).toBe("");
+  });
+});
+
+describe("getProductSummary", () => {
+  it("extracts concise 2-sentence summary from long descriptions", () => {
+    const desc =
+      "Natural Gauri Shankar Rudraksha is a highly auspicious and rare sacred bead originating from Nepal. It is naturally formed by the joining of two Rudraksha beads, symbolizing the divine union of Lord Shiva and Goddess Parvati. Every bead is unique in its natural formation, texture, and appearance.";
+    const summary = getProductSummary(desc);
+    expect(summary).toBe(
+      "Natural Gauri Shankar Rudraksha is a highly auspicious and rare sacred bead originating from Nepal. It is naturally formed by the joining of two Rudraksha beads, symbolizing the divine union of Lord Shiva and Goddess Parvati."
+    );
+  });
+
+  it("handles short descriptions or null", () => {
+    expect(getProductSummary("Pure Silver Frame.")).toBe("Pure Silver Frame.");
+    expect(getProductSummary(null)).toBe("");
+  });
+});
+

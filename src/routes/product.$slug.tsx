@@ -18,7 +18,7 @@ import {
   Loader2,
   Play,
 } from "lucide-react";
-import { getProductRating } from "@/lib/product-display";
+import { getProductRating, getCleanProductTitle, getProductSummary } from "@/lib/product-display";
 import { ProductRating } from "@/components/ProductRating";
 
 export const Route = createFileRoute("/product/$slug")({
@@ -213,11 +213,13 @@ function ProductPage() {
     navigate({ to: "/cart", search: { cleared: undefined } });
   };
 
+  const displayTitle = getCleanProductTitle(product.name);
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-10">
+      <div className="container mx-auto px-4 py-5 md:py-7">
         {/* Breadcrumb */}
-        <nav className="text-xs tracking-widest uppercase text-muted-foreground mb-8">
+        <nav className="text-xs tracking-wider uppercase text-muted-foreground mb-4 line-clamp-1">
           <Link to="/" className="hover:text-maroon">
             Home
           </Link>
@@ -230,7 +232,7 @@ function ProductPage() {
               <span className="mx-2 text-gold">/</span>
             </>
           ) : null}
-          <span className="text-maroon-deep">{product.name}</span>
+          <span className="text-maroon-deep font-medium">{displayTitle}</span>
         </nav>
 
         <div className="grid lg:grid-cols-2 gap-12">
@@ -344,38 +346,60 @@ function ProductPage() {
 
           {/* Details */}
           <div>
-            <p className="text-gold tracking-[0.3em] text-xs">{cat.name.toUpperCase()}</p>
-            <h1 className="font-display text-4xl md:text-5xl text-maroon-deep mt-2">
-              {product.name}
+            <p className="text-gold tracking-[0.3em] text-xs font-semibold">{cat.name.toUpperCase()}</p>
+            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl text-maroon-deep mt-1 leading-snug font-semibold">
+              {displayTitle}
             </h1>
 
-            <div className="flex items-center gap-3 mt-4">
+            <div className="flex items-center gap-2.5 mt-2">
               <ProductRating
                 rating={getProductRating(slug || product.name)}
                 size="md"
                 showScore={false}
                 className="mb-0"
               />
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs sm:text-sm text-muted-foreground">
                 {getProductRating(slug || product.name).toFixed(1)} · 1,284 reviews
               </span>
             </div>
 
             {product.description && (
-              <p className="mt-5 text-foreground/80 leading-relaxed">{product.description}</p>
+              <p className="mt-3 text-xs sm:text-sm text-foreground/80 line-clamp-2 leading-relaxed">
+                {getProductSummary(product.description)}
+              </p>
             )}
 
-            <div className="flex items-baseline gap-3 mt-6">
-              <span className="font-numeric text-4xl text-maroon-deep">
+            {/* Trust badges */}
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              {[
+                { icon: ShieldCheck, label: "Lab Certified", active: product.certified !== false },
+                { icon: Sparkles, label: "Vedic Energised", active: true },
+                { icon: Award, label: "Origin Verified", active: true },
+                { icon: Truck, label: "Free Shipping", active: true },
+              ]
+                .filter((b) => b.active)
+                .map(({ icon: Icon, label }) => (
+                  <div
+                    key={label}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cream/70 border border-gold/25 text-[11px] sm:text-xs text-maroon-deep font-medium whitespace-nowrap shadow-2xs"
+                  >
+                    <Icon className="w-3.5 h-3.5 text-gold shrink-0" />
+                    <span>{label}</span>
+                  </div>
+                ))}
+            </div>
+
+            <div className="flex items-baseline gap-3 mt-3.5">
+              <span className="font-numeric text-3xl sm:text-4xl text-maroon-deep font-bold">
                 ₹{price.toLocaleString("en-IN")}
               </span>
               {mrp > price && (
-                <span className="text-muted-foreground line-through">
+                <span className="text-sm text-muted-foreground line-through">
                   ₹{mrp.toLocaleString("en-IN")}
                 </span>
               )}
               {off > 0 && (
-                <span className="text-xs bg-gold/20 text-maroon px-2 py-1 rounded tracking-widest uppercase">
+                <span className="text-xs bg-gold/20 text-maroon px-2 py-0.5 rounded tracking-wider uppercase font-medium">
                   {off}% off
                 </span>
               )}
@@ -383,8 +407,8 @@ function ProductPage() {
 
             {/* Variant selector if multiple variants exist */}
             {product.variants && product.variants.length > 1 && (
-              <div className="mt-6">
-                <label className="text-xs font-semibold uppercase tracking-wider text-maroon-deep block mb-2">
+              <div className="mt-3.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-maroon-deep block mb-1.5">
                   Select Option:
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -395,7 +419,7 @@ function ProductPage() {
                         key={v.id || idx}
                         type="button"
                         onClick={() => setSelectedVariantIndex(idx)}
-                        className={`px-4 py-2 rounded-lg text-xs font-medium border transition ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
                           isSelected
                             ? "bg-maroon-deep text-cream border-gold ring-1 ring-gold"
                             : "bg-cream/50 text-maroon-deep border-gold/30 hover:bg-cream"
@@ -409,76 +433,65 @@ function ProductPage() {
               </div>
             )}
 
-            {/* Quantity Selector */}
-            <div className="flex items-center gap-4 mt-6">
-              <span className="text-xs font-semibold uppercase tracking-wider text-maroon-deep">
-                Quantity:
-              </span>
-              <div className="flex items-center border border-gold/40 rounded-lg bg-cream">
+            {/* Quantity Selector & Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-4">
+              <div className="flex items-center justify-between sm:justify-start gap-2.5">
+                <span className="text-xs font-semibold uppercase tracking-wider text-maroon-deep sm:hidden">
+                  Quantity:
+                </span>
+                <div className="flex items-center border border-gold/40 rounded-lg bg-cream h-11 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="px-3 h-full text-maroon-deep hover:bg-gold/10 font-bold"
+                    aria-label="Decrease quantity"
+                  >
+                    -
+                  </button>
+                  <span className="px-3 text-sm font-medium">{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => q + 1)}
+                    className="px-3 h-full text-maroon-deep hover:bg-gold/10 font-bold"
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-1 gap-2.5">
                 <button
-                  type="button"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="px-3 py-1.5 text-maroon-deep hover:bg-gold/10 font-bold"
-                  aria-label="Decrease quantity"
+                  onClick={addToCart}
+                  disabled={!isAvailable}
+                  className="flex-1 h-11 bg-royal text-cream px-4 rounded-md font-medium tracking-wider text-xs uppercase hover:opacity-90 transition shadow-royal flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
-                  -
+                  <ShoppingBag className="w-4 h-4" /> {isAvailable ? "Add to Cart" : "Out of Stock"}
                 </button>
-                <span className="px-4 text-sm font-medium">{quantity}</span>
                 <button
-                  type="button"
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="px-3 py-1.5 text-maroon-deep hover:bg-gold/10 font-bold"
-                  aria-label="Increase quantity"
+                  onClick={buyNow}
+                  disabled={!isAvailable}
+                  className="flex-1 h-11 bg-gold text-maroon-deep px-4 rounded-md font-bold tracking-wider text-xs uppercase hover:bg-gold-soft transition shadow-gold disabled:opacity-50"
                 >
-                  +
+                  Buy Now
                 </button>
               </div>
             </div>
 
-            {/* Trust badges */}
-            <div className="grid grid-cols-2 gap-3 mt-7">
-              {[
-                { icon: ShieldCheck, label: "Lab Certified", active: product.certified !== false },
-                { icon: Sparkles, label: "Vedic Energised", active: true },
-                { icon: Award, label: "Origin Verified", active: true },
-                { icon: Truck, label: "Free Shipping", active: true },
-              ]
-                .filter((b) => b.active)
-                .map(({ icon: Icon, label }) => (
-                  <div
-                    key={label}
-                    className="flex items-center gap-2 p-3 rounded-lg bg-cream border border-gold/20"
-                  >
-                    <Icon className="w-5 h-5 text-gold shrink-0" />
-                    <span className="text-sm text-maroon-deep font-medium">{label}</span>
-                  </div>
-                ))}
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-3 mt-7">
-              <button
-                onClick={addToCart}
-                disabled={!isAvailable}
-                className="flex-1 bg-royal text-cream px-6 py-4 rounded-md font-medium tracking-widest text-xs uppercase hover:opacity-90 transition shadow-royal flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <ShoppingBag className="w-4 h-4" /> {isAvailable ? "Add to Cart" : "Out of Stock"}
-              </button>
-              <button
-                onClick={buyNow}
-                disabled={!isAvailable}
-                className="flex-1 bg-gold text-maroon-deep px-6 py-4 rounded-md font-medium tracking-widest text-xs uppercase hover:bg-gold-soft transition shadow-gold disabled:opacity-50"
-              >
-                Buy Now
-              </button>
-            </div>
-
             {/* Details accordion-like */}
-            <div className="mt-10 space-y-4">
+            <div className="mt-8 space-y-4">
+              {product.description && (
+                <div className="border-t border-gold/20 pt-4">
+                  <h3 className="font-display text-lg text-maroon-deep">Product Description</h3>
+                  <p className="mt-2 text-sm text-foreground/80 leading-relaxed whitespace-pre-line">
+                    {product.description}
+                  </p>
+                </div>
+              )}
               {product.benefits && product.benefits.length > 0 ? (
-                <div className="border-t border-gold/20 pt-5">
-                  <h3 className="font-display text-xl text-maroon-deep">Spiritual Benefits</h3>
-                  <ul className="mt-3 space-y-2 text-sm text-foreground/80">
+                <div className="border-t border-gold/20 pt-4">
+                  <h3 className="font-display text-lg text-maroon-deep">Spiritual Benefits</h3>
+                  <ul className="mt-2.5 space-y-2 text-sm text-foreground/80">
                     {product.benefits.map((benefit: string, idx: number) => (
                       <li key={idx} className="flex gap-2">
                         <span className="text-gold">✦</span> {benefit}
@@ -487,9 +500,9 @@ function ProductPage() {
                   </ul>
                 </div>
               ) : (
-                <div className="border-t border-gold/20 pt-5">
-                  <h3 className="font-display text-xl text-maroon-deep">Spiritual Benefits</h3>
-                  <ul className="mt-3 space-y-2 text-sm text-foreground/80">
+                <div className="border-t border-gold/20 pt-4">
+                  <h3 className="font-display text-lg text-maroon-deep">Spiritual Benefits</h3>
+                  <ul className="mt-2.5 space-y-2 text-sm text-foreground/80">
                     <li className="flex gap-2">
                       <span className="text-gold">✦</span> Removes obstacles and negative energies
                     </li>
@@ -497,8 +510,7 @@ function ProductPage() {
                       <span className="text-gold">✦</span> Enhances concentration and meditation
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-gold">✦</span> Bestows the wearer with peace and
-                      prosperity
+                      <span className="text-gold">✦</span> Bestows the wearer with peace and prosperity
                     </li>
                     <li className="flex gap-2">
                       <span className="text-gold">✦</span> Aligns chakras and balances energy
@@ -507,9 +519,9 @@ function ProductPage() {
                 </div>
               )}
 
-              <div className="border-t border-gold/20 pt-5">
-                <h3 className="font-display text-xl text-maroon-deep">How to Wear / Use</h3>
-                <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
+              <div className="border-t border-gold/20 pt-4">
+                <h3 className="font-display text-lg text-maroon-deep">How to Wear / Use</h3>
+                <p className="mt-2 text-sm text-foreground/80 leading-relaxed">
                   We provide the complete energisation and usage guide with every order. Follow the
                   included instructions for maximum spiritual benefits.
                 </p>

@@ -25,7 +25,7 @@ export function formatShopifyProductName(node: {
   description?: string;
   handle?: string;
 }): string {
-  let title = node.title || "";
+  let title = (node.title || "").split(/\s+[|–—]\s+|\|/)[0].trim();
   const isGemstone =
     node.productType?.toLowerCase() === "gemstone" ||
     (node.tags || []).some((t: string) => {
