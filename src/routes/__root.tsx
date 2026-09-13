@@ -16,66 +16,53 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.location.replace("/");
+    }
+  }, []);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-4">
       <div className="max-w-md text-center">
         <p className="text-gold tracking-[0.3em] text-xs">|| ॐ ||</p>
-        <h1 className="font-display text-7xl text-maroon-deep mt-4">404</h1>
-        <h2 className="mt-3 font-display text-2xl text-maroon">Path not found</h2>
+        <h1 className="font-display text-4xl text-maroon-deep mt-4">Redirecting...</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you seek does not exist on this sacred journey.
+          Returning to home...
         </p>
-        <Link
-          to="/"
-          className="inline-flex mt-6 items-center justify-center rounded-md bg-royal text-cream px-6 py-3 text-sm tracking-widest uppercase font-medium hover:opacity-90 transition shadow-royal"
-        >
-          Return Home
-        </Link>
       </div>
     </div>
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error }: { error: Error; reset: () => void }) {
   console.error(error);
-  const router = useRouter();
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const msg = error?.message || String(error) || "";
-    if (msg.includes('Failed to fetch dynamically imported module') || msg.includes('Importing a module script failed') || msg.includes('520')) {
-      const lastReload = sessionStorage.getItem('chunk_reload_time');
-      if (!lastReload || (Date.now() - parseInt(lastReload)) > 5000) {
-        sessionStorage.setItem('chunk_reload_time', Date.now().toString());
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('v', Date.now().toString());
-        window.location.href = newUrl.toString();
+    if (typeof window !== "undefined") {
+      const msg = error?.message || String(error) || "";
+      if (
+        msg.includes("Failed to fetch dynamically imported module") ||
+        msg.includes("Importing a module script failed") ||
+        msg.includes("520")
+      ) {
+        const lastReload = sessionStorage.getItem("chunk_reload_time");
+        if (!lastReload || Date.now() - parseInt(lastReload) > 5000) {
+          sessionStorage.setItem("chunk_reload_time", Date.now().toString());
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.set("v", Date.now().toString());
+          window.location.href = newUrl.toString();
+          return;
+        }
       }
+      window.location.replace("/");
     }
   }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-2xl text-maroon-deep">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Please try refreshing or return home.</p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="rounded-md bg-royal text-cream px-5 py-2.5 text-sm tracking-widest uppercase hover:opacity-90 transition"
-          >
-            Try Again
-          </button>
-          <a
-            href="/"
-            className="rounded-md border border-maroon text-maroon px-5 py-2.5 text-sm tracking-widest uppercase hover:bg-maroon hover:text-cream transition"
-          >
-            Go Home
-          </a>
-        </div>
+        <h1 className="font-display text-2xl text-maroon-deep">Redirecting to Home...</h1>
       </div>
     </div>
   );

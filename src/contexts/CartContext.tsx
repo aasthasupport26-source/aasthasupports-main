@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode, useCallback } from "react";
 
 export type CartItem = {
+  cartItemId?: string;
   slug: string;
   name: string;
   image: string;
@@ -9,6 +10,7 @@ export type CartItem = {
   quantity: number;
   variantId: string;
   categoryName?: string;
+  attributes?: { key: string; value: string }[];
 };
 
 type CartCtx = {
@@ -16,8 +18,8 @@ type CartCtx = {
   count: number;
   subtotal: number;
   add: (item: Omit<CartItem, "quantity">, qty?: number) => void;
-  update: (variantId: string, qty: number) => void;
-  remove: (variantId: string) => void;
+  update: (idOrSlug: string, qty: number) => void;
+  remove: (idOrSlug: string) => void;
   clear: () => void;
 };
 
@@ -45,15 +47,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const add = useCallback((item: Omit<CartItem, "quantity">, qty = 1) => {
     if (qty <= 0) return;
     setItems((prev) => {
-      const matchKey = item.variantId || item.slug;
-      const ex = prev.find(
-        (p) => (item.variantId && p.variantId === item.variantId) || (p.slug && p.slug === item.slug),
-      );
+      const isMatch = (p: CartItem) => {
+        if (item.cartItemId || p.cartItemId) {
+          return item.cartItemId === p.cartItemId;
+        }
+        return (item.variantId && p.variantId === item.variantId) || (p.slug && p.slug === item.slug);
+      };
+
+      const ex = prev.find(isMatch);
       if (ex) {
         return prev.map((p) =>
-          ((item.variantId && p.variantId === item.variantId) || (p.slug && p.slug === item.slug))
-            ? { ...p, quantity: p.quantity + qty }
-            : p,
+          isMatch(p) ? { ...p, quantity: p.quantity + qty } : p,
         );
       }
       return [...prev, { ...item, quantity: qty }];
@@ -63,9 +67,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const update = useCallback((idOrSlug: string, qty: number) => {
     setItems((prev) =>
       qty <= 0
-        ? prev.filter((p) => p.variantId !== idOrSlug && p.slug !== idOrSlug)
+        ? prev.filter((p) => p.cartItemId !== idOrSlug && p.variantId !== idOrSlug && p.slug !== idOrSlug)
         : prev.map((p) =>
-            p.variantId === idOrSlug || p.slug === idOrSlug
+            p.cartItemId === idOrSlug || p.variantId === idOrSlug || p.slug === idOrSlug
               ? { ...p, quantity: qty }
               : p,
           ),
@@ -73,7 +77,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const remove = useCallback((idOrSlug: string) => {
-    setItems((prev) => prev.filter((p) => p.variantId !== idOrSlug && p.slug !== idOrSlug));
+    setItems((prev) =>
+      prev.filter((p) => p.cartItemId !== idOrSlug && p.variantId !== idOrSlug && p.slug !== idOrSlug),
+    );
   }, []);
 
   const clear = useCallback(() => setItems([]), []);

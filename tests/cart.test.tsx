@@ -177,4 +177,54 @@ describe("Cart Subsystem & Context", () => {
     expect(result.current.count).toBe(0);
     expect(result.current.subtotal).toBe(0);
   });
+
+  it("handles Rudraksha bead with pendant and without pendant as distinct line items", () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+
+    // 1. Add Rudraksha Without Pendant
+    act(() => {
+      result.current.add({
+        cartItemId: "rudraksha-101",
+        slug: "natural-5-mukhi-rudraksha",
+        name: "Natural 5 Mukhi Nepali Rudraksha Bead",
+        image: "https://example.com/5-mukhi.jpg",
+        price: 799,
+        mrp: 1499,
+        variantId: "gid://shopify/ProductVariant/101",
+        attributes: [{ key: "Pendant", value: "Without Pendant (Only Bead)" }],
+      }, 1);
+    });
+
+    // 2. Add Same Rudraksha With Pure Silver Pendant (+₹700)
+    act(() => {
+      result.current.add({
+        cartItemId: "rudraksha-101-pendant",
+        slug: "natural-5-mukhi-rudraksha",
+        name: "Natural 5 Mukhi Nepali Rudraksha Bead (With Pure Silver Pendant Capping)",
+        image: "https://example.com/5-mukhi-pendant.jpg",
+        price: 1499,
+        mrp: 2199,
+        variantId: "gid://shopify/ProductVariant/101",
+        attributes: [{ key: "Pendant", value: "With Pure Silver Pendant Capping (+₹700)" }],
+      }, 1);
+    });
+
+    expect(result.current.items.length).toBe(2);
+    expect(result.current.count).toBe(2);
+    expect(result.current.subtotal).toBe(799 + 1499);
+
+    // Verify attributes
+    expect(result.current.items[0].attributes?.[0].value).toBe("Without Pendant (Only Bead)");
+    expect(result.current.items[1].attributes?.[0].value).toBe("With Pure Silver Pendant Capping (+₹700)");
+
+    // Update the pendant item quantity
+    act(() => {
+      result.current.update("rudraksha-101-pendant", 2);
+    });
+
+    expect(result.current.items[1].quantity).toBe(2);
+    expect(result.current.items[0].quantity).toBe(1);
+    expect(result.current.count).toBe(3);
+    expect(result.current.subtotal).toBe(799 + 1499 * 2);
+  });
 });

@@ -408,16 +408,63 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
       }
     }
 
+    // Count total rudraksha items that have Pure Silver Pendant Capping selected
+    const pendantCount = data.items.reduce((sum, item) => {
+      const hasPendant = item.attributes?.some(
+        (a) => a.key === "Pendant" && a.value.includes("With Pure Silver Pendant"),
+      );
+      return hasPendant ? sum + item.quantity : sum;
+    }, 0);
+
+    // Cart-level order attributes for Shopify fulfillment staff
+    const cartAttributes: { key: string; value: string }[] = [];
+    if (pendantCount > 0) {
+      cartAttributes.push({
+        key: "Rudraksha Pendant Fulfillment",
+        value: `Order contains ${pendantCount} Rudraksha bead(s) with Pure Silver Pendant Capping. Please cap with 925 Silver before shipping.`,
+      });
+    }
+
+    // Check if an add-on product for Pure Silver Pendant Capping exists in Shopify
+    let pendantVariantId = process.env.SHOPIFY_PENDANT_VARIANT_ID;
+    if (!pendantVariantId && pendantCount > 0) {
+      try {
+        const pendantRes: any = await shopifyClient.request(GET_PRODUCT_BY_HANDLE_QUERY, {
+          handle: "pure-silver-pendant-capping",
+        });
+        const foundId = pendantRes?.product?.variants?.edges?.[0]?.node?.id;
+        if (foundId) {
+          pendantVariantId = foundId;
+        }
+      } catch (err) {
+        console.warn("[Shopify] Could not fetch pendant addon product from Shopify:", err);
+      }
+    }
+
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        const lines = data.items.map((item) => ({
+        const lines: any[] = data.items.map((item) => ({
           merchandiseId: item.variantId,
           quantity: item.quantity,
           attributes: item.attributes || [],
         }));
 
+        if (pendantVariantId && pendantCount > 0) {
+          lines.push({
+            merchandiseId: pendantVariantId,
+            quantity: pendantCount,
+            attributes: [
+              {
+                key: "Service",
+                value: "Pure 925 Silver Pendant Capping (+₹700)",
+              },
+            ],
+          });
+        }
+
         const response: any = await shopifyClient.request(CREATE_CART_MUTATION, {
           lines,
+          attributes: cartAttributes.length > 0 ? cartAttributes : undefined,
         });
 
         const cartCreate = response.cartCreate;

@@ -77,7 +77,7 @@ function ShopPage() {
   ];
 
   const filteredProducts = useMemo(() => {
-    const searchLower = debouncedSearch.trim().toLowerCase();
+    const searchLower = search.trim().toLowerCase();
     if (!searchLower) return products;
     return products.filter(
       (p: any) =>
@@ -86,7 +86,7 @@ function ShopPage() {
         p.category?.toLowerCase().includes(searchLower) ||
         p.productType?.toLowerCase().includes(searchLower),
     );
-  }, [products, debouncedSearch]);
+  }, [products, search]);
 
   const groupedProducts = useMemo(() => {
     return filteredProducts.reduce((acc: any, product: any) => {

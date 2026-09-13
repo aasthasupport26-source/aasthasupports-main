@@ -51,33 +51,27 @@ export function Footer() {
               blessed and delivered with shraddha.
             </p>
             <div className="flex items-center gap-3 mt-6">
-              <a
-                href="https://www.facebook.com/aasthasupports"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-maroon-deep transition"
+              <span
+                className="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center text-gold opacity-80 cursor-default"
                 aria-label="Facebook"
+                title="Facebook (Coming Soon)"
               >
                 <Facebook className="w-4 h-4" />
-              </a>
-              <a
-                href="https://www.instagram.com/aasthasupports"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-maroon-deep transition"
+              </span>
+              <span
+                className="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center text-gold opacity-80 cursor-default"
                 aria-label="Instagram"
+                title="Instagram (Coming Soon)"
               >
                 <Instagram className="w-4 h-4" />
-              </a>
-              <a
-                href="https://www.youtube.com/@aasthasupports"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-maroon-deep transition"
+              </span>
+              <span
+                className="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center text-gold opacity-80 cursor-default"
                 aria-label="YouTube"
+                title="YouTube (Coming Soon)"
               >
                 <Youtube className="w-4 h-4" />
-              </a>
+              </span>
             </div>
           </div>
 

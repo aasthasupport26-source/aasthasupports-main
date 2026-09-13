@@ -12,6 +12,22 @@ function generateUUID(): string {
   return crypto.randomUUID();
 }
 
+// Helper to bound DB network requests to a 2s timeout so fallbacks load fast
+async function withTimeout<T = any>(promise: Promise<T>, ms = 2000): Promise<any> {
+  let timer: NodeJS.Timeout;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`DB query timed out after ${ms}ms`)), ms);
+  });
+  try {
+    const res = await Promise.race([promise, timeout]);
+    clearTimeout(timer!);
+    return res;
+  } catch (err) {
+    clearTimeout(timer!);
+    throw err;
+  }
+}
+
 // ---------------------------------------------------------
 // FETCHERS (For Browsing Temples, Pujas, Packages)
 // ---------------------------------------------------------
@@ -19,11 +35,12 @@ function generateUUID(): string {
 export const getTemples = createServerFn({ method: "GET" }).handler(async () => {
     const { supabaseAdmin } = await import("./auth/shopify-customer");
   try {
-    const { data, error } = await supabaseAdmin
+    const query = supabaseAdmin
       .from("temples")
       .select("id, name, city, slug, image_url, active")
       .eq("active", true)
       .order("name");
+    const { data, error } = await withTimeout(query as any, 2000);
     if (!error && data && data.length > 0) return data;
   } catch (err) {
     console.debug("Failed to fetch temples from DB, using fallback", err);
@@ -37,12 +54,13 @@ export const getPujasByTemple = createServerFn({ method: "GET" })
     const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     try {
-      const { data: pujas, error } = await supabaseAdmin
+      const query = supabaseAdmin
         .from("pujas")
         .select("*, packages(*)")
         .eq("temple_id", data.templeId)
         .eq("is_active", true)
         .order("name");
+      const { data: pujas, error } = await withTimeout(query as any, 2000);
       if (!error && pujas && pujas.length > 0) return pujas;
     } catch (err) {
       console.debug("Failed to fetch pujas from DB, using fallback", err);

@@ -1,6 +1,6 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
-import { getCategory } from "@/data/catalog";
+import { categories, getCategory } from "@/data/catalog";
 import { getShopifyProducts, normalizeShopifyVideoUrl } from "@/lib/shopify.functions";
 import { getTemples, getPujasByTemple } from "@/lib/booking.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -22,6 +22,14 @@ import { ProductRating } from "@/components/ProductRating";
 
 export const Route = createFileRoute("/category/$slug")({
   loader: ({ params }) => {
+    const slug = (params.slug || "").toLowerCase().trim();
+    const validSlugs = ["rudraksha", "mala", "bracelets", "gemstones", "yantra", "online-pooja", "pooja", "puja"];
+    const isValid = validSlugs.includes(slug) || slug === "all" || !!categories.find((c) => c.slug === slug);
+
+    if (!isValid || slug.includes("ethnic") || slug.includes("wear")) {
+      throw redirect({ to: "/" });
+    }
+
     const cat = getCategory(params.slug);
     return {
       cat: cat || { slug: params.slug, name: params.slug, tagline: "", hero: "", sections: [] },
