@@ -428,16 +428,44 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
     // Check if an add-on product for Pure Silver Pendant Capping exists in Shopify
     let pendantVariantId = process.env.SHOPIFY_PENDANT_VARIANT_ID;
     if (!pendantVariantId && pendantCount > 0) {
-      try {
-        const pendantRes: any = await shopifyClient.request(GET_PRODUCT_BY_HANDLE_QUERY, {
-          handle: "pure-silver-pendant-capping",
-        });
-        const foundId = pendantRes?.product?.variants?.edges?.[0]?.node?.id;
-        if (foundId) {
-          pendantVariantId = foundId;
+      const candidateHandles = [
+        "pure-silver-pendant-capping",
+        "silver-pendant-capping",
+        "pure-silver-pendant",
+        "silver-capping",
+        "pendant-capping",
+      ];
+      for (const h of candidateHandles) {
+        try {
+          const pendantRes: any = await shopifyClient.request(GET_PRODUCT_BY_HANDLE_QUERY, {
+            handle: h,
+          });
+          const foundId = pendantRes?.product?.variants?.edges?.[0]?.node?.id;
+          if (foundId) {
+            pendantVariantId = foundId;
+            console.log(`[Shopify] Found pendant addon product by handle '${h}': ${foundId}`);
+            break;
+          }
+        } catch {}
+      }
+
+      if (!pendantVariantId) {
+        try {
+          const searchRes: any = await shopifyClient.request(GET_PRODUCTS_QUERY, {
+            first: 10,
+            query: "title:pendant OR title:capping",
+          });
+          const match = searchRes.products?.edges?.find((e: any) => {
+            const t = e.node.title.toLowerCase();
+            return (t.includes("pendant") || t.includes("capping")) && !t.includes("mala");
+          });
+          if (match) {
+            pendantVariantId = match.node.variants?.edges?.[0]?.node?.id;
+            console.log(`[Shopify] Found pendant addon product by search '${match.node.title}': ${pendantVariantId}`);
+          }
+        } catch (err) {
+          console.warn("[Shopify] Could not search for pendant addon product:", err);
         }
-      } catch (err) {
-        console.warn("[Shopify] Could not fetch pendant addon product from Shopify:", err);
       }
     }
 

@@ -384,9 +384,13 @@ function ProductPage() {
         ? ` (${currentVariant.title})`
         : "";
     
-    const pendantSuffix = isWithPendant ? " (With Pure Silver Pendant Capping)" : "";
-    const cartItemId = isWithPendant
-      ? `${currentVariant.id || product.shopifyId}-pendant`
+    const pendantSuffix = isRudraksha
+      ? isWithPendant
+        ? " (With Pure Silver Pendant Capping)"
+        : " (Without Pendant - Bead Only)"
+      : "";
+    const cartItemId = isRudraksha
+      ? `${currentVariant.id || product.shopifyId}-${pendantOption}`
       : currentVariant.id || product.shopifyId;
 
     const attributes = isRudraksha
@@ -420,7 +424,7 @@ function ProductPage() {
       quantity,
     );
     toast.success(
-      `${product.name}${isWithPendant ? " (With Silver Pendant)" : ""} (x${quantity}) added to cart`,
+      `${product.name}${isRudraksha ? (isWithPendant ? " (With Silver Pendant)" : " (Without Pendant)") : ""} (x${quantity}) added to cart`,
     );
     setCrossSellOpen(true);
   };
