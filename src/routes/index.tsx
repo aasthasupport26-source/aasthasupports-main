@@ -107,7 +107,7 @@ function HomePage() {
                 params={{ slug: "online-pooja" }}
                 className="inline-flex items-center gap-2 border border-gold/60 text-cream px-7 py-3.5 rounded-md font-medium tracking-widest text-xs uppercase hover:bg-gold/15 transition"
               >
-                Book Online Pooja
+                Online Pooja (Coming Soon)
               </Link>
             </div>
           </div>
@@ -280,7 +280,7 @@ function HomePage() {
               params={{ slug: "online-pooja" }}
               className="border border-gold/60 px-8 py-3.5 rounded-md tracking-widest text-xs uppercase hover:bg-gold/15 transition"
             >
-              Book a Pooja
+              Online Pooja (Coming Soon)
             </Link>
           </div>
         </div>

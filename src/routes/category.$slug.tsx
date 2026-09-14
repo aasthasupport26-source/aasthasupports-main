@@ -14,6 +14,9 @@ import {
   Clock,
   Users,
   ArrowRight,
+  ShieldCheck,
+  Video,
+  CheckCircle2,
 } from "lucide-react";
 import { DirectBookingModal } from "@/components/booking/DirectBookingModal";
 import { toast } from "sonner";
@@ -389,374 +392,190 @@ function GemstoneProductCard({ item }: { item: any }) {
   );
 }
 
-// ─── Online Pooja page — Supabase powered ─────────────────────────
+// ─── Online Pooja page — Coming Soon ─────────────────────────
 
 function OnlinePoojaPage({ cat }: { cat: any }) {
-  const fetchTemples = useServerFn(getTemples);
-  const fetchPujas = useServerFn(getPujasByTemple);
+  const [notifyContact, setNotifyContact] = useState("");
+  const [notified, setNotified] = useState(false);
 
-  const [temples, setTemples] = useState<any[]>([]);
-  const [selectedTemple, setSelectedTemple] = useState<any>(null);
-  const [pujas, setPujas] = useState<any[]>([]);
-  const [loadingTemples, setLoadingTemples] = useState(true);
-  const [loadingPujas, setLoadingPujas] = useState(false);
+  const handleNotify = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!notifyContact.trim()) return;
+    setNotified(true);
+    toast.success("Namaste! We will notify you as soon as Online Pooja services launch.");
+  };
 
-  const [bookingModal, setBookingModal] = useState<{
-    isOpen: boolean;
-    sevaName: string;
-    amount: number;
-  }>({ isOpen: false, sevaName: "", amount: 0 });
-
-  // Load temples from Supabase
-  useEffect(() => {
-    fetchTemples({})
-      .then((data) => {
-        setTemples(data || []);
-        // Auto-select first temple
-        if (data && data.length > 0) setSelectedTemple(data[0]);
-      })
-      .catch(() => setTemples([]))
-      .finally(() => setLoadingTemples(false));
-  }, []);
-
-  // Load pujas when temple changes
-  useEffect(() => {
-    if (!selectedTemple) return;
-    setLoadingPujas(true);
-    setPujas([]);
-    fetchPujas({ data: { templeId: selectedTemple.id } })
-      .then((data) => setPujas(data || []))
-      .catch(() => setPujas([]))
-      .finally(() => setLoadingPujas(false));
-  }, [selectedTemple?.id]);
+  const whatsappMsg = encodeURIComponent(
+    "Namaste! I would like to inquire about upcoming Online Pooja and Vedic ritual services at Aastha Supports.",
+  );
 
   return (
     <Layout>
-      {/* Hero */}
+      {/* Hero Slider */}
       <OnlinePoojaHero cat={cat} />
 
-      {/* Sawan Special Seva Section */}
-      <section className="py-12 bg-gradient-to-r from-maroon-deep via-maroon to-maroon-deep text-cream border-b border-gold/30">
+      {/* Main Coming Soon Banner */}
+      <section className="py-16 bg-cream border-b border-gold/20 relative overflow-hidden">
         <div className="container mx-auto px-4 max-w-5xl">
-          <div className="text-center mb-8">
-            <span className="text-gold tracking-[0.4em] text-xs font-bold uppercase">
-              ✦ पवित्र श्रावण मास विशेष ✦
-            </span>
-            <h2 className="font-display text-3xl md:text-4xl text-gold mt-2">
-              सावन स्पेशल सेवा (Sawan Special Seva)
-            </h2>
-            <p className="text-cream/80 text-sm mt-1 max-w-xl mx-auto">
-              सावन के हर सोमवार आपके नाम एवं गोत्र से महाकाल एवं विश्वनाथ मंदिर में जल व बेलपत्र
-              अर्पित किया जाएगा।
+          {/* Header Banner */}
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/15 border border-gold/40 text-maroon-deep text-xs font-bold tracking-widest uppercase mb-4 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-gold" />
+              <span>Coming Soon · शीघ्र उपलब्ध</span>
+            </div>
+            <h1 className="font-display text-4xl md:text-5xl text-maroon-deep leading-tight">
+              Sacred Online Pooja Services
+            </h1>
+            <p className="font-devanagari text-gold text-xl md:text-2xl mt-3 font-semibold">
+              || सर्वमङ्गलमाङ्गल्ये शिवे सर्वार्थसाधिके ||
+            </p>
+            <p className="text-muted-foreground mt-4 text-base md:text-lg leading-relaxed">
+              Experience authentic, personalized live Vedic rituals and sankalps performed by certified Purohits from sacred tirthas — Kashi Vishwanath, Mahakaleshwar Ujjain, Haridwar, and Ayodhya — right from your home.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {/* Card 1: ₹51 */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-gold/30 flex flex-col justify-between hover:border-gold transition shadow-xl">
-              <div>
-                <div className="flex justify-between items-start mb-2">
-                  <span className="bg-gold text-maroon-deep text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full">
-                    सावन सोमवार जल सेवा
-                  </span>
-                  <span className="font-display text-3xl font-bold text-gold">₹51</span>
-                </div>
-                <h3 className="font-display text-xl text-cream mt-2">जल अभिषेक (Jal Abhishek)</h3>
-                <p className="text-xs text-cream/80 mt-2 leading-relaxed">
-                  सावन के हर सोमवार आपके नाम एवं गोत्र से भगवान शिव को पवित्र जल अर्पित किया जाएगा।
-                  संकल्प के साथ पूजा।
-                </p>
-                <ul className="mt-4 space-y-1.5 text-xs text-cream/90">
-                  <li className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> नाम एवं गोत्र से संकल्प
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> सावन सोमवार जल अर्पण
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> डिजिटल पूजा फोटो
-                  </li>
-                </ul>
+          {/* 4 Divine Pillars Preview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
+            <div className="bg-white p-6 rounded-2xl border border-gold/25 shadow-sm hover:shadow-md transition">
+              <div className="w-12 h-12 rounded-xl bg-gold/15 flex items-center justify-center text-maroon mb-4">
+                <Flame className="w-6 h-6 text-gold" />
               </div>
-              <button
-                onClick={() =>
-                  setBookingModal({ isOpen: true, sevaName: "सावन सोमवार जल अभिषेक", amount: 51 })
-                }
-                className="mt-6 w-full text-center bg-gold text-maroon-deep font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:bg-gold-soft transition"
-              >
-                ₹51 में संकल्प लें →
-              </button>
-            </div>
-
-            {/* Card 2: ₹101 */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-gold/50 flex flex-col justify-between hover:border-gold transition shadow-xl relative overflow-hidden">
-              <div className="absolute top-3 right-3 bg-amber-400 text-maroon-deep text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full">
-                लोकप्रिय
-              </div>
-              <div>
-                <div className="flex justify-between items-start mb-2">
-                  <span className="bg-amber-400 text-maroon-deep text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full">
-                    बेलपत्र व जल सेवा
-                  </span>
-                  <span className="font-display text-3xl font-bold text-gold">₹101</span>
-                </div>
-                <h3 className="font-display text-xl text-cream mt-2">
-                  बेलपत्र एवं जल अभिषेक (Belpatra & Jal Abhishek)
-                </h3>
-                <p className="text-xs text-cream/80 mt-2 leading-relaxed">
-                  सावन के हर सोमवार आपके नाम एवं गोत्र से बेलपत्र और जल दोनों अर्पित किए जाएंगे।
-                  संकल्प के साथ संपूर्ण पूजा।
-                </p>
-                <ul className="mt-4 space-y-1.5 text-xs text-cream/90">
-                  <li className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> नाम एवं गोत्र से
-                    व्यक्तिगत संकल्प
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> 108 बेलपत्र एवं जल
-                    अभिषेक
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-gold shrink-0" /> पूजा फोटो एवं वीडियो
-                    क्लिप
-                  </li>
-                </ul>
-              </div>
-              <button
-                onClick={() =>
-                  setBookingModal({
-                    isOpen: true,
-                    sevaName: "सावन बेलपत्र व जल अभिषेक",
-                    amount: 101,
-                  })
-                }
-                className="mt-6 w-full text-center bg-amber-400 text-maroon-deep font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:bg-amber-300 transition"
-              >
-                ₹101 में संकल्प लें →
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Temple selector + Puja listing */}
-      <section className="py-16 bg-cream min-h-[500px]">
-        <div className="container mx-auto px-4">
-          {/* Section header */}
-          <div className="text-center mb-12">
-            <p className="text-gold tracking-[0.4em] text-xs font-semibold">✦ SACRED POOJAS ✦</p>
-            <h2 className="font-display text-4xl md:text-5xl text-maroon-deep mt-3">
-              Choose Your Pooja
-            </h2>
-            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-              Select a temple and choose from our Vedic pandits-curated poojas, performed live at
-              sacred sites.
-            </p>
-          </div>
-
-          {loadingTemples ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-maroon" />
-            </div>
-          ) : temples.length === 0 ? (
-            <div className="text-center py-20 max-w-md mx-auto bg-white rounded-2xl border border-gold/20 shadow-sm px-8">
-              <Flame className="w-12 h-12 text-gold mx-auto mb-4" />
-              <h3 className="font-display text-2xl text-maroon-deep mb-2">Coming Soon</h3>
-              <p className="text-muted-foreground text-sm mb-6">
-                Our pandit network is being set up. Sacred poojas will be listed here soon.
+              <h3 className="font-display text-lg text-maroon-deep font-semibold mb-2">
+                Personalized Sankalp
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Rituals conducted with your specific Name, Gotra, and Nakshatra for maximum Vedic potency and blessings.
               </p>
-              <Link
-                to="/book-pooja"
-                className="inline-flex items-center gap-2 bg-maroon-deep text-cream px-6 py-3 rounded-md text-xs tracking-widest uppercase hover:opacity-90 transition shadow-royal"
-              >
-                Book Directly <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
             </div>
-          ) : (
-            <>
-              {/* Temple tabs */}
-              <div className="flex flex-wrap gap-3 mb-10 justify-center">
-                {temples.map((temple) => (
-                  <button
-                    key={temple.id}
-                    onClick={() => setSelectedTemple(temple)}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all border ${
-                      selectedTemple?.id === temple.id
-                        ? "bg-maroon-deep text-cream border-maroon-deep shadow-royal"
-                        : "bg-white text-maroon-deep border-gold/30 hover:border-maroon-deep/40 hover:bg-cream"
-                    }`}
-                  >
-                    {temple.image_url && (
-                      <img
-                        src={temple.image_url}
-                        alt={temple.name}
-                        className="w-5 h-5 rounded-full object-cover"
-                      />
-                    )}
-                    {temple.name}
-                    {temple.city && (
-                      <span
-                        className={`text-xs ${selectedTemple?.id === temple.id ? "text-gold-soft" : "text-muted-foreground"}`}
-                      >
-                        · {temple.city}
-                      </span>
-                    )}
-                  </button>
-                ))}
+
+            <div className="bg-white p-6 rounded-2xl border border-gold/25 shadow-sm hover:shadow-md transition">
+              <div className="w-12 h-12 rounded-xl bg-gold/15 flex items-center justify-center text-maroon mb-4">
+                <ShieldCheck className="w-6 h-6 text-gold" />
               </div>
+              <h3 className="font-display text-lg text-maroon-deep font-semibold mb-2">
+                Vedic Shastriya Vidhi
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Performed by verified temple pandits following centuries-old Vedic scriptures and pure traditional vidhi.
+              </p>
+            </div>
 
-              {/* Temple info strip */}
-              {selectedTemple && (
-                <div className="mb-8 p-5 bg-white rounded-2xl border border-gold/20 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-4">
-                  {selectedTemple.image_url && (
-                    <img
-                      src={selectedTemple.image_url}
-                      alt={selectedTemple.name}
-                      className="w-20 h-20 rounded-xl object-cover border border-gold/30 flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <h3 className="font-display text-xl text-maroon-deep">{selectedTemple.name}</h3>
-                    {selectedTemple.city && (
-                      <p className="text-xs text-muted-foreground mt-0.5 tracking-wide">
-                        {selectedTemple.city}
-                      </p>
-                    )}
-                    {selectedTemple.description && (
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                        {selectedTemple.description}
-                      </p>
-                    )}
-                  </div>
-                  <Link
-                    to="/book-pooja"
-                    className="flex items-center gap-2 bg-gold text-maroon-deep px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-gold-soft transition shadow-gold flex-shrink-0"
-                  >
-                    Book Now <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              )}
+            <div className="bg-white p-6 rounded-2xl border border-gold/25 shadow-sm hover:shadow-md transition">
+              <div className="w-12 h-12 rounded-xl bg-gold/15 flex items-center justify-center text-maroon mb-4">
+                <Video className="w-6 h-6 text-gold" />
+              </div>
+              <h3 className="font-display text-lg text-maroon-deep font-semibold mb-2">
+                Live Video & Clips
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Watch rituals live via private streaming or receive personalized HD recorded video clips of your puja.
+              </p>
+            </div>
 
-              {/* Puja cards grid */}
-              {loadingPujas ? (
-                <div className="flex justify-center py-16">
-                  <Loader2 className="w-8 h-8 animate-spin text-maroon" />
-                </div>
-              ) : pujas.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-2xl border border-gold/20 shadow-sm">
-                  <Flame className="w-10 h-10 text-gold/50 mx-auto mb-3" />
-                  <p className="text-muted-foreground">No poojas configured for this temple yet.</p>
+            <div className="bg-white p-6 rounded-2xl border border-gold/25 shadow-sm hover:shadow-md transition">
+              <div className="w-12 h-12 rounded-xl bg-gold/15 flex items-center justify-center text-maroon mb-4">
+                <Sparkles className="w-6 h-6 text-gold" />
+              </div>
+              <h3 className="font-display text-lg text-maroon-deep font-semibold mb-2">
+                Blessed Prasad Delivery
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Consecrated holy prasad, bhasma, raksha sutra, and dry fruits delivered straight to your doorstep.
+              </p>
+            </div>
+          </div>
+
+          {/* Interactive Launch Alert & WhatsApp guidance Card */}
+          <div className="bg-gradient-to-br from-maroon-deep via-[#5a1515] to-maroon text-cream rounded-3xl p-8 md:p-12 shadow-royal border border-gold/30 relative overflow-hidden mb-16">
+            <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="max-w-2xl mx-auto text-center relative z-10">
+              <span className="text-gold tracking-[0.3em] text-xs font-bold uppercase block mb-2">
+                ✦ BE THE FIRST TO BE BLESSED ✦
+              </span>
+              <h2 className="font-display text-3xl md:text-4xl text-cream mb-4">
+                Get Notified Upon Launch
+              </h2>
+              <p className="text-cream/80 text-sm leading-relaxed mb-8">
+                Join our priority blessing list to receive early access, date-reservation priority, and exclusive inauguration offers when our Live Online Pooja services commence.
+              </p>
+
+              {notified ? (
+                <div className="bg-white/10 border border-gold/40 rounded-2xl p-6 text-center animate-fade-up">
+                  <CheckCircle2 className="w-8 h-8 text-gold mx-auto mb-2" />
+                  <p className="font-display text-lg text-gold font-semibold">
+                    You're on the priority list!
+                  </p>
+                  <p className="text-xs text-cream/80 mt-1">
+                    We will send you an invitation as soon as bookings open. Har Har Mahadev!
+                  </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {pujas.map((puja: any) => {
-                    const minPrice = puja.packages?.length
-                      ? Math.min(...puja.packages.map((p: any) => parseFloat(p.price || 0)))
-                      : null;
-                    return (
-                      <div
-                        key={puja.id}
-                        className="group bg-white rounded-2xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition-all duration-300 hover:-translate-y-1 flex flex-col"
-                      >
-                        {/* Image */}
-                        <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[#fdf3e3] to-[#f5e0c0]">
-                          {puja.image_url ? (
-                            <img
-                              src={puja.image_url}
-                              alt={puja.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center h-full">
-                              <Flame className="w-16 h-16 text-[#c49a3c]/40" />
-                            </div>
-                          )}
-                          {/* Duration badge */}
-                          {puja.duration_minutes && (
-                            <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm text-cream text-[10px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
-                              <Clock className="w-3 h-3" /> {puja.duration_minutes} min
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-4 flex-1 flex flex-col">
-                          <ProductRating rating={getProductRating(puja.slug || puja.name)} />
-                          <h3 className="font-display text-lg font-bold text-maroon-deep leading-tight line-clamp-2 group-hover:text-maroon">
-                            {puja.name}
-                          </h3>
-                          {puja.description && (
-                            <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-                              {puja.description}
-                            </p>
-                          )}
-
-                          {/* Packages count */}
-                          {puja.packages?.length > 0 && (
-                            <div className="flex items-center gap-1 mt-2 text-[11px] text-muted-foreground">
-                              <Users className="w-3 h-3" />
-                              {puja.packages.length} package{puja.packages.length !== 1 ? "s" : ""}{" "}
-                              available
-                            </div>
-                          )}
-
-                          {/* Price + CTA */}
-                          <div className="mt-auto pt-3 border-t border-gold/15 flex items-center justify-between">
-                            <div>
-                              {minPrice !== null ? (
-                                <>
-                                  <span className="text-[10px] text-muted-foreground">
-                                    Starting at
-                                  </span>
-                                  <p className="font-display text-lg text-maroon-deep leading-none">
-                                    ₹{minPrice.toLocaleString("en-IN")}
-                                  </p>
-                                </>
-                              ) : (
-                                <span className="text-xs text-muted-foreground">
-                                  Contact for price
-                                </span>
-                              )}
-                            </div>
-                            <Link
-                              to="/book-pooja"
-                              className="flex items-center gap-1.5 bg-maroon-deep text-cream text-[11px] font-semibold px-3.5 py-2 rounded-full hover:bg-maroon transition shadow-royal"
-                            >
-                              Book <ArrowRight className="w-3 h-3" />
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <form onSubmit={handleNotify} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-6">
+                  <input
+                    type="text"
+                    required
+                    value={notifyContact}
+                    onChange={(e) => setNotifyContact(e.target.value)}
+                    placeholder="Enter Mobile Number or Email"
+                    className="flex-1 px-4 py-3 rounded-xl bg-white text-maroon-deep placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-gold text-maroon-deep font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider hover:bg-gold-soft transition shadow-gold whitespace-nowrap"
+                  >
+                    Notify Me
+                  </button>
+                </form>
               )}
 
-              {/* CTA Footer */}
-              <div className="mt-16 text-center">
-                <Link
-                  to="/book-pooja"
-                  className="inline-flex items-center gap-3 bg-gradient-to-r from-maroon-deep to-[#5a1515] text-cream px-10 py-4 rounded-full text-sm font-bold tracking-widest uppercase hover:opacity-90 transition shadow-royal"
+              <div className="pt-6 border-t border-cream/15 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-cream/80">
+                <span>Need urgent astrological or pooja guidance right now?</span>
+                <a
+                  href={`https://wa.me/918766343513?text=${whatsappMsg}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-lg transition"
                 >
-                  <Flame className="w-5 h-5 text-gold" />
-                  Book a Full Pooja
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Secure payment via Razorpay · Performed by certified Vedic pandits
-                </p>
+                  Connect on WhatsApp →
+                </a>
               </div>
-            </>
-          )}
+            </div>
+          </div>
+
+          {/* Explore Other Energized Products CTA */}
+          <div className="text-center">
+            <p className="text-xs tracking-[0.25em] text-gold uppercase font-semibold mb-2">
+              DISCOVER CERTIFIED SACRED ITEMS
+            </p>
+            <h3 className="font-display text-2xl md:text-3xl text-maroon-deep mb-6">
+              Shop 100% Authentic Vedic Products
+            </h3>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link
+                to="/category/$slug"
+                params={{ slug: "rudraksha" }}
+                className="bg-maroon-deep text-cream px-6 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-maroon transition shadow-md flex items-center gap-2"
+              >
+                Explore Rudraksha <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link
+                to="/category/$slug"
+                params={{ slug: "gemstones" }}
+                className="bg-white text-maroon-deep border border-gold/40 px-6 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-cream transition shadow-sm flex items-center gap-2"
+              >
+                Astrological Gemstones <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link
+                to="/category/$slug"
+                params={{ slug: "mala" }}
+                className="bg-white text-maroon-deep border border-gold/40 px-6 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-cream transition shadow-sm flex items-center gap-2"
+              >
+                Spiritual Malas <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
-
-      <DirectBookingModal
-        isOpen={bookingModal.isOpen}
-        onClose={() => setBookingModal((prev) => ({ ...prev, isOpen: false }))}
-        sevaName={bookingModal.sevaName}
-        amount={bookingModal.amount}
-      />
     </Layout>
   );
 }

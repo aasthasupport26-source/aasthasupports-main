@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getShopifyProducts } from "@/lib/shopify.functions";
 import type { Category } from "@/data/catalog";
 import { getShortProductName } from "@/lib/product-display";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => void }) {
   const fetchProducts = useServerFn(getShopifyProducts);
@@ -110,35 +111,46 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
           </div>
 
           {cat.slug === "online-pooja" ? (
-            <div className={`col-span-9 grid gap-8 grid-cols-2`}>
-              {cat.sections.map((section) => (
-                <div key={section.title}>
-                  <h4 className="text-xs tracking-[0.25em] text-gold uppercase mb-4 pb-2 border-b border-gold/20 font-bold">
-                    {section.title}
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {section.items.map((item) => (
-                      <Link
-                        key={item.name}
-                        to="/book-pooja"
-                        className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
-                      >
-                        <img src={item.image} alt={item.name} loading="lazy" className="hidden" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate">
-                            {item.name}
-                          </p>
-                          {item.desc && (
-                            <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                              {item.desc}
-                            </p>
-                          )}
-                        </div>
-                      </Link>
-                    ))}
+            <div className="col-span-9 bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-gold/30 flex flex-col justify-between shadow-sm">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/15 text-maroon-deep text-[11px] font-bold uppercase tracking-wider mb-3">
+                  <Sparkles className="w-3.5 h-3.5 text-gold" />
+                  <span>Launching Soon · शीघ्र उपलब्ध</span>
+                </div>
+                <h3 className="font-display text-2xl text-maroon-deep font-bold mb-2">
+                  Live Temple Pujas & Personalized Sankalps
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed max-w-xl mb-6">
+                  Experience authentic live Vedic rituals performed from Kashi Vishwanath, Mahakaleshwar Ujjain & Haridwar with personal Sankalp and consecrated holy Prasad delivery.
+                </p>
+
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="p-3.5 rounded-xl bg-cream/70 border border-gold/20">
+                    <p className="text-xs font-bold text-maroon-deep">Live Video Sankalp</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">With Name & Gotra</p>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-cream/70 border border-gold/20">
+                    <p className="text-xs font-bold text-maroon-deep">Vedic Pandits</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Authentic Shastriya Vidhi</p>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-cream/70 border border-gold/20">
+                    <p className="text-xs font-bold text-maroon-deep">Holy Prasad Delivery</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">To your doorstep</p>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="flex items-center gap-4 pt-4 border-t border-gold/20">
+                <Link
+                  to="/category/$slug"
+                  params={{ slug: "online-pooja" }}
+                  onClick={onClose}
+                  className="inline-flex items-center gap-2 bg-maroon-deep text-cream px-5 py-2.5 rounded-lg text-xs font-semibold tracking-wider uppercase hover:bg-maroon transition shadow-md"
+                >
+                  View Launch Details <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <span className="text-xs text-muted-foreground">Opening soon for bookings</span>
+              </div>
             </div>
           ) : cat.slug === "rudraksha" ? (
             products.length === 0 ? (

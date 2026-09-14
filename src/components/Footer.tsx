@@ -84,7 +84,7 @@ export function Footer() {
                   params={{ slug: "online-pooja" }}
                   className="hover:text-gold"
                 >
-                  Online Pooja
+                  Online Pooja (Coming Soon)
                 </Link>
               </li>
               <li>

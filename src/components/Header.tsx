@@ -70,9 +70,14 @@ export function Header() {
                   <Link
                     to="/category/$slug"
                     params={{ slug: cat.slug }}
-                    className="px-2.5 xl:px-3 py-2.5 text-[12px] xl:text-[13px] tracking-widest uppercase text-cream/95 hover:text-gold transition-colors font-medium relative whitespace-nowrap flex items-center"
+                    className="px-2.5 xl:px-3 py-2.5 text-[12px] xl:text-[13px] tracking-widest uppercase text-cream/95 hover:text-gold transition-colors font-medium relative whitespace-nowrap flex items-center gap-1.5"
                   >
-                    {cat.name}
+                    <span>{cat.name}</span>
+                    {cat.slug === "online-pooja" && (
+                      <span className="px-1.5 py-0.5 text-[9px] font-extrabold tracking-wider bg-gold text-maroon-deep rounded-full uppercase leading-none shadow-sm">
+                        Soon
+                      </span>
+                    )}
                     {ui.openSlug === cat.slug && (
                       <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gold" />
                     )}
@@ -179,9 +184,14 @@ export function Header() {
                 to="/category/$slug"
                 params={{ slug: cat.slug }}
                 onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
-                className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center"
+                className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center justify-between"
               >
-                {cat.name}
+                <span>{cat.name}</span>
+                {cat.slug === "online-pooja" && (
+                  <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider bg-gold/20 text-maroon-deep border border-gold/40 rounded-full uppercase leading-none">
+                    Coming Soon
+                  </span>
+                )}
               </Link>
             ))}
             <Link
