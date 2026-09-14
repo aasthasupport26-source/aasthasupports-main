@@ -449,6 +449,10 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
     let pendantVariantId = process.env.SHOPIFY_PENDANT_VARIANT_ID;
     if (!pendantVariantId && pendantCount > 0) {
       const candidateHandles = [
+        "925-pure-silver-pendant-add-on",
+        "pure-silver-pendant-add-on",
+        "925-pure-silver-pendant",
+        "pendant-add-on",
         "pure-silver-pendant-capping",
         "silver-pendant-capping",
         "pure-silver-pendant",
@@ -472,12 +476,15 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
       if (!pendantVariantId) {
         try {
           const searchRes: any = await shopifyClient.request(GET_PRODUCTS_QUERY, {
-            first: 10,
-            query: "title:pendant OR title:capping",
+            first: 20,
+            query: "tag:pendant-add-on OR title:'925 Pure Silver' OR title:pendant OR title:capping",
           });
           const match = searchRes.products?.edges?.find((e: any) => {
-            const t = e.node.title.toLowerCase();
-            return (t.includes("pendant") || t.includes("capping")) && !t.includes("mala");
+            const t = (e.node.title + " " + (e.node.tags || []).join(" ")).toLowerCase();
+            return (
+              (t.includes("pendant") || t.includes("capping") || t.includes("silver")) &&
+              !t.includes("mala")
+            );
           });
           if (match) {
             pendantVariantId = match.node.variants?.edges?.[0]?.node?.id;
