@@ -423,22 +423,26 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
       return isWithout ? sum + item.quantity : sum;
     }, 0);
 
-    // Cart-level order attributes and fulfillment note for Shopify admin & shipping apps
+    // Cart-level order attributes for Shopify fulfillment staff & automation
     const cartAttributes: { key: string; value: string }[] = [];
-    let orderNote: string | undefined = undefined;
-
     if (pendantCount > 0) {
       cartAttributes.push({
-        key: "Rudraksha Fulfillment",
-        value: `⚠️ WITH PURE SILVER PENDANT CAPPING (${pendantCount} bead(s)). Cap with 925 Pure Silver before shipping.`,
+        key: "Pendant Requirement",
+        value: "WITH_PENDANT",
       });
-      orderNote = `⚠️ ATTENTION FULFILLMENT: This order contains ${pendantCount} Rudraksha bead(s) with Pure Silver Pendant Capping. Please cap with 925 Pure Silver before dispatch.`;
+      cartAttributes.push({
+        key: "Rudraksha Pendant Fulfillment",
+        value: `Order contains ${pendantCount} Rudraksha bead(s) with Pure Silver Pendant Capping. Please cap with 925 Silver before shipping.`,
+      });
     } else if (withoutPendantCount > 0) {
       cartAttributes.push({
-        key: "Rudraksha Fulfillment",
-        value: `ℹ️ WITHOUT PENDANT (ONLY BEAD) (${withoutPendantCount} bead(s)). Dispatch bead only, no capping.`,
+        key: "Pendant Requirement",
+        value: "WITHOUT_PENDANT",
       });
-      orderNote = `ℹ️ FULFILLMENT: This order contains ${withoutPendantCount} Rudraksha bead(s) WITHOUT pendant (Bead Only). No capping required.`;
+      cartAttributes.push({
+        key: "Rudraksha Packaging",
+        value: `Order contains ${withoutPendantCount} Rudraksha bead(s) WITHOUT pendant. Ship as bead only.`,
+      });
     }
 
     // Check if an add-on product for Pure Silver Pendant Capping exists in Shopify
@@ -509,7 +513,6 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
         const response: any = await shopifyClient.request(CREATE_CART_MUTATION, {
           lines,
           attributes: cartAttributes.length > 0 ? cartAttributes : undefined,
-          note: orderNote,
         });
 
         const cartCreate = response.cartCreate;
