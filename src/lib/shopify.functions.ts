@@ -411,14 +411,19 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
     // Count total rudraksha items that have Pure Silver Pendant Capping selected
     const pendantCount = data.items.reduce((sum, item) => {
       const hasPendant = item.attributes?.some(
-        (a) => a.key === "Pendant" && a.value.includes("With Pure Silver Pendant"),
+        (a) =>
+          a.key.toLowerCase() === "pendant" &&
+          a.value.toLowerCase().includes("with") &&
+          !a.value.toLowerCase().includes("without"),
       );
       return hasPendant ? sum + item.quantity : sum;
     }, 0);
 
     const withoutPendantCount = data.items.reduce((sum, item) => {
       const isWithout = item.attributes?.some(
-        (a) => a.key === "Pendant" && a.value.includes("Without Pendant"),
+        (a) =>
+          a.key.toLowerCase() === "pendant" &&
+          a.value.toLowerCase().includes("without"),
       );
       return isWithout ? sum + item.quantity : sum;
     }, 0);
@@ -445,8 +450,9 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
       });
     }
 
-    // Check if an add-on product for Pure Silver Pendant Capping exists in Shopify
-    let pendantVariantId = process.env.SHOPIFY_PENDANT_VARIANT_ID;
+    // Official Sidekick-created 925 Pure Silver Pendant Add-on variant ID (₹700)
+    const DEFAULT_PENDANT_VARIANT_ID = "gid://shopify/ProductVariant/52350656905504";
+    let pendantVariantId = process.env.SHOPIFY_PENDANT_VARIANT_ID || DEFAULT_PENDANT_VARIANT_ID;
     if (!pendantVariantId && pendantCount > 0) {
       const candidateHandles = [
         "925-pure-silver-pendant-add-on",
