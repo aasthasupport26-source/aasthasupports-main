@@ -3,23 +3,35 @@ import { Link } from "@tanstack/react-router";
 interface LogoProps {
   variant?: "light" | "dark";
   compact?: boolean;
+  className?: string;
 }
 
-export function Logo({ variant = "light", compact = false }: LogoProps) {
-  // On dark backgrounds (header, footer) → cream; on light (admin sidebar) → maroon
-  const textColor = variant === "dark" ? "text-maroon-deep" : "text-cream";
+export function Logo({ variant = "light", compact = false, className = "" }: LogoProps) {
+  // variant="light" is for dark backgrounds (Header, Footer, Admin sidebar)
+  // variant="dark" is for light/cream backgrounds (Invoice, Checkout, Modals)
+  const fullLogoSrc = variant === "light" ? "/logo-light.png" : "/logo.png";
+  const emblemSrc = "/icon-192.png";
 
   return (
-    <Link to="/" className="flex items-center gap-3 group" aria-label="Aastha Supports home">
-      <img
-        src="/logo.png"
-        alt="Aastha Supports"
-        className={`object-cover rounded-full bg-white shadow-sm transition-transform duration-500 group-hover:scale-105 ${compact ? 'w-10 h-10' : 'w-16 h-16 xl:w-14 xl:h-14'}`}
-      />
-      {!compact && (
-        <span className={`font-display text-xl font-bold tracking-tight drop-shadow-sm ${textColor} hidden min-[1100px]:inline`}>
-          Aastha Supports
-        </span>
+    <Link
+      to="/"
+      className={`inline-flex items-center group transition-transform duration-300 hover:scale-[1.02] ${className}`}
+      aria-label="Aastha Supports home"
+    >
+      {compact ? (
+        <img
+          src={emblemSrc}
+          alt="Aastha Supports"
+          className="w-9 h-9 object-contain transition-transform duration-300 group-hover:scale-105"
+          loading="eager"
+        />
+      ) : (
+        <img
+          src={fullLogoSrc}
+          alt="Aastha Supports - Your Faith, Our Support"
+          className="h-11 sm:h-12 md:h-14 lg:h-16 w-auto object-contain transition-all duration-300 drop-shadow-sm"
+          loading="eager"
+        />
       )}
     </Link>
   );
