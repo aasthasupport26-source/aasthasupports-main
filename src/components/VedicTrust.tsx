@@ -1,25 +1,20 @@
-import { ShieldCheck, Microscope, Flame, Award, FileCheck, BadgeCheck } from "lucide-react";
+import { ShieldCheck, Microscope, Flame, FileCheck, BadgeCheck } from "lucide-react";
 
 const certifications = [
   {
     icon: ShieldCheck,
-    title: "Lab Certified",
-    desc: "Every rudraksha and gemstone is tested at NABL-accredited laboratories. Certificate of authenticity included with every product.",
+    title: "IGL & GJSPC Certified",
+    desc: "IGL & GJSPC Certified — On Request. Every sacred piece is authenticated for natural origin and purity.",
   },
   {
     icon: Microscope,
-    title: "X-Ray Verified",
-    desc: "Rudraksha beads are X-ray scanned to verify internal chamber count (mukhi) — no guesswork, only scientific proof.",
+    title: "X-Ray Verification",
+    desc: "X-Ray Verification Available on Request — to verify internal chamber count (mukhi) with clear scientific proof.",
   },
   {
     icon: Flame,
     title: "Vedic Abhimantran",
-    desc: "Products are energised through traditional Vedic rituals at our Haridwar ashram by learned pandits before dispatch.",
-  },
-  {
-    icon: Award,
-    title: "ISO 9001:2015",
-    desc: "Our sourcing and quality management systems are ISO certified, ensuring consistent standards across every order.",
+    desc: "Energised Through Traditional Vedic Rituals by learned pandits before dispatch.",
   },
   {
     icon: FileCheck,
@@ -45,7 +40,7 @@ export function VedicTrust({ compact = false }: { compact?: boolean }) {
         <div className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-gold tracking-[0.3em] text-xs font-medium">TRUST & AUTHENTICITY</p>
           <h2 className="font-display text-4xl md:text-5xl text-maroon-deep mt-3">
-            Why Aastha Support is India's Most Trusted
+            Faith Backed By Certification
           </h2>
           <div className="divider-gold w-32 mx-auto mt-5" />
           <p className="mt-5 text-muted-foreground">
@@ -74,13 +69,13 @@ export function VedicTrust({ compact = false }: { compact?: boolean }) {
         {/* Trust stats bar */}
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 bg-maroon-deep rounded-2xl p-8 md:p-10">
           {[
-            { num: "50,000+", label: "Happy Devotees" },
+            { num: "100%", label: "Every Piece Hand-Selected & Certified" },
             { num: "100%", label: "Authentic Products" },
             { num: "7 Day", label: "Easy Returns" },
-            { num: "4.9/5", label: "Average Rating" },
+            { num: "Guaranteed", label: "Certified Quality, Every Time" },
           ].map((s) => (
             <div key={s.label} className="text-center">
-              <p className="font-numeric text-3xl md:text-4xl text-gold font-bold">{s.num}</p>
+              <p className="font-numeric text-2xl md:text-3xl text-gold font-bold">{s.num}</p>
               <p className="text-xs text-cream/70 tracking-wider uppercase mt-1">{s.label}</p>
             </div>
           ))}

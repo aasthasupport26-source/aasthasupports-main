@@ -122,7 +122,7 @@ function TermsOfService() {
             <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Contact Information</h2>
             <p>For questions about these terms, contact us at:</p>
             <ul className="list-none space-y-1">
-              <li>Email: aastha.support.26@gmail.com</li>
+              <li>Email: hello@aasthasupports.com</li>
               <li>Phone: +91-82876-70827</li>
               <li>Address: Mampur bana, Lucknow, Uttar Pradesh 226201, India</li>
             </ul>

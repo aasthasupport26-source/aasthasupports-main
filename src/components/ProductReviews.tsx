@@ -87,7 +87,7 @@ const DEFAULT_REVIEWS: Record<string, Review[]> = {
       verifiedBuyer: true,
       verifiedLab: true,
       helpfulCount: 56,
-      tags: ["NABL Certified", "Astrologer Approved"],
+      tags: ["Lab Certified", "Astrologer Approved"],
     },
     {
       id: "rev-6",
@@ -97,7 +97,7 @@ const DEFAULT_REVIEWS: Record<string, Review[]> = {
       date: "1 week ago",
       title: "Stunning Ceylon Blue Sapphire with documentation",
       comment:
-        "Delivered with a QR-coded NABL laboratory report. The cornflower blue color and natural silk inclusions are breathtaking. Pandit Ji provided personalized wearing Vidhi.",
+        "Delivered with a QR-coded gemological laboratory report. The cornflower blue color and natural silk inclusions are breathtaking. Pandit Ji provided personalized wearing Vidhi.",
       verifiedBuyer: true,
       verifiedLab: true,
       helpfulCount: 38,

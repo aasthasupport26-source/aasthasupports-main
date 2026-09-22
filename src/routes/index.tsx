@@ -201,7 +201,7 @@ function HomePage() {
               },
               {
                 title: "Energised by Pandits",
-                desc: "Products are abhimantrit through traditional Vedic rituals at our Haridwar ashram before dispatch.",
+                desc: "Energised Through Traditional Vedic Rituals by learned pandits before dispatch.",
                 num: "02",
               },
               {
@@ -225,39 +225,41 @@ function HomePage() {
 
       <VedicTrust />
 
-      {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-b from-cream to-secondary">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-gold tracking-[0.3em] text-xs">DEVOTEES SPEAK</p>
-            <h2 className="font-display text-4xl md:text-5xl text-maroon-deep mt-3">
-              Blessings Shared
-            </h2>
-            <div className="divider-gold w-32 mx-auto mt-5" />
-          </div>
+      {/* Testimonials - Hidden until authentic customer reviews are collected */}
+      {false && (
+        <section className="py-20 bg-gradient-to-b from-cream to-secondary">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-14">
+              <p className="text-gold tracking-[0.3em] text-xs">DEVOTEES SPEAK</p>
+              <h2 className="font-display text-4xl md:text-5xl text-maroon-deep mt-3">
+                Blessings Shared
+              </h2>
+              <div className="divider-gold w-32 mx-auto mt-5" />
+            </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <div
-                key={t.name}
-                className="bg-white rounded-xl p-7 shadow-soft border border-gold/20 relative"
-              >
-                <Quote className="absolute top-5 right-5 w-10 h-10 text-gold/15" />
-                <div className="flex items-center gap-0.5 text-gold mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
+            <div className="grid md:grid-cols-3 gap-6">
+              {testimonials.map((t) => (
+                <div
+                  key={t.name}
+                  className="bg-white rounded-xl p-7 shadow-soft border border-gold/20 relative"
+                >
+                  <Quote className="absolute top-5 right-5 w-10 h-10 text-gold/15" />
+                  <div className="flex items-center gap-0.5 text-gold mb-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-foreground/80 leading-relaxed text-sm">"{t.text}"</p>
+                  <div className="mt-5 pt-5 border-t border-gold/15">
+                    <p className="font-display text-lg text-maroon-deep">{t.name}</p>
+                    <p className="text-xs text-muted-foreground tracking-wider uppercase">{t.city}</p>
+                  </div>
                 </div>
-                <p className="text-foreground/80 leading-relaxed text-sm">"{t.text}"</p>
-                <div className="mt-5 pt-5 border-t border-gold/15">
-                  <p className="font-display text-lg text-maroon-deep">{t.name}</p>
-                  <p className="text-xs text-muted-foreground tracking-wider uppercase">{t.city}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="py-20 bg-royal text-cream relative overflow-hidden">

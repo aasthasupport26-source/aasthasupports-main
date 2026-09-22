@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, ShoppingBag, User, Menu, X, Phone } from "lucide-react";
 import { Logo } from "./Logo";
 import { MegaDropdown } from "@/components/MegaDropdown";
@@ -7,6 +7,7 @@ import { categories } from "@/data/catalog";
 import { useCart } from "@/contexts/CartContext";
 
 export function Header() {
+  const navigate = useNavigate();
   const [ui, setUi] = useState({
     openSlug: null as string | null,
     mobileOpen: false,
@@ -17,8 +18,10 @@ export function Header() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (ui.searchQuery.trim()) {
-      window.location.href = `/shop?search=${encodeURIComponent(ui.searchQuery)}`;
+    const query = ui.searchQuery.trim();
+    if (query) {
+      setUi((prev) => ({ ...prev, searchOpen: false }));
+      navigate({ to: "/shop", search: { search: query, category: undefined } });
     }
   };
 

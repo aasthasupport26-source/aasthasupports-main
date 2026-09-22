@@ -330,8 +330,8 @@ function TrackOrderPage() {
                   +91 82876 70827
                 </a>{" "}
                 or email{" "}
-                <a href="mailto:aastha.support.26@gmail.com" className="text-maroon underline">
-                  aastha.support.26@gmail.com
+                <a href="mailto:hello@aasthasupports.com" className="text-maroon underline">
+                  hello@aasthasupports.com
                 </a>
               </p>
             </div>

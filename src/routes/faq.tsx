@@ -60,7 +60,7 @@ const faqCategories = [
       },
       {
         q: "Can I modify or cancel my order after placing it?",
-        a: "Orders can be modified or cancelled within 2 hours of placement, provided they haven't been dispatched or the pooja hasn't started. Contact our care team immediately at aastha.support.26@gmail.com or WhatsApp us.",
+        a: "Orders can be modified or cancelled within 2 hours of placement, provided they haven't been dispatched or the pooja hasn't started. Contact our care team immediately at hello@aasthasupports.com or WhatsApp us.",
       },
     ],
   },
@@ -69,7 +69,7 @@ const faqCategories = [
     items: [
       {
         q: "How do I know my rudraksha is authentic?",
-        a: "Every rudraksha comes with a Lab Testing Certificate from a NABL-accredited laboratory. We also provide X-ray verification images showing the internal chamber (mukhi) count. Additionally, each bead is energised through Vedic rituals at our Haridwar ashram.",
+        a: "Every rudraksha comes with a Lab Testing Certificate (IGL & GJSPC Certified — on request). We also provide X-ray verification on request showing the internal chamber (mukhi) count. Additionally, each bead is energised through traditional Vedic rituals.",
       },
       {
         q: "What is the difference between Indonesian and Nepali rudraksha?",
@@ -90,7 +90,7 @@ const faqCategories = [
     items: [
       {
         q: "How does Online Pooja work?",
-        a: "Once you book a pooja, our pandit ji performs the ritual at our Haridwar ashram on the auspicious date you choose. You receive a live video link, photos, and a sankalpa video recording. Prasad is shipped to your address within 7 days.",
+        a: "Once you book a pooja, our learned pandits perform the sacred ritual on the auspicious date you choose. You receive a live video link, photos, and a sankalpa video recording. Prasad is shipped to your address within 7 days.",
       },
       {
         q: "Can I choose the date and time for my pooja?",
@@ -128,7 +128,7 @@ const faqCategories = [
       },
       {
         q: "How do I initiate a return?",
-        a: "Contact our support team via WhatsApp or email aastha.support.26@gmail.com with your order ID. We will arrange a reverse pickup within 48 hours. Refunds are processed to your original payment method within 5–7 business days after product receipt.",
+        a: "Contact our support team via WhatsApp or email hello@aasthasupports.com with your order ID. We will arrange a reverse pickup within 48 hours. Refunds are processed to your original payment method within 5–7 business days after product receipt.",
       },
       {
         q: "What if I receive a damaged or wrong product?",
@@ -145,7 +145,7 @@ const faqCategories = [
       },
       {
         q: "Can I get my own rudraksha energised by Aastha Support?",
-        a: "Yes, we offer a standalone Vedic Energisation service. You can ship your rudraksha or mala to our Haridwar ashram. Our pandits will perform the rituals and return it with a completion certificate.",
+        a: "Yes, we offer a standalone Vedic Energisation service. Our pandits will perform traditional Vedic rituals and return it with a completion certificate.",
       },
       {
         q: "Are your pandits qualified?",
@@ -215,7 +215,7 @@ function FaqPage() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3 justify-center">
             <a
-              href="mailto:aastha.support.26@gmail.com"
+              href="mailto:hello@aasthasupports.com"
               className="bg-gold text-maroon-deep px-8 py-3.5 rounded-md tracking-widest text-xs uppercase font-medium hover:bg-gold-soft transition shadow-gold"
             >
               Email Us

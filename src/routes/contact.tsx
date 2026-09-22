@@ -34,7 +34,7 @@ export const Route = createFileRoute("/contact")({
           image: "https://www.aasthasupports.com/og-image.jpg",
           url: "https://www.aasthasupports.com/contact",
           telephone: "+91-82876-70827",
-          email: "aastha.support.26@gmail.com",
+          email: "hello@aasthasupports.com",
           address: {
             "@type": "PostalAddress",
             streetAddress: "Mampur bana",
@@ -187,9 +187,9 @@ function ContactPage() {
               {
                 icon: Mail,
                 title: "Email Us",
-                v1: "aastha.support.26@gmail.com",
+                v1: "hello@aasthasupports.com",
                 v2: "Replied within 24 hours",
-                href: "mailto:aastha.support.26@gmail.com",
+                href: "mailto:hello@aasthasupports.com",
               },
               {
                 icon: MapPin,

@@ -119,7 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             "@type": "ContactPoint",
             telephone: "+91-82876-70827",
             contactType: "customer service",
-            email: "aastha.support.26@gmail.com",
+            email: "hello@aasthasupports.com",
             areaServed: "IN",
           },
         }),

@@ -591,24 +591,77 @@ function ProductPage() {
             )}
 
             {/* Trust badges */}
-            <div className="flex flex-wrap items-center gap-2 mt-3">
-              {[
-                { icon: ShieldCheck, label: "Lab Certified", active: product.certified !== false },
-                { icon: Sparkles, label: "Vedic Energised", active: true },
-                { icon: Award, label: "Origin Verified", active: true },
-                { icon: Truck, label: "Free Shipping", active: true },
-              ]
-                .filter((b) => b.active)
-                .map(({ icon: Icon, label }) => (
-                  <div
-                    key={label}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cream/70 border border-gold/25 text-[11px] sm:text-xs text-maroon-deep font-medium whitespace-nowrap shadow-2xs"
-                  >
-                    <Icon className="w-3.5 h-3.5 text-gold shrink-0" />
-                    <span>{label}</span>
+            {(() => {
+              const pName = (product.name || "").toLowerCase();
+              const pCat = (cat.slug || product.category || "").toLowerCase();
+              const pType = (product.productType || "").toLowerCase();
+              const pTags = (product.tags || []).map((t: string) => t.toLowerCase()).join(" ");
+
+              let certLabel = "Lab Certified";
+              let certLine = "Lab Certified — Available on Request";
+
+              if (
+                pName.includes("crystal") ||
+                pName.includes("bracelet") ||
+                pCat.includes("bracelet") ||
+                pType.includes("bracelet") ||
+                pTags.includes("bracelet") ||
+                pName.includes("combo")
+              ) {
+                certLabel = "Cambay Certified";
+                certLine = "Cambay Certificate Available on Request";
+              } else if (
+                pCat.includes("gemstone") ||
+                pType.includes("gemstone") ||
+                pTags.includes("gemstone") ||
+                pName.includes("sapphire") ||
+                pName.includes("pukhraj") ||
+                pName.includes("ruby") ||
+                pName.includes("emerald") ||
+                pName.includes("neelam") ||
+                pName.includes("manik") ||
+                pName.includes("panna")
+              ) {
+                certLabel = "Lab Certified (IIGJ)";
+                certLine = "Lab Certified (IIGJ, on request)";
+              } else if (
+                pName.includes("rudraksha") ||
+                pCat.includes("rudraksha") ||
+                pType.includes("rudraksha") ||
+                pTags.includes("rudraksha")
+              ) {
+                certLabel = "GJSPC & IGL Certified";
+                certLine = "Certified by GJSPC & IGL (available on request)";
+              }
+
+              return (
+                <>
+                  <div className="flex flex-wrap items-center gap-2 mt-3">
+                    {[
+                      { icon: ShieldCheck, label: certLabel, active: product.certified !== false },
+                      { icon: Sparkles, label: "Vedic Energised", active: true },
+                      { icon: Award, label: "Origin Verified", active: true },
+                      { icon: Truck, label: "Free Shipping", active: true },
+                    ]
+                      .filter((b) => b.active)
+                      .map(({ icon: Icon, label }) => (
+                        <div
+                          key={label}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cream/70 border border-gold/25 text-[11px] sm:text-xs text-maroon-deep font-medium whitespace-nowrap shadow-2xs"
+                        >
+                          <Icon className="w-3.5 h-3.5 text-gold shrink-0" />
+                          <span>{label}</span>
+                        </div>
+                      ))}
                   </div>
-                ))}
-            </div>
+
+                  <div className="mt-2.5 inline-flex items-center gap-2 text-xs font-semibold text-maroon-deep bg-amber-50/80 border border-gold/40 px-3 py-1.5 rounded-lg shadow-2xs">
+                    <ShieldCheck className="w-4 h-4 text-gold shrink-0" />
+                    <span>{certLine}</span>
+                  </div>
+                </>
+              );
+            })()}
 
             <div className="flex items-baseline gap-3 mt-3.5">
               <span className="font-numeric text-3xl sm:text-4xl text-maroon-deep font-bold">
@@ -844,6 +897,13 @@ function ProductPage() {
                   </ul>
                 </div>
               )}
+
+              <div className="border-t border-gold/20 pt-4">
+                <h3 className="font-display text-lg text-maroon-deep">Authenticity & Certification</h3>
+                <p className="mt-2 text-sm text-foreground/80 leading-relaxed">
+                  Every spiritual piece undergoes strict quality verification to ensure 100% natural origin, purity, and spiritual sanctity. Lab certification is provided on request.
+                </p>
+              </div>
 
               <div className="border-t border-gold/20 pt-4">
                 <h3 className="font-display text-lg text-maroon-deep">How to Wear / Use</h3>

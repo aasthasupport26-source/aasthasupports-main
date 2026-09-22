@@ -19,6 +19,12 @@ import { getShortProductName, getProductRating, getProductCardDescription } from
 import { ProductRating } from "@/components/ProductRating";
 
 export const Route = createFileRoute("/shop")({
+  validateSearch: (search: Record<string, unknown>): { search?: string; category?: string } => {
+    return {
+      search: typeof search.search === "string" ? search.search : undefined,
+      category: typeof search.category === "string" ? search.category : undefined,
+    };
+  },
   head: () => {
     const title = "Shop All — Rudraksha, Mala, Gemstones | Aastha Support";
     const desc =
@@ -41,24 +47,42 @@ export const Route = createFileRoute("/shop")({
 function ShopPage() {
   const { add } = useCart();
   const navigate = useNavigate();
+  const routeSearch = Route.useSearch();
   const fetchProducts = useServerFn(getShopifyProducts);
 
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [search, setSearch] = useState(routeSearch.search || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>(routeSearch.category || "all");
 
   React.useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => clearTimeout(timer);
-  }, [search]);
+    if (routeSearch.search !== undefined && routeSearch.search !== search) {
+      setSearch(routeSearch.search);
+    }
+  }, [routeSearch.search]);
+
+  React.useEffect(() => {
+    if (routeSearch.category !== undefined && routeSearch.category !== selectedCategory) {
+      setSelectedCategory(routeSearch.category);
+    }
+  }, [routeSearch.category]);
+
+  const updateFilters = (newSearch: string, newCategory: string) => {
+    navigate({
+      to: "/shop",
+      search: {
+        search: newSearch.trim() || undefined,
+        category: newCategory !== "all" ? newCategory : undefined,
+      },
+      replace: true,
+    });
+  };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["products", selectedCategory],
+    queryKey: ["products", "all"],
     queryFn: () =>
       fetchProducts({
         data: {
-          category: selectedCategory,
-          limit: 20,
+          category: "all",
+          limit: 250,
         },
       }),
     staleTime: 5 * 60 * 1000,
@@ -78,15 +102,65 @@ function ShopPage() {
 
   const filteredProducts = useMemo(() => {
     const searchLower = search.trim().toLowerCase();
-    if (!searchLower) return products;
-    return products.filter(
-      (p: any) =>
-        p.name?.toLowerCase().includes(searchLower) ||
-        p.description?.toLowerCase().includes(searchLower) ||
-        p.category?.toLowerCase().includes(searchLower) ||
-        p.productType?.toLowerCase().includes(searchLower),
-    );
-  }, [products, search]);
+    const queryTokens = searchLower.split(/\s+/).filter(Boolean);
+
+    return products.filter((p: any) => {
+      // 1. Category filter
+      if (selectedCategory && selectedCategory !== "all") {
+        const catKey = (p.category || p.productType || "").toLowerCase();
+        const pName = (p.name || "").toLowerCase();
+        const pTags = (Array.isArray(p.tags) ? p.tags : []).map((t: string) => t.toLowerCase()).join(" ");
+
+        if (selectedCategory === "rudraksha") {
+          const isRudr =
+            (pName.includes("rudraksha") || catKey.includes("rudraksha") || pTags.includes("rudraksha")) &&
+            !pName.includes("mala") &&
+            !catKey.includes("mala") &&
+            !pName.includes("bracelet");
+          if (!isRudr) return false;
+        } else if (selectedCategory === "mala") {
+          if (!pName.includes("mala") && !catKey.includes("mala") && !pTags.includes("mala")) return false;
+        } else if (selectedCategory === "bracelet") {
+          if (!pName.includes("bracelet") && !catKey.includes("bracelet") && !pTags.includes("bracelet"))
+            return false;
+        } else if (selectedCategory === "gemstone") {
+          const isGem =
+            catKey.includes("gemstone") ||
+            pTags.includes("gemstone") ||
+            pName.includes("sapphire") ||
+            pName.includes("pukhraj") ||
+            pName.includes("ruby") ||
+            pName.includes("emerald") ||
+            pName.includes("neelam") ||
+            pName.includes("manik") ||
+            pName.includes("panna") ||
+            pName.includes("moti") ||
+            pName.includes("pearl") ||
+            pName.includes("coral") ||
+            pName.includes("moonga");
+          if (!isGem) return false;
+        } else if (selectedCategory === "yantra") {
+          if (!pName.includes("yantra") && !catKey.includes("yantra") && !pTags.includes("yantra"))
+            return false;
+        }
+      }
+
+      // 2. Search query filter
+      if (queryTokens.length === 0) return true;
+      const searchable = [
+        p.name,
+        p.description,
+        p.category,
+        p.productType,
+        ...(Array.isArray(p.tags) ? p.tags : []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return queryTokens.every((token) => searchable.includes(token));
+    });
+  }, [products, search, selectedCategory]);
 
   const groupedProducts = useMemo(() => {
     return filteredProducts.reduce((acc: any, product: any) => {
@@ -150,7 +224,11 @@ function ShopPage() {
                 type="text"
                 placeholder="Search for rudraksha, gemstones, malas..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSearch(val);
+                  updateFilters(val, selectedCategory);
+                }}
                 className="w-full pl-12 pr-4 py-4 rounded-xl border border-gold/20 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
               />
             </div>
@@ -160,7 +238,10 @@ function ShopPage() {
               {categories.map((cat) => (
                 <button
                   key={cat.slug}
-                  onClick={() => setSelectedCategory(cat.slug)}
+                  onClick={() => {
+                    setSelectedCategory(cat.slug);
+                    updateFilters(search, cat.slug);
+                  }}
                   className={`px-6 py-2.5 rounded-full transition-all ${
                     selectedCategory === cat.slug
                       ? "bg-maroon-deep text-white shadow-md"
@@ -223,6 +304,7 @@ function ShopPage() {
                   onClick={() => {
                     setSearch("");
                     setSelectedCategory("all");
+                    updateFilters("", "all");
                   }}
                   className="text-maroon-deep hover:underline"
                 >
