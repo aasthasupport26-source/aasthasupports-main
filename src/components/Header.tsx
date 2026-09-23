@@ -64,7 +64,9 @@ export function Header() {
 
             {/* Desktop nav - centered */}
             <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
-              {categories.map((cat) => (
+              {categories
+                .filter((cat) => cat.slug !== "online-pooja")
+                .map((cat) => (
                 <div
                   key={cat.slug}
                   className="relative h-full flex items-center cursor-pointer"
@@ -76,11 +78,6 @@ export function Header() {
                     className="px-2.5 xl:px-3 py-2.5 text-[12px] xl:text-[13px] tracking-widest uppercase text-cream/95 hover:text-gold transition-colors font-medium relative whitespace-nowrap flex items-center gap-1.5"
                   >
                     <span>{cat.name}</span>
-                    {cat.slug === "online-pooja" && (
-                      <span className="px-1.5 py-0.5 text-[9px] font-extrabold tracking-wider bg-gold text-maroon-deep rounded-full uppercase leading-none shadow-sm">
-                        Soon
-                      </span>
-                    )}
                     {ui.openSlug === cat.slug && (
                       <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gold" />
                     )}
@@ -181,7 +178,9 @@ export function Header() {
       {ui.mobileOpen && (
         <div className="lg:hidden bg-cream border-t border-gold/30 shadow-xl">
           <nav className="container mx-auto px-4 py-4 flex flex-col">
-            {categories.map((cat) => (
+            {categories
+              .filter((cat) => cat.slug !== "online-pooja")
+              .map((cat) => (
               <Link
                 key={cat.slug}
                 to="/category/$slug"

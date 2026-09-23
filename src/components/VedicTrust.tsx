@@ -3,28 +3,28 @@ import { ShieldCheck, Microscope, Flame, FileCheck, BadgeCheck } from "lucide-re
 const certifications = [
   {
     icon: ShieldCheck,
-    title: "IGL & GJSPC Certified",
-    desc: "IGL & GJSPC Certified — On Request. Every sacred piece is authenticated for natural origin and purity.",
+    title: "Certification Available",
+    desc: "IGL and GJSPC certification can be requested for eligible products before purchase.",
   },
   {
     icon: Microscope,
-    title: "X-Ray Verification",
-    desc: "X-Ray Verification Available on Request — to verify internal chamber count (mukhi) with clear scientific proof.",
+    title: "X-Ray Verification Available",
+    desc: "X-ray verification can be requested for eligible rudraksha products to inspect the internal chamber count.",
   },
   {
     icon: Flame,
-    title: "Vedic Abhimantran",
-    desc: "Energised Through Traditional Vedic Rituals by learned pandits before dispatch.",
+    title: "Traditional Rituals",
+    desc: "Eligible products may be energised through traditional Vedic rituals before dispatch.",
   },
   {
     icon: FileCheck,
-    title: "Origin Traceable",
-    desc: "Each product carries origin details — Nepal, Indonesia, Sri Lanka — so you know exactly where your spiritual item comes from.",
+    title: "Origin Details",
+    desc: "Product listings include available origin information so you can review the details before ordering.",
   },
   {
     icon: BadgeCheck,
-    title: "Astrologer Verified",
-    desc: "Free consultation with our in-house Vedic astrologers to match the right product with your kundali and planetary needs.",
+    title: "Product Guidance",
+    desc: "Contact our team for product guidance and questions about choosing a spiritual item.",
   },
 ];
 
@@ -44,8 +44,7 @@ export function VedicTrust({ compact = false }: { compact?: boolean }) {
           </h2>
           <div className="divider-gold w-32 mx-auto mt-5" />
           <p className="mt-5 text-muted-foreground">
-            We don't just sell spiritual products — we deliver divine blessings backed by science,
-            scripture, and transparency.
+            Clear product details and available documentation help you choose with confidence.
           </p>
         </div>
 
@@ -69,10 +68,10 @@ export function VedicTrust({ compact = false }: { compact?: boolean }) {
         {/* Trust stats bar */}
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 bg-maroon-deep rounded-2xl p-8 md:p-10">
           {[
-            { num: "100%", label: "Every Piece Hand-Selected & Certified" },
-            { num: "100%", label: "Authentic Products" },
+            { num: "On Request", label: "Certification Documents" },
+            { num: "Clear", label: "Product Details" },
             { num: "7 Day", label: "Easy Returns" },
-            { num: "Guaranteed", label: "Certified Quality, Every Time" },
+            { num: "Support", label: "Before You Order" },
           ].map((s) => (
             <div key={s.label} className="text-center">
               <p className="font-numeric text-2xl md:text-3xl text-gold font-bold">{s.num}</p>

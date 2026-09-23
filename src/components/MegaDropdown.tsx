@@ -121,7 +121,9 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                   Live Temple Pujas & Personalized Sankalps
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed max-w-xl mb-6">
-                  Experience authentic live Vedic rituals performed from Kashi Vishwanath, Mahakaleshwar Ujjain & Haridwar with personal Sankalp and consecrated holy Prasad delivery.
+                  Experience authentic live Vedic rituals performed from Kashi
+                  Vishwanath, Mahakaleshwar Ujjain & Haridwar with personal
+                  Sankalp and consecrated holy Prasad delivery.
                 </p>
 
                 <div className="grid grid-cols-3 gap-4 mb-6">
@@ -131,7 +133,9 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                   </div>
                   <div className="p-3.5 rounded-xl bg-cream/70 border border-gold/20">
                     <p className="text-xs font-bold text-maroon-deep">Vedic Pandits</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Authentic Shastriya Vidhi</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Authentic Shastriya Vidhi
+                    </p>
                   </div>
                   <div className="p-3.5 rounded-xl bg-cream/70 border border-gold/20">
                     <p className="text-xs font-bold text-maroon-deep">Holy Prasad Delivery</p>
@@ -164,7 +168,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                       {section.items.map((item) => (
                         <Link
                           key={item.name}
-                          to="/product/$slug"
+                          to={item.slug === "gemstones" ? "/category/$slug" : "/product/$slug"}
                           params={{ slug: item.slug }}
                           className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
                         >

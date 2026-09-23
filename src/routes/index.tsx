@@ -3,22 +3,22 @@ import { Layout } from "@/components/Layout";
 import { categories } from "@/data/catalog";
 import { VedicTrust } from "@/components/VedicTrust";
 import heroImg from "@/assets/hero-sage.jpg";
-import { Star, Sparkles, ArrowRight, Quote } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aastha Supports — Rudraksha, Gems & Online Pooja" },
+      { title: "Aastha Supports — Rudraksha, Gems & Yantras" },
       {
         name: "description",
         content:
-          "Shop certified rudraksha, malas, bracelets, gemstones & yantras. Book online poojas performed live by Vedic pandits from Kashi, Ujjain & Haridwar.",
+          "Shop rudraksha, malas, bracelets, gemstones and yantras with clear product details and available certification information.",
       },
-      { property: "og:title", content: "Aastha Supports — Rudraksha, Gems & Online Pooja" },
+      { property: "og:title", content: "Aastha Supports — Rudraksha, Gems & Yantras" },
       {
         property: "og:description",
         content:
-          "Certified rudraksha, gems, malas, bracelets, yantras and live Vedic poojas — energised by learned pandits.",
+          "Certified rudraksha, gems, malas, bracelets and yantras — energised through traditional Vedic rituals.",
       },
       { property: "og:url", content: "https://www.aasthasupports.com/" },
       { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
@@ -43,24 +43,6 @@ export const Route = createFileRoute("/")({
   }),
   component: HomePage,
 });
-
-const testimonials = [
-  {
-    name: "Rakesh Sharma",
-    city: "Mumbai",
-    text: "Got my 7 Mukhi Nepali Rudraksha — packaging was divine, certificate authentic. Felt the energy from day one.",
-  },
-  {
-    name: "Anjali Verma",
-    city: "Delhi",
-    text: "Booked Mahamrityunjay Jaap for my father's health. Live darshan from Kashi gave us so much peace.",
-  },
-  {
-    name: "Vikram Singh",
-    city: "Jaipur",
-    text: "Pukhraj from Aastha Supports changed my career trajectory. Lab certified and astrologically perfect.",
-  },
-];
 
 function HomePage() {
   return (
@@ -91,8 +73,8 @@ function HomePage() {
             </h1>
             <p className="font-devanagari text-gold-soft text-2xl mt-4">|| असतो मा सद्गमय ||</p>
             <p className="mt-6 text-cream/85 text-lg max-w-xl leading-relaxed">
-              Authentic, certified, and Vedic-energised spiritual products — rudraksha, gemstones
-              and live poojas performed by learned pandits.
+              Authentic, certified, and Vedic-energised spiritual products — rudraksha, gemstones,
+              malas, bracelets and yantras.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -101,13 +83,6 @@ function HomePage() {
                 className="inline-flex items-center gap-2 bg-gold text-maroon-deep px-7 py-3.5 rounded-md font-medium tracking-widest text-xs uppercase hover:bg-gold-soft transition shadow-gold"
               >
                 Shop Rudraksha <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/category/$slug"
-                params={{ slug: "online-pooja" }}
-                className="inline-flex items-center gap-2 border border-gold/60 text-cream px-7 py-3.5 rounded-md font-medium tracking-widest text-xs uppercase hover:bg-gold/15 transition"
-              >
-                Online Pooja (Coming Soon)
               </Link>
             </div>
           </div>
@@ -196,7 +171,7 @@ function HomePage() {
             {[
               {
                 title: "Vedic Authenticity",
-                desc: "Every rudraksha, gemstone and yantra is sourced directly from origin — Nepal, Indonesia, Sri Lanka — and X-ray / lab certified.",
+                desc: "Every product includes available origin and certification details so you can make an informed choice.",
                 num: "01",
               },
               {
@@ -224,42 +199,6 @@ function HomePage() {
       </section>
 
       <VedicTrust />
-
-      {/* Testimonials - Hidden until authentic customer reviews are collected */}
-      {false && (
-        <section className="py-20 bg-gradient-to-b from-cream to-secondary">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-14">
-              <p className="text-gold tracking-[0.3em] text-xs">DEVOTEES SPEAK</p>
-              <h2 className="font-display text-4xl md:text-5xl text-maroon-deep mt-3">
-                Blessings Shared
-              </h2>
-              <div className="divider-gold w-32 mx-auto mt-5" />
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimonials.map((t) => (
-                <div
-                  key={t.name}
-                  className="bg-white rounded-xl p-7 shadow-soft border border-gold/20 relative"
-                >
-                  <Quote className="absolute top-5 right-5 w-10 h-10 text-gold/15" />
-                  <div className="flex items-center gap-0.5 text-gold mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-foreground/80 leading-relaxed text-sm">"{t.text}"</p>
-                  <div className="mt-5 pt-5 border-t border-gold/15">
-                    <p className="font-display text-lg text-maroon-deep">{t.name}</p>
-                    <p className="text-xs text-muted-foreground tracking-wider uppercase">{t.city}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* CTA */}
       <section className="py-20 bg-royal text-cream relative overflow-hidden">

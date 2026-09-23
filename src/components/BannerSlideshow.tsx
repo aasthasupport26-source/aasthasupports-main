@@ -12,11 +12,6 @@ const slides = [
     title: "Sacred Gemstones",
     subtitle: "Natural & Astrologically Aligned",
   },
-  {
-    image: "/banners/banner3.jpg",
-    title: "Online Puja Services",
-    subtitle: "Live Vedic Rituals from Holy Temples",
-  },
 ];
 
 export function BannerSlideshow() {
