@@ -188,8 +188,8 @@ export const GET_PRODUCT_BY_HANDLE_QUERY = gql`
 `;
 
 export const CREATE_CART_MUTATION = gql`
-  mutation CreateCart($lines: [CartLineInput!]!, $attributes: [AttributeInput!]) {
-    cartCreate(input: { lines: $lines, attributes: $attributes }) {
+  mutation CreateCart($lines: [CartLineInput!]!, $attributes: [AttributeInput!], $buyerIdentity: CartBuyerIdentityInput) {
+    cartCreate(input: { lines: $lines, attributes: $attributes, buyerIdentity: $buyerIdentity }) {
       cart {
         id
         checkoutUrl

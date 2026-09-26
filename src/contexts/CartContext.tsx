@@ -1,4 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode, useCallback } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useServerFn } from "@tanstack/react-start";
+import { checkRecentOrderPlaced } from "@/lib/shopify.functions";
+import { toast } from "sonner";
 
 export type CartItem = {
   cartItemId?: string;
@@ -26,8 +30,19 @@ type CartCtx = {
 const Ctx = createContext<CartCtx | null>(null);
 const KEY = "aastha_cart_v1";
 
+function useSafeAuth() {
+  try {
+    return useAuth();
+  } catch {
+    return null;
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const auth = useSafeAuth();
+  const accessToken = auth?.accessToken;
+  const checkRecentOrder = useServerFn(checkRecentOrderPlaced);
 
   useEffect(() => {
     try {
@@ -82,7 +97,91 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const clear = useCallback(() => setItems([]), []);
+  const clear = useCallback(() => {
+    setItems([]);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(KEY);
+        localStorage.removeItem("aastha_pending_checkout");
+      } catch {}
+    }
+  }, []);
+
+  // Check URL parameters for order completion signals (cleared=1, order, order_id, order_number)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const isCleared = searchParams.get("cleared") === "1";
+      const hasOrder =
+        searchParams.has("order") ||
+        searchParams.has("order_id") ||
+        searchParams.has("order_number") ||
+        searchParams.has("thank_you");
+      const isOrderSuccessPath = window.location.pathname.startsWith("/order-success");
+
+      if (isCleared || hasOrder || isOrderSuccessPath) {
+        clear();
+      }
+    } catch (e) {
+      console.warn("Failed checking order completion from URL", e);
+    }
+  }, [clear]);
+
+  // Check if a pending checkout was completed successfully on Shopify
+  const verifyPendingOrder = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    try {
+      const rawPending = localStorage.getItem("aastha_pending_checkout");
+      if (!rawPending) return;
+
+      const pending = JSON.parse(rawPending);
+      const now = Date.now();
+      // If older than 4 hours, clean up
+      if (!pending.timestamp || now - pending.timestamp > 4 * 60 * 60 * 1000) {
+        localStorage.removeItem("aastha_pending_checkout");
+        return;
+      }
+
+      const res = await checkRecentOrder({
+        data: {
+          customerAccessToken: accessToken || undefined,
+          sinceTimestamp: pending.timestamp,
+        },
+      });
+
+      if (res?.orderPlaced) {
+        clear();
+        toast.success("Order confirmed! Your cart has been updated.");
+      }
+    } catch (err) {
+      console.warn("Failed checking pending order:", err);
+    }
+  }, [accessToken, checkRecentOrder, clear]);
+
+  useEffect(() => {
+    verifyPendingOrder();
+
+    const handleFocus = () => {
+      verifyPendingOrder();
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        verifyPendingOrder();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("pageshow", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("pageshow", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [verifyPendingOrder]);
 
   const count = useMemo(() => items.reduce((s, i) => s + (Number(i.quantity) || 0), 0), [items]);
   const subtotal = useMemo(

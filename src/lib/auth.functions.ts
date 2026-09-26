@@ -109,13 +109,13 @@ export const loginUser = createServerFn({ method: "POST" })
 
       let adminUser: any = null;
       try {
-        const { data } = await supabaseAdmin
+        const { data: dbAdminUser } = await supabaseAdmin
           .from("users")
           .select("email, full_name, is_admin, password_hash")
           .eq("email", data.email)
           .eq("is_admin", true)
           .maybeSingle();
-        adminUser = data;
+        adminUser = dbAdminUser;
       } catch (dbErr: any) {
         // Supabase skipped or unreachable; continue to customer login
         console.warn("Supabase admin lookup skipped:", dbErr?.message || dbErr);

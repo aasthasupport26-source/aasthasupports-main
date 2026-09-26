@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { CheckCircle2, Package, Sparkles } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/order-success/$orderNumber")({
   head: () => ({
@@ -11,6 +13,12 @@ export const Route = createFileRoute("/order-success/$orderNumber")({
 
 function OrderSuccess() {
   const { orderNumber } = Route.useParams();
+  const { clear } = useCart();
+
+  useEffect(() => {
+    clear();
+  }, [clear]);
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-20 max-w-2xl text-center">

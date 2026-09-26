@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { logoutUser } from "@/lib/auth.functions";
 import { getCustomerOrders } from "@/lib/shopify.functions";
 import { getUserBookings } from "@/lib/booking.functions";
@@ -97,6 +98,8 @@ function ProfilePage() {
     if (!authLoading && !customer) navigate({ to: "/auth", search: {} as any });
   }, [authLoading, customer, navigate]);
 
+  const { clear } = useCart();
+
   useEffect(() => {
     if (customer) {
       setEditedName(customer.displayName || customer.firstName || "");
@@ -107,7 +110,21 @@ function ProfilePage() {
   useEffect(() => {
     if (accessToken) {
       fetchOrders({ data: { customerAccessToken: accessToken, limit: 20 } })
-        .then((res) => setOrders(res.orders || []))
+        .then((res) => {
+          const loadedOrders = res.orders || [];
+          setOrders(loadedOrders);
+          if (loadedOrders.length > 0) {
+            try {
+              const rawPending = localStorage.getItem("aastha_pending_checkout");
+              const latestOrderTime = new Date(loadedOrders[0].processedAt).getTime();
+              const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
+              if (rawPending || latestOrderTime > twoHoursAgo) {
+                clear();
+                localStorage.removeItem("aastha_pending_checkout");
+              }
+            } catch {}
+          }
+        })
         .catch((err) => {
           console.error("Failed to load orders:", err);
           setOrders([]);
@@ -116,7 +133,7 @@ function ProfilePage() {
     } else if (!authLoading) {
       setLoadingOrders(false);
     }
-  }, [accessToken, authLoading]);
+  }, [accessToken, authLoading, clear]);
 
   useEffect(() => {
     if (customer?.id && accessToken) {

@@ -35,10 +35,15 @@ function CartPage() {
 
   // Clear cart when returning from Shopify order confirmation
   useEffect(() => {
-    if (search?.cleared === "1") {
+    let hasOrderParam = false;
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      hasOrderParam = sp.has("order") || sp.has("order_id") || sp.has("order_number") || sp.has("thank_you");
+    }
+    if (search?.cleared === "1" || hasOrderParam) {
       clear();
     }
-  }, [search?.cleared]);
+  }, [search?.cleared, clear]);
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
@@ -60,7 +65,17 @@ function CartPage() {
       console.log("[Cart] Checkout response:", res);
       if (res.checkoutUrl) {
         console.log("[Cart] Redirecting to:", res.checkoutUrl);
-        // Don't clear cart - let Shopify handle it after successful checkout
+        // Track pending checkout so cart can automatically pop out once order succeeds
+        try {
+          localStorage.setItem(
+            "aastha_pending_checkout",
+            JSON.stringify({
+              timestamp: Date.now(),
+              itemCount: items.length,
+              items: payload,
+            }),
+          );
+        } catch {}
         window.location.href = res.checkoutUrl;
       } else {
         throw new Error("No checkout URL returned");

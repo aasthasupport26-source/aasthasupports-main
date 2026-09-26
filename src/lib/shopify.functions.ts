@@ -368,11 +368,22 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
       throw new Error("Please sign in before checkout");
     }
 
+    let customerAccessToken: string | undefined;
+    let customerEmail: string | undefined;
+    let customerPhone: string | undefined;
     try {
-      const session = JSON.parse(sessionCookie) as { expiresAt?: string };
+      const session = JSON.parse(sessionCookie) as {
+        expiresAt?: string;
+        accessToken?: string;
+        email?: string;
+        phone?: string | null;
+      };
       if (!session.expiresAt || new Date(session.expiresAt).getTime() <= Date.now()) {
         throw new Error("Please sign in before checkout");
       }
+      customerAccessToken = session.accessToken;
+      customerEmail = session.email;
+      customerPhone = session.phone || undefined;
     } catch {
       throw new Error("Please sign in before checkout");
     }
@@ -523,10 +534,31 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
           });
         }
 
-        const response: any = await shopifyClient.request(CREATE_CART_MUTATION, {
-          lines,
-          attributes: cartAttributes.length > 0 ? cartAttributes : undefined,
-        });
+        const buyerIdentity: any = {};
+        if (customerEmail) {
+          buyerIdentity.email = customerEmail;
+        }
+        if (customerPhone && /^\+?[1-9]\d{1,14}$/.test(customerPhone.replace(/[\s-]/g, ""))) {
+          buyerIdentity.phone = customerPhone.replace(/[\s-]/g, "");
+        }
+        if (customerAccessToken && !customerAccessToken.startsWith("shcat_")) {
+          buyerIdentity.customerAccessToken = customerAccessToken;
+        }
+
+        let response: any;
+        try {
+          response = await shopifyClient.request(CREATE_CART_MUTATION, {
+            lines,
+            attributes: cartAttributes.length > 0 ? cartAttributes : undefined,
+            buyerIdentity: Object.keys(buyerIdentity).length > 0 ? buyerIdentity : undefined,
+          });
+        } catch (identityErr) {
+          console.warn("[Shopify] cartCreate with buyerIdentity failed, retrying without buyerIdentity:", identityErr);
+          response = await shopifyClient.request(CREATE_CART_MUTATION, {
+            lines,
+            attributes: cartAttributes.length > 0 ? cartAttributes : undefined,
+          });
+        }
 
         const cartCreate = response.cartCreate;
         if (cartCreate.userErrors && cartCreate.userErrors.length > 0) {
@@ -716,5 +748,109 @@ export const getCustomerOrders = createServerFn({ method: "GET" })
     } catch (error: any) {
       console.error("Shopify customer orders error:", error);
       return { orders: [] };
+    }
+  });
+
+export const checkRecentOrderPlaced = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      customerAccessToken: z.string().optional(),
+      sinceTimestamp: z.number(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    let token = data.customerAccessToken;
+    if (!token) {
+      const sessionCookie = getCookie("aastha_session");
+      if (sessionCookie) {
+        try {
+          const session = JSON.parse(sessionCookie);
+          token = session.accessToken;
+        } catch {}
+      }
+    }
+    if (!token) {
+      return { orderPlaced: false };
+    }
+
+    const { shopifyClient } = await import("./shopify/client");
+    const { GET_CUSTOMER_ORDERS_QUERY } = await import("./shopify/queries");
+
+    try {
+      if (token.startsWith("shcat_")) {
+        const SHOP_ID = process.env.SHOPIFY_SHOP_ID || process.env.SHOPIFY_STORE_ID;
+        const url = `https://shopify.com/${SHOP_ID}/account/customer/api/2025-07/graphql`;
+        const query = `
+          query CheckRecentOrder {
+            customer {
+              orders(first: 5) {
+                nodes {
+                  id
+                  name
+                  processedAt
+                }
+              }
+            }
+          }
+        `;
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ query }),
+        });
+
+        if (!res.ok) {
+          return { orderPlaced: false };
+        }
+
+        const response: any = await res.json();
+        const orders = response.data?.customer?.orders?.nodes || [];
+        for (const order of orders) {
+          if (order.processedAt) {
+            const processedTime = new Date(order.processedAt).getTime();
+            // Allow 2 minutes clock skew buffer
+            if (processedTime >= data.sinceTimestamp - 120000) {
+              return {
+                orderPlaced: true,
+                orderName: order.name,
+                orderId: order.id,
+              };
+            }
+          }
+        }
+        return { orderPlaced: false };
+      } else {
+        const response: any = await shopifyClient.request(GET_CUSTOMER_ORDERS_QUERY, {
+          customerAccessToken: token,
+          first: 5,
+        });
+
+        if (!response.customer) {
+          return { orderPlaced: false };
+        }
+
+        const orders = response.customer.orders?.edges || [];
+        for (const edge of orders) {
+          const order = edge.node;
+          if (order?.processedAt) {
+            const processedTime = new Date(order.processedAt).getTime();
+            if (processedTime >= data.sinceTimestamp - 120000) {
+              return {
+                orderPlaced: true,
+                orderName: order.name,
+                orderId: order.id,
+              };
+            }
+          }
+        }
+        return { orderPlaced: false };
+      }
+    } catch (err) {
+      console.warn("[CheckRecentOrder] Error checking recent order:", err);
+      return { orderPlaced: false };
     }
   });
