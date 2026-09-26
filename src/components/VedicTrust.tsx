@@ -3,28 +3,28 @@ import { ShieldCheck, Microscope, Flame, FileCheck, BadgeCheck } from "lucide-re
 const certifications = [
   {
     icon: ShieldCheck,
-    title: "Certification Available",
-    desc: "IGL and GJSPC certification can be requested for eligible products before purchase.",
+    title: "IGL & GJSPC Certified",
+    desc: "IGL & GJSPC Certified — On Request. Authenticated for natural origin and purity.",
   },
   {
     icon: Microscope,
-    title: "X-Ray Verification Available",
-    desc: "X-ray verification can be requested for eligible rudraksha products to inspect the internal chamber count.",
+    title: "X-Ray Verification",
+    desc: "X-Ray Verification Available on Request to verify internal chamber count (mukhi).",
   },
   {
     icon: Flame,
-    title: "Traditional Rituals",
-    desc: "Eligible products may be energised through traditional Vedic rituals before dispatch.",
+    title: "Vedic Energisation",
+    desc: "Energised Through Traditional Vedic Rituals by learned pandits before dispatch.",
   },
   {
     icon: FileCheck,
     title: "Origin Details",
-    desc: "Product listings include available origin information so you can review the details before ordering.",
+    desc: "Product listings include verified origin information for full transparency.",
   },
   {
     icon: BadgeCheck,
     title: "Product Guidance",
-    desc: "Contact our team for product guidance and questions about choosing a spiritual item.",
+    desc: "Contact our team for dedicated guidance and Vedic recommendations.",
   },
 ];
 
@@ -68,10 +68,10 @@ export function VedicTrust({ compact = false }: { compact?: boolean }) {
         {/* Trust stats bar */}
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 bg-maroon-deep rounded-2xl p-8 md:p-10">
           {[
-            { num: "On Request", label: "Certification Documents" },
-            { num: "Clear", label: "Product Details" },
+            { num: "100%", label: "Every Piece Hand-Selected & Certified" },
+            { num: "100%", label: "Authentic Products" },
             { num: "7 Day", label: "Easy Returns" },
-            { num: "Support", label: "Before You Order" },
+            { num: "Guaranteed", label: "Certified Quality, Every Time" },
           ].map((s) => (
             <div key={s.label} className="text-center">
               <p className="font-numeric text-2xl md:text-3xl text-gold font-bold">{s.num}</p>

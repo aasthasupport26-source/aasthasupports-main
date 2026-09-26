@@ -14,6 +14,7 @@ import {
   SlidersHorizontal,
   ShoppingBag,
   Loader2,
+  X,
 } from "lucide-react";
 import { getShortProductName, getProductRating, getProductCardDescription } from "@/lib/product-display";
 import { ProductRating } from "@/components/ProductRating";
@@ -44,6 +45,54 @@ export const Route = createFileRoute("/shop")({
   component: ShopPage,
 });
 
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  // Rudraksha Mukhis & numbers
+  "1": ["ek", "one"],
+  "ek": ["1", "one"],
+  "2": ["do", "two"],
+  "do": ["2", "two"],
+  "3": ["teen", "three"],
+  "teen": ["3", "three"],
+  "4": ["char", "four"],
+  "char": ["4", "four"],
+  "5": ["panch", "panchmukhi", "five"],
+  "panch": ["5", "panchmukhi", "five"],
+  "panchmukhi": ["5", "panch", "five", "mukhi"],
+  "6": ["cheh", "six"],
+  "cheh": ["6", "six"],
+  "7": ["saat", "sat", "seven"],
+  "saat": ["7", "seven"],
+  "sat": ["7", "seven"],
+  "8": ["aath", "ath", "eight"],
+  "aath": ["8", "eight"],
+  "9": ["nau", "nine"],
+  "nau": ["9", "nine"],
+  "10": ["das", "ten"],
+  "das": ["10", "ten"],
+  "11": ["gyarah", "eleven"],
+  "12": ["barah", "twelve"],
+  "14": ["chaudah", "fourteen"],
+  // Gemstones Hindi & English
+  "emerald": ["panna", "zamrud"],
+  "panna": ["emerald", "panna"],
+  "sapphire": ["neelam", "pukhraj"],
+  "pukhraj": ["yellow sapphire", "sapphire", "pukhraj"],
+  "neelam": ["blue sapphire", "sapphire", "neelam"],
+  "ruby": ["manik", "manikya", "ruby"],
+  "manik": ["ruby", "manikya"],
+  "manikya": ["ruby", "manik"],
+  "pearl": ["moti", "pearl"],
+  "moti": ["pearl", "moti"],
+  "coral": ["moonga", "munga", "coral"],
+  "moonga": ["coral", "red coral", "moonga"],
+  "munga": ["coral"],
+  "hessonite": ["gomed"],
+  "gomed": ["hessonite", "gomed"],
+  "sphatik": ["crystal", "quartz", "sphatik"],
+  "crystal": ["sphatik", "quartz", "crystal"],
+  "quartz": ["sphatik", "crystal", "quartz"],
+};
+
 function ShopPage() {
   const { add } = useCart();
   const navigate = useNavigate();
@@ -52,25 +101,81 @@ function ShopPage() {
 
   const [search, setSearch] = useState(routeSearch.search || "");
   const [selectedCategory, setSelectedCategory] = useState<string>(routeSearch.category || "all");
+  const debouncedNavigateRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Sync state if routeSearch params change from outside (e.g. Header search or Back button)
   React.useEffect(() => {
-    if (routeSearch.search !== undefined && routeSearch.search !== search) {
-      setSearch(routeSearch.search);
+    const nextSearch = routeSearch.search || "";
+    if (nextSearch !== search) {
+      setSearch(nextSearch);
     }
   }, [routeSearch.search]);
 
   React.useEffect(() => {
-    if (routeSearch.category !== undefined && routeSearch.category !== selectedCategory) {
-      setSelectedCategory(routeSearch.category);
+    const nextCat = routeSearch.category || "all";
+    if (nextCat !== selectedCategory) {
+      setSelectedCategory(nextCat);
     }
   }, [routeSearch.category]);
 
-  const updateFilters = (newSearch: string, newCategory: string) => {
+  React.useEffect(() => {
+    return () => {
+      if (debouncedNavigateRef.current) {
+        clearTimeout(debouncedNavigateRef.current);
+      }
+    };
+  }, []);
+
+  const handleSearchChange = (val: string) => {
+    setSearch(val);
+
+    // If user starts typing a search query, reset category to 'all' so they don't get trapped in 0 results
+    let targetCategory = selectedCategory;
+    if (val.trim() && selectedCategory !== "all") {
+      targetCategory = "all";
+      setSelectedCategory("all");
+    }
+
+    if (debouncedNavigateRef.current) {
+      clearTimeout(debouncedNavigateRef.current);
+    }
+    debouncedNavigateRef.current = setTimeout(() => {
+      navigate({
+        to: "/shop",
+        search: {
+          search: val.trim() || undefined,
+          category: targetCategory !== "all" ? targetCategory : undefined,
+        },
+        replace: true,
+      });
+    }, 300);
+  };
+
+  const handleClearSearch = () => {
+    setSearch("");
+    if (debouncedNavigateRef.current) {
+      clearTimeout(debouncedNavigateRef.current);
+    }
     navigate({
       to: "/shop",
       search: {
-        search: newSearch.trim() || undefined,
-        category: newCategory !== "all" ? newCategory : undefined,
+        search: undefined,
+        category: selectedCategory !== "all" ? selectedCategory : undefined,
+      },
+      replace: true,
+    });
+  };
+
+  const handleCategoryChange = (catSlug: string) => {
+    setSelectedCategory(catSlug);
+    if (debouncedNavigateRef.current) {
+      clearTimeout(debouncedNavigateRef.current);
+    }
+    navigate({
+      to: "/shop",
+      search: {
+        search: search.trim() || undefined,
+        category: catSlug !== "all" ? catSlug : undefined,
       },
       replace: true,
     });
@@ -149,6 +254,8 @@ function ShopPage() {
       if (queryTokens.length === 0) return true;
       const searchable = [
         p.name,
+        p.slug,
+        p.slug ? p.slug.replace(/[-_]/g, " ") : "",
         p.description,
         p.category,
         p.productType,
@@ -158,7 +265,12 @@ function ShopPage() {
         .join(" ")
         .toLowerCase();
 
-      return queryTokens.every((token) => searchable.includes(token));
+      return queryTokens.every((token) => {
+        if (searchable.includes(token)) return true;
+        const syns = SEARCH_SYNONYMS[token];
+        if (syns && syns.some((syn) => searchable.includes(syn))) return true;
+        return false;
+      });
     });
   }, [products, search, selectedCategory]);
 
@@ -219,18 +331,24 @@ function ShopPage() {
           <div className="mb-12 space-y-6">
             {/* Search Bar */}
             <div className="relative max-w-2xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search for rudraksha, gemstones, malas..."
                 value={search}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setSearch(val);
-                  updateFilters(val, selectedCategory);
-                }}
-                className="w-full pl-12 pr-4 py-4 rounded-xl border border-gold/20 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full pl-12 pr-12 py-4 rounded-xl border border-gold/20 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all text-base bg-white shadow-sm"
               />
+              {search && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  aria-label="Clear search"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground hover:text-maroon-deep rounded-full hover:bg-gold/10 transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
             </div>
 
             {/* Category Filter */}
@@ -238,14 +356,11 @@ function ShopPage() {
               {categories.map((cat) => (
                 <button
                   key={cat.slug}
-                  onClick={() => {
-                    setSelectedCategory(cat.slug);
-                    updateFilters(search, cat.slug);
-                  }}
-                  className={`px-6 py-2.5 rounded-full transition-all ${
+                  onClick={() => handleCategoryChange(cat.slug)}
+                  className={`px-6 py-2.5 rounded-full transition-all font-medium text-sm ${
                     selectedCategory === cat.slug
-                      ? "bg-maroon-deep text-white shadow-md"
-                      : "bg-white text-maroon-deep border border-gold/20 hover:border-gold"
+                      ? "bg-maroon-deep text-white shadow-md scale-105"
+                      : "bg-white text-maroon-deep border border-gold/20 hover:border-gold hover:bg-cream/40"
                   }`}
                 >
                   {cat.name}
@@ -293,29 +408,41 @@ function ShopPage() {
               </button>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground text-lg mb-4">
-                {search || selectedCategory !== "all"
-                  ? "No products match your search"
-                  : "No products found in Shopify"}
+            <div className="text-center py-20 max-w-md mx-auto">
+              <p className="text-muted-foreground text-lg mb-2">
+                {search
+                  ? `No products found matching "${search}"${
+                      selectedCategory !== "all"
+                        ? ` in ${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory}`
+                        : ""
+                    }`
+                  : selectedCategory !== "all"
+                  ? `No products found in ${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory}`
+                  : "No products found in store"}
               </p>
-              {(search || selectedCategory !== "all") && (
-                <button
-                  onClick={() => {
-                    setSearch("");
-                    setSelectedCategory("all");
-                    updateFilters("", "all");
-                  }}
-                  className="text-maroon-deep hover:underline"
-                >
-                  Clear filters
-                </button>
-              )}
-              {!search && selectedCategory === "all" && (
-                <p className="text-sm text-muted-foreground mt-4">
-                  Add products in your Shopify admin with proper metafields
-                </p>
-              )}
+              <div className="flex flex-wrap justify-center gap-3 mt-4">
+                {selectedCategory !== "all" && search && (
+                  <button
+                    onClick={() => handleCategoryChange("all")}
+                    className="px-5 py-2.5 text-sm bg-maroon-deep text-white rounded-lg hover:bg-maroon transition shadow-sm font-medium"
+                  >
+                    Search across all categories
+                  </button>
+                )}
+                {(search || selectedCategory !== "all") && (
+                  <button
+                    onClick={() => {
+                      setSearch("");
+                      setSelectedCategory("all");
+                      if (debouncedNavigateRef.current) clearTimeout(debouncedNavigateRef.current);
+                      navigate({ to: "/shop", search: {}, replace: true });
+                    }}
+                    className="px-5 py-2.5 text-sm text-maroon-deep border border-maroon-deep/30 rounded-lg hover:bg-maroon-deep/5 transition font-medium"
+                  >
+                    Clear all filters
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <>
