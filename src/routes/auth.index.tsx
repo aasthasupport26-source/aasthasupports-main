@@ -133,7 +133,7 @@ function AuthPage() {
               )}
             </Button>
             <p className="text-xs text-center text-muted-foreground">
-              Secure one-click sign in and order tracking via Shopify & Google Accounts
+              Secure one-click sign in and order tracking
             </p>
           </div>
 
