@@ -341,24 +341,27 @@ export async function logoutShopifyCustomer(accessToken: string): Promise<void> 
  * Sync Shopify customer to our Supabase users table
  */
 export async function syncShopifyCustomerToSupabase(customer: ShopifyCustomer): Promise<void> {
-  const { error } = await supabaseAdmin.from("users").upsert(
-    {
-      email: customer.email,
-      full_name:
-        customer.displayName || `${customer.firstName || ""} ${customer.lastName || ""}`.trim(),
-      phone: customer.phone,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      onConflict: "email",
-      ignoreDuplicates: false,
-    },
-  );
+  try {
+    const { error } = await supabaseAdmin.from("users").upsert(
+      {
+        email: customer.email,
+        full_name:
+          customer.displayName || `${customer.firstName || ""} ${customer.lastName || ""}`.trim(),
+        phone: customer.phone,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "email",
+        ignoreDuplicates: false,
+      },
+    );
 
-  if (error) {
-    console.error("Failed to sync customer to Supabase:", error);
-    throw new Error("Failed to sync user data");
+    if (error) {
+      console.warn("Could not sync customer to Supabase:", error.message || error);
+    }
+  } catch (err: any) {
+    console.warn("Supabase unreachable during customer sync:", err?.message || err);
   }
 }
 
