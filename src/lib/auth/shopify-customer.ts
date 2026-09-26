@@ -339,30 +339,11 @@ export async function logoutShopifyCustomer(accessToken: string): Promise<void> 
 
 /**
  * Sync Shopify customer to our Supabase users table
+ * Skipped: customer auth and order data are managed directly via Shopify & Google Auth.
  */
 export async function syncShopifyCustomerToSupabase(customer: ShopifyCustomer): Promise<void> {
-  try {
-    const { error } = await supabaseAdmin.from("users").upsert(
-      {
-        email: customer.email,
-        full_name:
-          customer.displayName || `${customer.firstName || ""} ${customer.lastName || ""}`.trim(),
-        phone: customer.phone,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: "email",
-        ignoreDuplicates: false,
-      },
-    );
-
-    if (error) {
-      console.warn("Could not sync customer to Supabase:", error.message || error);
-    }
-  } catch (err: any) {
-    console.warn("Supabase unreachable during customer sync:", err?.message || err);
-  }
+  // Supabase sync intentionally skipped to rely purely on Shopify and Google Auth.
+  return Promise.resolve();
 }
 
 /**

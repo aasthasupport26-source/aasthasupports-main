@@ -107,12 +107,19 @@ export const loginUser = createServerFn({ method: "POST" })
       const { recordFailedAttempt, resetAttempts } = await import("./brute-force-protection");
       const { logSecurityEvent } = await import("./security-monitor");
 
-      const { data: adminUser } = await supabaseAdmin
-        .from("users")
-        .select("email, full_name, is_admin, password_hash")
-        .eq("email", data.email)
-        .eq("is_admin", true)
-        .maybeSingle();
+      let adminUser: any = null;
+      try {
+        const { data } = await supabaseAdmin
+          .from("users")
+          .select("email, full_name, is_admin, password_hash")
+          .eq("email", data.email)
+          .eq("is_admin", true)
+          .maybeSingle();
+        adminUser = data;
+      } catch (dbErr: any) {
+        // Supabase skipped or unreachable; continue to customer login
+        console.warn("Supabase admin lookup skipped:", dbErr?.message || dbErr);
+      }
 
       if (adminUser) {
         const storedHash = (adminUser as any)?.password_hash;
