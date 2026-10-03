@@ -34,7 +34,7 @@ export const Route = createFileRoute("/")({
           url: "https://www.aasthasupports.com",
           potentialAction: {
             "@type": "SearchAction",
-            target: "https://www.aasthasupports.com/category/{search_term_string}",
+            target: "https://www.aasthasupports.com/shop?search={search_term_string}",
             "query-input": "required name=search_term_string",
           },
         }),

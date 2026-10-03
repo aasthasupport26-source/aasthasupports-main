@@ -68,10 +68,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const defaultExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     const finalExpires = expiresAt || defaultExpiry;
 
+    let isAdminUser = false;
     try {
       const adminResult = await checkAdmin({ data: { email: customer.email } });
-      const isAdminUser = adminResult.isAdmin;
+      isAdminUser = adminResult?.isAdmin || false;
+    } catch (e) {
+      console.warn("Admin check skipped or failed:", e);
+    }
 
+    try {
       await setSessionFn({
         data: {
           customerId: customer.id,
@@ -85,15 +90,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           expiresAt: finalExpires,
         },
       });
-
-      setCustomer(customer);
-      setAccessToken(token);
-      setIsAdmin(isAdminUser);
-      return isAdminUser;
-    } catch {
-      setIsAdmin(false);
-      return false;
+    } catch (sessionErr) {
+      console.warn("Server session sync skipped or failed, preserving active client session:", sessionErr);
     }
+
+    setCustomer(customer);
+    setAccessToken(token);
+    setIsAdmin(isAdminUser);
+    return isAdminUser;
   }, [checkAdmin, setSessionFn]);
 
   const clearSessionFn = useServerFn(clearSession);

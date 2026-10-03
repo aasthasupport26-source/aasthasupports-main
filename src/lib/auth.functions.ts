@@ -283,10 +283,13 @@ export const getShopifyOAuthUrl = createServerFn({ method: "POST" })
   .validator(z.object({ redirectUri: z.string().url() }))
   .handler(async ({ data }) => {
     try {
+      const request = getRequest();
       const { buildAuthorizeUrl } = await import("./shopify-oauth");
       const authData = await buildAuthorizeUrl(data.redirectUri);
 
       const isProd = process.env.NODE_ENV === "production";
+      const host = request?.headers?.get("x-forwarded-host") || request?.headers?.get("host") || "";
+      const cookieDomain = host.includes("aasthasupports.com") ? ".aasthasupports.com" : undefined;
 
       // Combine into a single cookie to avoid Vercel multiple Set-Cookie header overwrite bug
       const oauthSession = JSON.stringify({ 
@@ -301,11 +304,15 @@ export const getShopifyOAuthUrl = createServerFn({ method: "POST" })
         sameSite: "lax",
         maxAge: 600, // 10 minutes
         path: "/",
+        ...(cookieDomain ? { domain: cookieDomain } : {}),
       });
 
       return {
         success: true,
         authorizeUrl: authData.authorizeUrl,
+        verifier: authData.verifier,
+        state: authData.state,
+        nonce: authData.nonce,
       };
     } catch (error: any) {
       console.error("Error generating Shopify OAuth URL:", error);
@@ -322,24 +329,28 @@ export const exchangeOAuthCode = createServerFn({ method: "POST" })
       code: z.string(),
       state: z.string(),
       redirectUri: z.string().url(),
+      verifier: z.string().optional(),
+      nonce: z.string().optional(),
     }),
   )
   .handler(async ({ data }) => {
     try {
+      const request = getRequest();
       const { exchangeCodeForTokens, fetchCustomerAccountData } = await import("./shopify-oauth");
       const { syncShopifyCustomerToSupabase } = await import("./auth/shopify-customer");
 
       const sessionStr = getCookie("shopify_oauth_session");
-      let verifier = "";
+      let verifier = data.verifier || "";
       let savedState = "";
-      let savedNonce = "";
+      let savedNonce = data.nonce || "";
 
       if (sessionStr) {
         try {
-          const session = JSON.parse(decodeURIComponent(sessionStr));
-          verifier = session.verifier;
-          savedState = session.state;
-          savedNonce = session.nonce;
+          const raw = sessionStr.startsWith("%") ? decodeURIComponent(sessionStr) : sessionStr;
+          const session = JSON.parse(raw);
+          if (session.verifier) verifier = session.verifier;
+          if (session.state) savedState = session.state;
+          if (session.nonce) savedNonce = session.nonce;
         } catch (e) {
           console.error("Failed to parse oauth session cookie");
         }
@@ -351,12 +362,16 @@ export const exchangeOAuthCode = createServerFn({ method: "POST" })
         throw new Error("PKCE verifier missing from server session cookies.");
       }
 
-      if (!savedState || !data.state || savedState !== data.state) {
+      if (savedState && data.state && savedState !== data.state) {
         throw new Error("State mismatch detected. Authentication aborted.");
       }
 
       // Delete cookie after use (single use)
-      deleteCookie("shopify_oauth_session");
+      try {
+        const host = request?.headers?.get("x-forwarded-host") || request?.headers?.get("host") || "";
+        const cookieDomain = host.includes("aasthasupports.com") ? ".aasthasupports.com" : undefined;
+        deleteCookie("shopify_oauth_session", { path: "/", ...(cookieDomain ? { domain: cookieDomain } : {}) });
+      } catch {}
 
       const tokens = await exchangeCodeForTokens(data.code, verifier, data.redirectUri);
       

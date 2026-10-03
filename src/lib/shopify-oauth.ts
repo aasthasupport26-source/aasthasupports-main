@@ -15,7 +15,7 @@ function getStoreDomain(): string {
   if (!val) throw new Error("SHOPIFY_STORE_DOMAIN is required");
   return val;
 }
-function getAllowedRedirectUris(): string[] {
+export function getAllowedRedirectUris(): string[] {
   return [
     process.env.VITE_SHOPIFY_REDIRECT_URI,
     "https://aasthasupport.com/auth/callback",
@@ -26,6 +26,45 @@ function getAllowedRedirectUris(): string[] {
     "http://localhost:5173/auth/callback",
     "http://localhost:8082/auth/callback",
   ].filter(Boolean) as string[];
+}
+
+export function isAllowedRedirectUri(uri: string): boolean {
+  const allowed = getAllowedRedirectUris();
+  if (allowed.includes(uri)) return true;
+  try {
+    const parsed = new URL(uri);
+    if (parsed.pathname === "/auth/callback") {
+      if (
+        parsed.hostname.endsWith(".vercel.app") ||
+        parsed.hostname === "localhost" ||
+        parsed.hostname === "127.0.0.1" ||
+        parsed.hostname.includes("aasthasupport")
+      ) {
+        return true;
+      }
+    }
+  } catch {}
+  return false;
+}
+
+export function getOAuthRedirectUri(): string {
+  if (typeof window !== "undefined") {
+    const origin = window.location.origin;
+    if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+      return `${origin}/auth/callback`;
+    }
+    if (origin.includes("aasthasupports.com") || origin.includes("aasthasupport.com")) {
+      return `${origin}/auth/callback`;
+    }
+    if (import.meta.env.VITE_SHOPIFY_REDIRECT_URI) {
+      return import.meta.env.VITE_SHOPIFY_REDIRECT_URI;
+    }
+    return `${origin}/auth/callback`;
+  }
+  return (
+    process.env.VITE_SHOPIFY_REDIRECT_URI ||
+    "https://www.aasthasupports.com/auth/callback"
+  );
 }
 
 export interface OidcConfig {
@@ -72,8 +111,7 @@ export async function getOidcConfig(): Promise<OidcConfig> {
 }
 
 export async function buildAuthorizeUrl(redirectUri: string) {
-  const ALLOWED_REDIRECT_URIS = getAllowedRedirectUris();
-  if (!ALLOWED_REDIRECT_URIS.includes(redirectUri)) {
+  if (!isAllowedRedirectUri(redirectUri)) {
     throw new Error("Invalid redirect URI");
   }
 
@@ -104,8 +142,7 @@ export async function buildAuthorizeUrl(redirectUri: string) {
 }
 
 export async function exchangeCodeForTokens(code: string, verifier: string, redirectUri: string) {
-  const ALLOWED_REDIRECT_URIS = getAllowedRedirectUris();
-  if (!ALLOWED_REDIRECT_URIS.includes(redirectUri)) {
+  if (!isAllowedRedirectUri(redirectUri)) {
     throw new Error("Invalid redirect URI");
   }
 

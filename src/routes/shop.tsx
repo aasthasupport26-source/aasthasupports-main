@@ -93,6 +93,22 @@ const SEARCH_SYNONYMS: Record<string, string[]> = {
   "quartz": ["sphatik", "crystal", "quartz"],
 };
 
+function normalizeSearchText(value: unknown): string {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[\u2010-\u2015_-]+/g, " ")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getSearchTerms(token: string): string[] {
+  const normalizedToken = normalizeSearchText(token);
+  return [normalizedToken, ...(SEARCH_SYNONYMS[normalizedToken] || [])]
+    .map(normalizeSearchText)
+    .filter(Boolean);
+}
+
 function ShopPage() {
   const { add } = useCart();
   const navigate = useNavigate();
@@ -206,8 +222,7 @@ function ShopPage() {
   ];
 
   const filteredProducts = useMemo(() => {
-    const searchLower = search.trim().toLowerCase();
-    const queryTokens = searchLower.split(/\s+/).filter(Boolean);
+    const queryTokens = normalizeSearchText(search).split(" ").filter(Boolean);
 
     return products.filter((p: any) => {
       // 1. Category filter
@@ -262,14 +277,11 @@ function ShopPage() {
         ...(Array.isArray(p.tags) ? p.tags : []),
       ]
         .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+        .map(normalizeSearchText)
+        .join(" ");
 
       return queryTokens.every((token) => {
-        if (searchable.includes(token)) return true;
-        const syns = SEARCH_SYNONYMS[token];
-        if (syns && syns.some((syn) => searchable.includes(syn))) return true;
-        return false;
+        return getSearchTerms(token).some((term) => searchable.includes(term));
       });
     });
   }, [products, search, selectedCategory]);

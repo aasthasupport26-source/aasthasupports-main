@@ -6,6 +6,8 @@ import { MegaDropdown } from "@/components/MegaDropdown";
 import { categories } from "@/data/catalog";
 import { useCart } from "@/contexts/CartContext";
 
+const popularSearches = ["Rudraksha", "7 Mukhi", "Pukhraj", "Mala"];
+
 export function Header() {
   const navigate = useNavigate();
   const [ui, setUi] = useState({
@@ -20,9 +22,14 @@ export function Header() {
     e.preventDefault();
     const query = ui.searchQuery.trim();
     if (query) {
-      setUi((prev) => ({ ...prev, searchOpen: false }));
+      setUi((prev) => ({ ...prev, searchOpen: false, searchQuery: "" }));
       navigate({ to: "/shop", search: { search: query, category: undefined } });
     }
+  };
+
+  const searchPopular = (query: string) => {
+    setUi((prev) => ({ ...prev, searchOpen: false, searchQuery: "" }));
+    navigate({ to: "/shop", search: { search: query, category: undefined } });
   };
 
   return (
@@ -162,6 +169,19 @@ export function Header() {
                 >
                   <X className="w-5 h-5" />
                 </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 mb-5">
+                <span className="text-xs text-muted-foreground">Popular:</span>
+                {popularSearches.map((query) => (
+                  <button
+                    key={query}
+                    type="button"
+                    onClick={() => searchPopular(query)}
+                    className="px-3 py-1.5 text-xs text-maroon-deep border border-gold/30 rounded-full hover:bg-cream transition"
+                  >
+                    {query}
+                  </button>
+                ))}
               </div>
               <button
                 type="submit"

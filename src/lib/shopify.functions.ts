@@ -68,12 +68,29 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
       if (productsCache && Date.now() - productsCacheTime < CACHE_TTL && !data.cursor) {
         response = productsCache;
       } else {
-        response = await shopifyClient.request(GET_PRODUCTS_QUERY, {
-          first: 250, // Fetch all to filter in-memory due to dirty Shopify data
-          after: data.cursor,
-        });
+        const edges: any[] = [];
+        let cursor = data.cursor;
+        let pageInfo = { hasNextPage: false, endCursor: null as string | null };
 
-        // Cache the full response if it's the first page
+        do {
+          const page = await shopifyClient.request(GET_PRODUCTS_QUERY, {
+            first: 250,
+            after: cursor,
+          });
+
+          edges.push(...page.products.edges);
+          pageInfo = page.products.pageInfo;
+          cursor = pageInfo.endCursor || undefined;
+        } while (pageInfo.hasNextPage);
+
+        response = {
+          products: {
+            edges,
+            pageInfo,
+          },
+        };
+
+        // Cache the complete response if this is the first page.
         if (!data.cursor) {
           productsCache = response;
           productsCacheTime = Date.now();
@@ -372,7 +389,8 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
     let customerEmail: string | undefined;
     let customerPhone: string | undefined;
     try {
-      const session = JSON.parse(sessionCookie) as {
+      const raw = sessionCookie.startsWith("%") ? decodeURIComponent(sessionCookie) : sessionCookie;
+      const session = JSON.parse(raw) as {
         expiresAt?: string;
         accessToken?: string;
         email?: string;
@@ -764,7 +782,8 @@ export const checkRecentOrderPlaced = createServerFn({ method: "POST" })
       const sessionCookie = getCookie("aastha_session");
       if (sessionCookie) {
         try {
-          const session = JSON.parse(sessionCookie);
+          const raw = sessionCookie.startsWith("%") ? decodeURIComponent(sessionCookie) : sessionCookie;
+          const session = JSON.parse(raw);
           token = session.accessToken;
         } catch {}
       }

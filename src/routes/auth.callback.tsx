@@ -32,16 +32,44 @@ function AuthCallbackPage() {
           throw new Error("No authorization code provided in URL");
         }
 
-        const redirectUri =
-          import.meta.env.VITE_SHOPIFY_REDIRECT_URI ||
-          `${window.location.origin}${window.location.pathname}`;
+        let clientVerifier: string | undefined;
+        let clientNonce: string | undefined;
+
+        if (typeof window !== "undefined") {
+          try {
+            const stored = sessionStorage.getItem("shopify_oauth_session");
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              if (parsed.state && state && parsed.state !== state) {
+                throw new Error("State mismatch detected. Authentication aborted.");
+              }
+              clientVerifier = parsed.verifier;
+              clientNonce = parsed.nonce;
+            }
+          } catch (e: any) {
+            if (e.message?.includes("State mismatch")) throw e;
+            console.warn("Could not read oauth session from sessionStorage:", e);
+          }
+        }
+
+        const { getOAuthRedirectUri } = await import("@/lib/shopify-oauth");
+        const redirectUri = getOAuthRedirectUri();
+
         const res = await exchangeCode({
           data: {
             code,
             state: state || "",
             redirectUri,
+            verifier: clientVerifier,
+            nonce: clientNonce,
           },
         });
+
+        if (typeof window !== "undefined") {
+          try {
+            sessionStorage.removeItem("shopify_oauth_session");
+          } catch {}
+        }
 
         const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
         const isAdmin = await setAuthLogin(res.customer, res.accessToken, expiresAt);

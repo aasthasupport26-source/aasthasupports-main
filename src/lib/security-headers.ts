@@ -88,9 +88,9 @@ export function getSecurityHeaders(config: SecurityHeadersConfig = {}): Record<s
     headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=(), payment=()";
   }
   
-  // Add missing Cross-Origin headers (Relaxed for external CDN images)
+  // Add missing Cross-Origin headers (Relaxed for external CDN images and payment/OAuth popups)
   headers["Cross-Origin-Embedder-Policy"] = "unsafe-none";
-  headers["Cross-Origin-Opener-Policy"] = "same-origin";
+  headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups";
   headers["Cross-Origin-Resource-Policy"] = "cross-origin";
   
   return headers;

@@ -20,11 +20,26 @@ function AuthLoginPage() {
 
     const initOAuth = async () => {
       try {
-        const redirectUri =
-          import.meta.env.VITE_SHOPIFY_REDIRECT_URI || `${window.location.origin}/auth/callback`;
+        const { getOAuthRedirectUri } = await import("@/lib/shopify-oauth");
+        const redirectUri = getOAuthRedirectUri();
         const res = await getOAuthUrl({ data: { redirectUri } });
 
         if (res?.authorizeUrl) {
+          if (typeof window !== "undefined") {
+            try {
+              sessionStorage.setItem(
+                "shopify_oauth_session",
+                JSON.stringify({
+                  verifier: res.verifier,
+                  state: res.state,
+                  nonce: res.nonce,
+                  redirectUri,
+                }),
+              );
+            } catch (storageErr) {
+              console.warn("sessionStorage unavailable:", storageErr);
+            }
+          }
           window.location.href = res.authorizeUrl;
         } else {
           throw new Error("Failed to obtain authorization URL");

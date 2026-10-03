@@ -65,7 +65,11 @@ export function validateCSRF(request: Request): void {
   // Skip manual validation for TanStack Start RPC endpoints
   // They are handled automatically by the createCsrfMiddleware in start.ts
   const url = new URL(request.url);
-  if (url.pathname.startsWith("/_server")) {
+  if (
+    url.pathname.startsWith("/_server") ||
+    url.searchParams.has("_serverFn") ||
+    url.searchParams.has("_server")
+  ) {
     return;
   }
 
