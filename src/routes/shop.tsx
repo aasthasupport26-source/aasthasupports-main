@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { getShortProductName, getProductRating, getProductCardDescription } from "@/lib/product-display";
 import { ProductRating } from "@/components/ProductRating";
+import { buildSearchIndex, searchProducts } from "@/lib/product-search";
 
 export const Route = createFileRoute("/shop")({
   validateSearch: (search: Record<string, unknown>): { search?: string; category?: string } => {
@@ -45,70 +46,6 @@ export const Route = createFileRoute("/shop")({
   component: ShopPage,
 });
 
-const SEARCH_SYNONYMS: Record<string, string[]> = {
-  // Rudraksha Mukhis & numbers
-  "1": ["ek", "one"],
-  "ek": ["1", "one"],
-  "2": ["do", "two"],
-  "do": ["2", "two"],
-  "3": ["teen", "three"],
-  "teen": ["3", "three"],
-  "4": ["char", "four"],
-  "char": ["4", "four"],
-  "5": ["panch", "panchmukhi", "five"],
-  "panch": ["5", "panchmukhi", "five"],
-  "panchmukhi": ["5", "panch", "five", "mukhi"],
-  "6": ["cheh", "six"],
-  "cheh": ["6", "six"],
-  "7": ["saat", "sat", "seven"],
-  "saat": ["7", "seven"],
-  "sat": ["7", "seven"],
-  "8": ["aath", "ath", "eight"],
-  "aath": ["8", "eight"],
-  "9": ["nau", "nine"],
-  "nau": ["9", "nine"],
-  "10": ["das", "ten"],
-  "das": ["10", "ten"],
-  "11": ["gyarah", "eleven"],
-  "12": ["barah", "twelve"],
-  "14": ["chaudah", "fourteen"],
-  // Gemstones Hindi & English
-  "emerald": ["panna", "zamrud"],
-  "panna": ["emerald", "panna"],
-  "sapphire": ["neelam", "pukhraj"],
-  "pukhraj": ["yellow sapphire", "sapphire", "pukhraj"],
-  "neelam": ["blue sapphire", "sapphire", "neelam"],
-  "ruby": ["manik", "manikya", "ruby"],
-  "manik": ["ruby", "manikya"],
-  "manikya": ["ruby", "manik"],
-  "pearl": ["moti", "pearl"],
-  "moti": ["pearl", "moti"],
-  "coral": ["moonga", "munga", "coral"],
-  "moonga": ["coral", "red coral", "moonga"],
-  "munga": ["coral"],
-  "hessonite": ["gomed"],
-  "gomed": ["hessonite", "gomed"],
-  "sphatik": ["crystal", "quartz", "sphatik"],
-  "crystal": ["sphatik", "quartz", "crystal"],
-  "quartz": ["sphatik", "crystal", "quartz"],
-};
-
-function normalizeSearchText(value: unknown): string {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/[\u2010-\u2015_-]+/g, " ")
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function getSearchTerms(token: string): string[] {
-  const normalizedToken = normalizeSearchText(token);
-  return [normalizedToken, ...(SEARCH_SYNONYMS[normalizedToken] || [])]
-    .map(normalizeSearchText)
-    .filter(Boolean);
-}
-
 function ShopPage() {
   const { add } = useCart();
   const navigate = useNavigate();
@@ -117,14 +54,18 @@ function ShopPage() {
 
   const [search, setSearch] = useState(routeSearch.search || "");
   const [selectedCategory, setSelectedCategory] = useState<string>(routeSearch.category || "all");
-  const debouncedNavigateRef = useRef<NodeJS.Timeout | null>(null);
+  const debouncedNavigateRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Last search value this component pushed into the URL. Used to ignore the
+  // URL "echo" of our own debounced navigate, which would otherwise overwrite
+  // characters the user typed in the meantime.
+  const lastPushedSearchRef = useRef<string>(routeSearch.search || "");
 
   // Sync state if routeSearch params change from outside (e.g. Header search or Back button)
   React.useEffect(() => {
     const nextSearch = routeSearch.search || "";
-    if (nextSearch !== search) {
-      setSearch(nextSearch);
-    }
+    if (nextSearch === lastPushedSearchRef.current) return;
+    lastPushedSearchRef.current = nextSearch;
+    setSearch(nextSearch);
   }, [routeSearch.search]);
 
   React.useEffect(() => {
@@ -156,6 +97,7 @@ function ShopPage() {
       clearTimeout(debouncedNavigateRef.current);
     }
     debouncedNavigateRef.current = setTimeout(() => {
+      lastPushedSearchRef.current = val.trim();
       navigate({
         to: "/shop",
         search: {
@@ -169,6 +111,7 @@ function ShopPage() {
 
   const handleClearSearch = () => {
     setSearch("");
+    lastPushedSearchRef.current = "";
     if (debouncedNavigateRef.current) {
       clearTimeout(debouncedNavigateRef.current);
     }
@@ -210,7 +153,7 @@ function ShopPage() {
     gcTime: 10 * 60 * 1000,
   });
 
-  const products = data?.products || [];
+  const products = useMemo(() => data?.products || [], [data]);
 
   const categories = [
     { name: "All Products", slug: "all" },
@@ -221,10 +164,12 @@ function ShopPage() {
     { name: "Yantras", slug: "yantra" },
   ];
 
-  const filteredProducts = useMemo(() => {
-    const queryTokens = normalizeSearchText(search).split(" ").filter(Boolean);
+  const searchIndex = useMemo(() => buildSearchIndex(products), [products]);
 
-    return products.filter((p: any) => {
+  const filteredProducts = useMemo(() => {
+    const rankedProducts = searchProducts(searchIndex, search);
+
+    return rankedProducts.filter((p: any) => {
       // 1. Category filter
       if (selectedCategory && selectedCategory !== "all") {
         const catKey = (p.category || p.productType || "").toLowerCase();
@@ -265,28 +210,17 @@ function ShopPage() {
         }
       }
 
-      // 2. Search query filter
-      if (queryTokens.length === 0) return true;
-      const searchable = [
-        p.name,
-        p.slug,
-        p.slug ? p.slug.replace(/[-_]/g, " ") : "",
-        p.description,
-        p.category,
-        p.productType,
-        ...(Array.isArray(p.tags) ? p.tags : []),
-      ]
-        .filter(Boolean)
-        .map(normalizeSearchText)
-        .join(" ");
-
-      return queryTokens.every((token) => {
-        return getSearchTerms(token).some((term) => searchable.includes(term));
-      });
+      return true;
     });
-  }, [products, search, selectedCategory]);
+  }, [searchIndex, search, selectedCategory]);
+
+  const isSearching = search.trim().length > 0;
 
   const groupedProducts = useMemo(() => {
+    // While searching, keep a single list so the best matches stay on top.
+    if (isSearching) {
+      return filteredProducts.length ? { [`Results for "${search.trim()}"`]: filteredProducts } : {};
+    }
     return filteredProducts.reduce((acc: any, product: any) => {
       let catName = (product.productType || "Other").trim().replace(/\s+/g, " ");
       catName = catName.toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase());
@@ -305,7 +239,7 @@ function ShopPage() {
       acc[catName].push(product);
       return acc;
     }, {});
-  }, [filteredProducts]);
+  }, [filteredProducts, isSearching, search]);
 
   const handleAddToCart = (product: any) => {
     if (!product.variantId) {
@@ -445,6 +379,7 @@ function ShopPage() {
                   <button
                     onClick={() => {
                       setSearch("");
+                      lastPushedSearchRef.current = "";
                       setSelectedCategory("all");
                       if (debouncedNavigateRef.current) clearTimeout(debouncedNavigateRef.current);
                       navigate({ to: "/shop", search: {}, replace: true });

@@ -1,36 +1,19 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Search, ShoppingBag, User, Menu, X, Phone } from "lucide-react";
 import { Logo } from "./Logo";
 import { MegaDropdown } from "@/components/MegaDropdown";
 import { categories } from "@/data/catalog";
 import { useCart } from "@/contexts/CartContext";
-
-const popularSearches = ["Rudraksha", "7 Mukhi", "Pukhraj", "Mala"];
+import { SearchModal } from "@/components/SearchModal";
 
 export function Header() {
-  const navigate = useNavigate();
   const [ui, setUi] = useState({
     openSlug: null as string | null,
     mobileOpen: false,
     searchOpen: false,
-    searchQuery: "",
   });
   const { count } = useCart();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const query = ui.searchQuery.trim();
-    if (query) {
-      setUi((prev) => ({ ...prev, searchOpen: false, searchQuery: "" }));
-      navigate({ to: "/shop", search: { search: query, category: undefined } });
-    }
-  };
-
-  const searchPopular = (query: string) => {
-    setUi((prev) => ({ ...prev, searchOpen: false, searchQuery: "" }));
-    navigate({ to: "/shop", search: { search: query, category: undefined } });
-  };
 
   return (
     <header className="sticky top-0 z-50">
@@ -140,59 +123,11 @@ export function Header() {
         )}
       </div>
 
-      {/* Search Modal */}
-      {ui.searchOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20"
-          onClick={() => setUi((prev) => ({ ...prev, searchOpen: false }))}
-        >
-          <div
-            className="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <form onSubmit={handleSearch} className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Search className="w-5 h-5 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={ui.searchQuery}
-                  onChange={(e) => setUi((prev) => ({ ...prev, searchQuery: e.target.value }))}
-                  className="flex-1 text-lg outline-none"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  onClick={() => setUi((prev) => ({ ...prev, searchOpen: false }))}
-                  className="p-2 hover:bg-gray-100 rounded"
-                  aria-label="Close search"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 mb-5">
-                <span className="text-xs text-muted-foreground">Popular:</span>
-                {popularSearches.map((query) => (
-                  <button
-                    key={query}
-                    type="button"
-                    onClick={() => searchPopular(query)}
-                    className="px-3 py-1.5 text-xs text-maroon-deep border border-gold/30 rounded-full hover:bg-cream transition"
-                  >
-                    {query}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-maroon text-white py-2 rounded-lg hover:bg-maroon-deep"
-              >
-                Search
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Search Modal (live results) */}
+      <SearchModal
+        open={ui.searchOpen}
+        onClose={() => setUi((prev) => ({ ...prev, searchOpen: false }))}
+      />
 
       {/* Mobile menu */}
       {ui.mobileOpen && (
