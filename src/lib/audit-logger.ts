@@ -17,23 +17,26 @@ export async function logAdminAction(
   resourceType: string,
   resourceId?: string,
   changes?: any,
-  request?: Request
+  request?: Request,
 ): Promise<void> {
   try {
-    const ip = request?.headers.get('x-forwarded-for')?.split(',')[0] || 
-               request?.headers.get('x-real-ip') || 
-               'unknown';
-    const userAgent = request?.headers.get('user-agent') || 'unknown';
-    
-    await supabaseAdmin.from('admin_audit_log').insert({
+    const ip =
+      request?.headers.get("x-forwarded-for")?.split(",")[0] ||
+      request?.headers.get("x-real-ip") ||
+      "unknown";
+    const userAgent = request?.headers.get("user-agent") || "unknown";
+
+    await supabaseAdmin.from("admin_audit_log").insert({
       admin_email: email,
       action,
       resource_type: resourceType,
       resource_id: resourceId,
-      changes: changes ? JSON.stringify(changes) : null,
-    });
+      // Table column is `details JSONB` (see supabase/migrations/20260818_add_admin_audit_log.sql);
+      // cast needed because the generated Supabase types predate that column.
+      details: changes ?? null,
+    } as any);
   } catch (error) {
     // Don't fail the operation if audit logging fails
-    console.error('Failed to log admin action:', error);
+    console.error("Failed to log admin action:", error);
   }
 }

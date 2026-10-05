@@ -162,7 +162,9 @@ function ProfilePage() {
   };
 
   const handleSave = () => {
-    toast.success("Profile updated securely.");
+    // There is no profile-update API wired up yet — never claim success for a
+    // change that was not saved.
+    toast.info("Profile editing is coming soon. To update details, contact support.");
     setIsEditing(false);
   };
 

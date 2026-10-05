@@ -8,7 +8,7 @@ export const refreshToken = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const request = getRequest();
     const { checkRateLimit } = await import("./rate-limit");
-    const rateCheck = checkRateLimit(request, "auth");
+    const rateCheck = await checkRateLimit(request, "auth");
     if (!rateCheck.allowed) {
       throw new Error(`Too many requests. Try again in ${rateCheck.retryAfter} seconds.`);
     }

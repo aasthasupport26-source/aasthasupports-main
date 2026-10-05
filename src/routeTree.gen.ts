@@ -16,10 +16,8 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BookPoojaRouteImport } from './routes/book-pooja'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as DebugProductsRouteImport } from './routes/debug-products'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as HealthRouteImport } from './routes/health'
-import { Route as ListAllProductsRouteImport } from './routes/list-all-products'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MyAccountRouteImport } from './routes/my-account'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
@@ -89,11 +87,6 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DebugProductsRoute = DebugProductsRouteImport.update({
-  id: '/debug-products',
-  path: '/debug-products',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
@@ -102,11 +95,6 @@ const FaqRoute = FaqRouteImport.update({
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ListAllProductsRoute = ListAllProductsRouteImport.update({
-  id: '/list-all-products',
-  path: '/list-all-products',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -286,10 +274,8 @@ export interface FileRoutesByFullPath {
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
   '/contact': typeof ContactRoute
-  '/debug-products': typeof DebugProductsRoute
   '/faq': typeof FaqRoute
   '/health': typeof HealthRoute
-  '/list-all-products': typeof ListAllProductsRoute
   '/mcp': typeof McpRoute
   '/my-account': typeof MyAccountRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -331,10 +317,8 @@ export interface FileRoutesByTo {
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
   '/contact': typeof ContactRoute
-  '/debug-products': typeof DebugProductsRoute
   '/faq': typeof FaqRoute
   '/health': typeof HealthRoute
-  '/list-all-products': typeof ListAllProductsRoute
   '/mcp': typeof McpRoute
   '/my-account': typeof MyAccountRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -378,10 +362,8 @@ export interface FileRoutesById {
   '/book-pooja': typeof BookPoojaRoute
   '/cart': typeof CartRoute
   '/contact': typeof ContactRoute
-  '/debug-products': typeof DebugProductsRoute
   '/faq': typeof FaqRoute
   '/health': typeof HealthRoute
-  '/list-all-products': typeof ListAllProductsRoute
   '/mcp': typeof McpRoute
   '/my-account': typeof MyAccountRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -426,10 +408,8 @@ export interface FileRouteTypes {
     | '/book-pooja'
     | '/cart'
     | '/contact'
-    | '/debug-products'
     | '/faq'
     | '/health'
-    | '/list-all-products'
     | '/mcp'
     | '/my-account'
     | '/privacy-policy'
@@ -471,10 +451,8 @@ export interface FileRouteTypes {
     | '/book-pooja'
     | '/cart'
     | '/contact'
-    | '/debug-products'
     | '/faq'
     | '/health'
-    | '/list-all-products'
     | '/mcp'
     | '/my-account'
     | '/privacy-policy'
@@ -517,10 +495,8 @@ export interface FileRouteTypes {
     | '/book-pooja'
     | '/cart'
     | '/contact'
-    | '/debug-products'
     | '/faq'
     | '/health'
-    | '/list-all-products'
     | '/mcp'
     | '/my-account'
     | '/privacy-policy'
@@ -564,10 +540,8 @@ export interface RootRouteChildren {
   BookPoojaRoute: typeof BookPoojaRoute
   CartRoute: typeof CartRoute
   ContactRoute: typeof ContactRoute
-  DebugProductsRoute: typeof DebugProductsRoute
   FaqRoute: typeof FaqRoute
   HealthRoute: typeof HealthRoute
-  ListAllProductsRoute: typeof ListAllProductsRoute
   McpRoute: typeof McpRoute
   MyAccountRoute: typeof MyAccountRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
@@ -642,13 +616,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/debug-products': {
-      id: '/debug-products'
-      path: '/debug-products'
-      fullPath: '/debug-products'
-      preLoaderRoute: typeof DebugProductsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/faq': {
       id: '/faq'
       path: '/faq'
@@ -661,13 +628,6 @@ declare module '@tanstack/react-router' {
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/list-all-products': {
-      id: '/list-all-products'
-      path: '/list-all-products'
-      fullPath: '/list-all-products'
-      preLoaderRoute: typeof ListAllProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -944,10 +904,8 @@ const rootRouteChildren: RootRouteChildren = {
   BookPoojaRoute: BookPoojaRoute,
   CartRoute: CartRoute,
   ContactRoute: ContactRoute,
-  DebugProductsRoute: DebugProductsRoute,
   FaqRoute: FaqRoute,
   HealthRoute: HealthRoute,
-  ListAllProductsRoute: ListAllProductsRoute,
   McpRoute: McpRoute,
   MyAccountRoute: MyAccountRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,

@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  ReactNode,
+  useCallback,
+} from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useServerFn } from "@tanstack/react-start";
 import { checkRecentOrderPlaced } from "@/lib/shopify.functions";
@@ -62,18 +70,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const add = useCallback((item: Omit<CartItem, "quantity">, qty = 1) => {
     if (qty <= 0) return;
     setItems((prev) => {
+      // Merge key: exact variant + identical attributes. The pendant option
+      // reuses the same Shopify variant with different cart attributes, so
+      // attributes must be part of the key (and different variants of one
+      // product must never collapse into each other).
+      const attrKey = (a?: { key: string; value: string }[]) =>
+        a && a.length ? JSON.stringify(a.map((x) => [x.key, x.value])) : "";
+      const itemAttrs = attrKey(item.attributes);
       const isMatch = (p: CartItem) => {
-        if (item.cartItemId || p.cartItemId) {
-          return item.cartItemId === p.cartItemId;
+        if (item.variantId && p.variantId) {
+          return item.variantId === p.variantId && attrKey(p.attributes) === itemAttrs;
         }
-        return (item.variantId && p.variantId === item.variantId) || (p.slug && p.slug === item.slug);
+        // Legacy entries without variantId: match on slug + attributes
+        return Boolean(
+          item.slug && p.slug && item.slug === p.slug && attrKey(p.attributes) === itemAttrs,
+        );
       };
 
       const ex = prev.find(isMatch);
       if (ex) {
-        return prev.map((p) =>
-          isMatch(p) ? { ...p, quantity: p.quantity + qty } : p,
-        );
+        return prev.map((p) => (isMatch(p) ? { ...p, quantity: p.quantity + qty } : p));
       }
       return [...prev, { ...item, quantity: qty }];
     });
@@ -82,7 +98,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const update = useCallback((idOrSlug: string, qty: number) => {
     setItems((prev) =>
       qty <= 0
-        ? prev.filter((p) => p.cartItemId !== idOrSlug && p.variantId !== idOrSlug && p.slug !== idOrSlug)
+        ? prev.filter(
+            (p) => p.cartItemId !== idOrSlug && p.variantId !== idOrSlug && p.slug !== idOrSlug,
+          )
         : prev.map((p) =>
             p.cartItemId === idOrSlug || p.variantId === idOrSlug || p.slug === idOrSlug
               ? { ...p, quantity: qty }
@@ -93,7 +111,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const remove = useCallback((idOrSlug: string) => {
     setItems((prev) =>
-      prev.filter((p) => p.cartItemId !== idOrSlug && p.variantId !== idOrSlug && p.slug !== idOrSlug),
+      prev.filter(
+        (p) => p.cartItemId !== idOrSlug && p.variantId !== idOrSlug && p.slug !== idOrSlug,
+      ),
     );
   }, []);
 

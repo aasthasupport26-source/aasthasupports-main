@@ -1,4 +1,8 @@
 import "./lib/error-capture";
+import { initSentry } from "./lib/sentry";
+
+// Initialize error tracking before anything else so startup errors are captured.
+initSentry();
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
@@ -86,7 +90,7 @@ export default {
       
       // Apply global rate limiting
       const { checkRateLimit } = await import("./lib/rate-limit");
-      const rateCheck = checkRateLimit(request, "global");
+      const rateCheck = await checkRateLimit(request, "global");
       if (!rateCheck.allowed) {
         return applySecurityHeaders(
           new Response("Rate limit exceeded", { status: 429 })

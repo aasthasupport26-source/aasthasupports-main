@@ -14,7 +14,29 @@ const ATTEMPT_WINDOW = 15 * 60 * 1000; // 15 minutes
 /**
  * Check if IP/email is locked out due to brute force attempts
  */
+/**
+ * Cleanup expired entries periodically.
+ * Started lazily on first use: a module-scope setInterval is illegal in
+ * Cloudflare Workers' global scope (it 500s the whole worker at init).
+ */
+let cleanupTimer: ReturnType<typeof setInterval> | null = null;
+
+function ensureCleanupTimer() {
+  if (cleanupTimer) return;
+  cleanupTimer = setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of bruteForceStore.entries()) {
+      if (entry.lockedUntil && now >= entry.lockedUntil) {
+        bruteForceStore.delete(key);
+      }
+    }
+  }, 60 * 1000); // Cleanup every minute
+  // Don't hold the process open on long-lived Node servers
+  (cleanupTimer as any)?.unref?.();
+}
+
 export function checkBruteForce(identifier: string): { allowed: boolean; lockedUntil?: number } {
+  ensureCleanupTimer();
   const entry = bruteForceStore.get(identifier);
   const now = Date.now();
 
@@ -74,15 +96,3 @@ export function recordFailedAttempt(identifier: string): void {
 export function resetAttempts(identifier: string): void {
   bruteForceStore.delete(identifier);
 }
-
-/**
- * Cleanup expired entries periodically
- */
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of bruteForceStore.entries()) {
-    if (entry.lockedUntil && now >= entry.lockedUntil) {
-      bruteForceStore.delete(key);
-    }
-  }
-}, 60 * 1000); // Cleanup every minute

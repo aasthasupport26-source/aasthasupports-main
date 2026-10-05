@@ -161,12 +161,12 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/returns-policy" hash="privacy" className="hover:text-gold">
+                <Link to="/privacy-policy" className="hover:text-gold">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/returns-policy" hash="terms" className="hover:text-gold">
+                <Link to="/terms-of-service" className="hover:text-gold">
                   Terms of Service
                 </Link>
               </li>
@@ -178,9 +178,10 @@ export function Footer() {
               type="button"
               onClick={() => {
                 window.open(
-                  "https://wa.me/918287670827?text=" + encodeURIComponent("Namaste! I have an inquiry regarding Aastha Supports."),
+                  "https://wa.me/918287670827?text=" +
+                    encodeURIComponent("Namaste! I have an inquiry regarding Aastha Supports."),
                   "whatsapp_popup",
-                  "width=600,height=700,scrollbars=yes,resizable=yes"
+                  "width=600,height=700,scrollbars=yes,resizable=yes",
                 );
               }}
               className="inline-flex items-center gap-2.5 mb-4 px-3.5 py-2 rounded-full bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 transition text-sm font-medium cursor-pointer group"
@@ -209,9 +210,10 @@ export function Footer() {
                   onClick={(e) => {
                     e.preventDefault();
                     window.open(
-                      "https://wa.me/918287670827?text=" + encodeURIComponent("Namaste! I have an inquiry regarding Aastha Supports."),
+                      "https://wa.me/918287670827?text=" +
+                        encodeURIComponent("Namaste! I have an inquiry regarding Aastha Supports."),
                       "whatsapp_popup",
-                      "width=600,height=700,scrollbars=yes,resizable=yes"
+                      "width=600,height=700,scrollbars=yes,resizable=yes",
                     );
                   }}
                   className="hover:text-gold text-emerald-400 font-medium"

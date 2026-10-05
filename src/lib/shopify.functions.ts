@@ -360,6 +360,49 @@ export const getShopifyProduct = createServerFn({ method: "GET" })
     }
   });
 
+/**
+ * Resolve a product handle to its first available variant (real variant GID +
+ * live price). Used by the cross-sell modal so cart lines always carry a valid
+ * variantId and the current Shopify price instead of hardcoded values.
+ */
+export const resolveProductVariant = createServerFn({ method: "GET" })
+  .validator(z.object({ handle: z.string().min(1).max(200) }))
+  .handler(async ({ data }) => {
+    const { shopifyClient } = await import("./shopify/client");
+    const { GET_PRODUCT_BY_HANDLE_QUERY } = await import("./shopify/queries");
+    try {
+      const response: any = await shopifyClient.request(GET_PRODUCT_BY_HANDLE_QUERY, {
+        handle: data.handle,
+      });
+      const node = response?.product;
+      if (!node) return null;
+
+      const variants = (node.variants?.edges || []).map((e: any) => e.node);
+      // Cheapest available variant — matches the "from" price the shop grid
+      // displays (priceRange.minVariantPrice), so the modal price is what the
+      // customer actually pays.
+      const byPrice = (a: any, b: any) => parseFloat(a.price.amount) - parseFloat(b.price.amount);
+      const available = variants.filter((v: any) => v.availableForSale).sort(byPrice);
+      const variant = available[0] || [...variants].sort(byPrice)[0] || null;
+      if (!variant?.id) return null;
+
+      const image =
+        node.images?.edges?.[0]?.node?.url || node.media?.edges?.[0]?.node?.previewImage?.url || "";
+
+      return {
+        variantId: variant.id as string,
+        price: parseFloat(variant.price.amount),
+        mrp: variant.compareAtPrice?.amount ? parseFloat(variant.compareAtPrice.amount) : null,
+        available: Boolean(variant.availableForSale),
+        name: formatShopifyProductName(node),
+        image,
+      };
+    } catch (err) {
+      console.error("resolveProductVariant failed:", err);
+      return null;
+    }
+  });
+
 export const createShopifyCheckout = createServerFn({ method: "POST" })
   .validator(
     z.object({
@@ -450,9 +493,7 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
 
     const withoutPendantCount = data.items.reduce((sum, item) => {
       const isWithout = item.attributes?.some(
-        (a) =>
-          a.key.toLowerCase() === "pendant" &&
-          a.value.toLowerCase().includes("without"),
+        (a) => a.key.toLowerCase() === "pendant" && a.value.toLowerCase().includes("without"),
       );
       return isWithout ? sum + item.quantity : sum;
     }, 0);
@@ -512,7 +553,8 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
         try {
           const searchRes: any = await shopifyClient.request(GET_PRODUCTS_QUERY, {
             first: 20,
-            query: "tag:pendant-add-on OR title:'925 Pure Silver' OR title:pendant OR title:capping",
+            query:
+              "tag:pendant-add-on OR title:'925 Pure Silver' OR title:pendant OR title:capping",
           });
           const match = searchRes.products?.edges?.find((e: any) => {
             const t = (e.node.title + " " + (e.node.tags || []).join(" ")).toLowerCase();
@@ -523,7 +565,9 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
           });
           if (match) {
             pendantVariantId = match.node.variants?.edges?.[0]?.node?.id;
-            console.log(`[Shopify] Found pendant addon product by search '${match.node.title}': ${pendantVariantId}`);
+            console.log(
+              `[Shopify] Found pendant addon product by search '${match.node.title}': ${pendantVariantId}`,
+            );
           }
         } catch (err) {
           console.warn("[Shopify] Could not search for pendant addon product:", err);
@@ -571,7 +615,10 @@ export const createShopifyCheckout = createServerFn({ method: "POST" })
             buyerIdentity: Object.keys(buyerIdentity).length > 0 ? buyerIdentity : undefined,
           });
         } catch (identityErr) {
-          console.warn("[Shopify] cartCreate with buyerIdentity failed, retrying without buyerIdentity:", identityErr);
+          console.warn(
+            "[Shopify] cartCreate with buyerIdentity failed, retrying without buyerIdentity:",
+            identityErr,
+          );
           response = await shopifyClient.request(CREATE_CART_MUTATION, {
             lines,
             attributes: cartAttributes.length > 0 ? cartAttributes : undefined,
@@ -782,7 +829,9 @@ export const checkRecentOrderPlaced = createServerFn({ method: "POST" })
       const sessionCookie = getCookie("aastha_session");
       if (sessionCookie) {
         try {
-          const raw = sessionCookie.startsWith("%") ? decodeURIComponent(sessionCookie) : sessionCookie;
+          const raw = sessionCookie.startsWith("%")
+            ? decodeURIComponent(sessionCookie)
+            : sessionCookie;
           const session = JSON.parse(raw);
           token = session.accessToken;
         } catch {}
@@ -872,4 +921,103 @@ export const checkRecentOrderPlaced = createServerFn({ method: "POST" })
       console.warn("[CheckRecentOrder] Error checking recent order:", err);
       return { orderPlaced: false };
     }
+  });
+
+/**
+ * Look up a merchandise order from the Shopify Admin API by order number and
+ * phone. This is the only reliable data source for order tracking — merchandise
+ * orders live in Shopify and are never written to Supabase.
+ */
+export const trackShopifyOrder = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      orderNumber: z.string().min(1).max(40),
+      phone: z.string().min(7).max(20),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const normalizePhone = (p: string) => p.replace(/\D/g, "").slice(-10);
+    const wantedPhone = normalizePhone(data.phone);
+
+    const raw = data.orderNumber.trim().replace(/^#/, "");
+    if (!/^\d{3,12}$/.test(raw)) return null;
+
+    const { shopifyAdminClient } = await import("./shopify/client");
+    const query = `
+      query TrackOrder($q: String!, $first: Int!) {
+        orders(first: $first, query: $q) {
+          nodes {
+            id
+            name
+            createdAt
+            financialStatus
+            fulfillmentStatus
+            phone
+            totalPriceSet { shopMoney { amount currencyCode } }
+            customer { phone }
+            lineItems(first: 20) {
+              nodes {
+                title
+                quantity
+                variant { image { url } }
+              }
+            }
+            fulfillments(first: 1) {
+              trackingInfo(first: 1) { number url }
+            }
+          }
+        }
+      }
+    `;
+
+    // Order names look like "#1001"; search accepts both with and without '#'.
+    const candidates = [`name:"${raw}" OR name:"#${raw}"`, `name:"#${raw}"`, `name:"${raw}"`];
+    for (const q of candidates) {
+      try {
+        const res: any = await shopifyAdminClient.request(query, { q, first: 10 });
+        const nodes = res?.orders?.nodes || [];
+        const match = nodes.find((o: any) => {
+          const phones = [o.phone, o.customer?.phone].filter(Boolean) as string[];
+          return phones.some((p) => normalizePhone(p) === wantedPhone);
+        });
+        if (!match) continue;
+
+        const tracking = match.fulfillments?.[0]?.trackingInfo?.[0];
+        return {
+          order_number: match.name,
+          created_at: match.createdAt,
+          // Map Shopify statuses onto the tracker's step model
+          status:
+            match.fulfillmentStatus === "FULFILLED" || match.fulfillmentStatus === "fulfilled"
+              ? "delivered"
+              : match.fulfillmentStatus === "IN_PROGRESS" ||
+                  match.fulfillmentStatus === "PARTIALLY_FULFILLED"
+                ? "shipped"
+                : match.financialStatus === "PAID" || match.financialStatus === "paid"
+                  ? "confirmed"
+                  : "pending",
+          payment_status:
+            match.financialStatus === "PAID" || match.financialStatus === "paid"
+              ? "Paid"
+              : "Pending",
+          payment_method: "Online (Shopify)",
+          total: parseFloat(match.totalPriceSet?.shopMoney?.amount || "0"),
+          items: (match.lineItems?.nodes || []).map((li: any) => ({
+            product_name: li.title,
+            quantity: li.quantity,
+            unit_price: null,
+            image: li.variant?.image?.url || null,
+          })),
+          tracking: tracking
+            ? { number: tracking.number || null, url: tracking.url || null }
+            : null,
+        };
+      } catch (err: any) {
+        console.error("[TrackOrder] Shopify admin lookup failed:", err?.message || err);
+        // Admin API unavailable/misconfigured — fall through to next candidate,
+        // and ultimately return null so the UI shows the contact-support state.
+        return null;
+      }
+    }
+    return null;
   });

@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { getAdminCategories, saveCategory, deleteCategory } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin/categories")({
   component: CategoriesPage,
@@ -21,37 +23,61 @@ type Category = {
 const empty: Category = { slug: "", name: "", sort_order: 0, is_active: true };
 
 function CategoriesPage() {
+  const { accessToken } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [editing, setEditing] = useState<Category | null>(null);
 
+  const loadFn = useServerFn(getAdminCategories);
+  const saveFn = useServerFn(saveCategory);
+  const deleteFn = useServerFn(deleteCategory);
+
   const load = async () => {
-    const { data } = await supabase
-      .from("categories")
-      .select("*")
-      .order("sort_order")
-      .order("name");
-    setItems((data ?? []) as any[]);
+    if (!accessToken) return;
+    try {
+      const rows = await loadFn({ data: { accessToken } });
+      setItems(rows ?? []);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to load categories");
+    }
   };
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken]);
 
   const save = async () => {
-    if (!editing) return;
-    const { error } = editing.id
-      ? await supabase.from("categories").update(editing).eq("id", editing.id)
-      : await supabase.from("categories").insert(editing);
-    if (error) return toast.error(error.message);
-    toast.success("Saved");
-    setEditing(null);
-    load();
+    if (!editing || !accessToken) return;
+    try {
+      await saveFn({
+        data: {
+          accessToken,
+          id: editing.id,
+          slug: editing.slug,
+          name: editing.name,
+          parent_slug: editing.parent_slug || "",
+          description: editing.description || "",
+          image_url: editing.image_url || "",
+          sort_order: editing.sort_order,
+          is_active: editing.is_active,
+        },
+      });
+      toast.success("Saved");
+      setEditing(null);
+      load();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to save category");
+    }
   };
 
   const remove = async (id: string) => {
+    if (!accessToken) return;
     if (!confirm("Delete?")) return;
-    const { error } = await supabase.from("categories").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    load();
+    try {
+      await deleteFn({ data: { accessToken, id } });
+      load();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to delete category");
+    }
   };
 
   return (

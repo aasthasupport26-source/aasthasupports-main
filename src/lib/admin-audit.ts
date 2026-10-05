@@ -15,8 +15,10 @@ export async function logAdminAction(entry: AuditLogEntry): Promise<void> {
       action: entry.action,
       resource_type: entry.resource_type,
       resource_id: entry.resource_id,
-      changes: entry.changes ? JSON.stringify(entry.changes) : null,
-    });
+      // Table column is `details JSONB` (see supabase/migrations/20260818_add_admin_audit_log.sql);
+      // cast needed because the generated Supabase types predate that column.
+      details: (entry.changes ? entry.changes : null) as any,
+    } as any);
   } catch (error) {
     console.error("Failed to log admin action:", error);
   }

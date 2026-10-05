@@ -2,7 +2,11 @@ import { createFileRoute, Link, notFound, redirect, useNavigate } from "@tanstac
 import { Layout } from "@/components/Layout";
 import { getCategory } from "@/data/catalog";
 import { useCart } from "@/contexts/CartContext";
-import { getShopifyProduct, getShopifyProducts, normalizeShopifyVideoUrl } from "@/lib/shopify.functions";
+import {
+  getShopifyProduct,
+  getShopifyProducts,
+  normalizeShopifyVideoUrl,
+} from "@/lib/shopify.functions";
 import { useServerFn } from "@tanstack/react-start";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { toast } from "sonner";
@@ -34,6 +38,11 @@ export const Route = createFileRoute("/product/$slug")({
       },
       staleTime: 5 * 60 * 1000,
     });
+    // Throw in the loader (not the component) so SSR responds with a real
+    // HTTP 404 status instead of a 200 + client-side redirect.
+    if (!product) {
+      throw notFound();
+    }
     return { slug: params.slug, product };
   },
   head: ({ loaderData }) => {
@@ -112,31 +121,51 @@ function ProductPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const catalogProducts: any[] = (allProductsData as any)?.products || (Array.isArray(allProductsData) ? allProductsData : []);
+  const catalogProducts: any[] =
+    (allProductsData as any)?.products || (Array.isArray(allProductsData) ? allProductsData : []);
 
   // Smart cross-sell dynamic recommendation & bundle pairing engine
-  const getProductCategoryKey = (p: any): "rudraksha" | "yantra" | "bracelet" | "mala" | "gemstone" => {
+  const getProductCategoryKey = (
+    p: any,
+  ): "rudraksha" | "yantra" | "bracelet" | "mala" | "gemstone" => {
     if (!p) return "rudraksha";
     const name = (p.name || p.title || "").toLowerCase();
     const type = (p.productType || "").toLowerCase();
     const cat = (p.category || "").toLowerCase();
 
     // 1. Primary classification by product name & explicit category
-    if (name.includes("bracelet") || cat.includes("bracelet") || type.includes("bracelet")) return "bracelet";
+    if (name.includes("bracelet") || cat.includes("bracelet") || type.includes("bracelet"))
+      return "bracelet";
     if (name.includes("mala") || cat.includes("mala") || type.includes("mala")) return "mala";
-    if (name.includes("yantra") || cat.includes("yantra") || type.includes("yantra") || name.includes("frame")) return "yantra";
     if (
-      name.includes("gemstone") || cat.includes("gemstone") || type.includes("gemstone") ||
-      name.includes("sapphire") || name.includes("pukhraj") || name.includes("ruby") || name.includes("emerald") || name.includes("carat") || name.includes("ratti")
-    ) return "gemstone";
-    if (name.includes("rudraksh") || cat.includes("rudraksh") || type.includes("rudraksh")) return "rudraksha";
+      name.includes("yantra") ||
+      cat.includes("yantra") ||
+      type.includes("yantra") ||
+      name.includes("frame")
+    )
+      return "yantra";
+    if (
+      name.includes("gemstone") ||
+      cat.includes("gemstone") ||
+      type.includes("gemstone") ||
+      name.includes("sapphire") ||
+      name.includes("pukhraj") ||
+      name.includes("ruby") ||
+      name.includes("emerald") ||
+      name.includes("carat") ||
+      name.includes("ratti")
+    )
+      return "gemstone";
+    if (name.includes("rudraksh") || cat.includes("rudraksh") || type.includes("rudraksh"))
+      return "rudraksha";
 
     // 2. Secondary fallback by tags only when title does not indicate category
     const tags = (p.tags || []).map((t: string) => t.toLowerCase()).join(" ");
     if (tags.includes("bracelet")) return "bracelet";
     if (tags.includes("mala")) return "mala";
     if (tags.includes("yantra")) return "yantra";
-    if (tags.includes("gemstone") || tags.includes("sapphire") || tags.includes("pukhraj")) return "gemstone";
+    if (tags.includes("gemstone") || tags.includes("sapphire") || tags.includes("pukhraj"))
+      return "gemstone";
     if (tags.includes("rudraksh")) return "rudraksha";
 
     return "rudraksha";
@@ -183,7 +212,9 @@ function ProductPage() {
 
     // Fallback if inventory is missing categories
     while (pickedAddons.length < 2) {
-      const fallback = available.find((p: any) => !usedSlugs.has(p.slug) && getProductCategoryKey(p) !== mainCat);
+      const fallback = available.find(
+        (p: any) => !usedSlugs.has(p.slug) && getProductCategoryKey(p) !== mainCat,
+      );
       if (!fallback) {
         const absoluteFallback = available.find((p: any) => !usedSlugs.has(p.slug));
         if (!absoluteFallback) break;
@@ -238,10 +269,10 @@ function ProductPage() {
   };
 
   if (!product) {
-    if (typeof window !== "undefined") {
-      window.location.replace("/");
-    }
-    throw redirect({ to: "/" });
+    // Render the app's real 404 page. getShopifyProduct returns null both for
+    // missing products and Shopify failures — either way this URL has nothing
+    // to show, and silently bouncing home hides broken links.
+    throw notFound();
   }
 
   // Construct unified media gallery list (supporting both images and videos)
@@ -267,11 +298,12 @@ function ProductPage() {
     setActiveMediaIndex(initialMediaIndex);
   }, [product.slug, initialMediaIndex]);
 
-  const activeMedia = galleryItems[activeMediaIndex] || galleryItems[0] || {
-    type: "image" as const,
-    id: "default",
-    url: product.images?.[0] || "",
-  };
+  const activeMedia = galleryItems[activeMediaIndex] ||
+    galleryItems[0] || {
+      type: "image" as const,
+      id: "default",
+      url: product.images?.[0] || "",
+    };
 
   const rawVideoUrl = activeMedia?.type === "video" ? activeMedia.url : "";
   const videoUrl = normalizeShopifyVideoUrl(rawVideoUrl);
@@ -290,9 +322,7 @@ function ProductPage() {
     v.playsInline = true;
     const playPromise = v.play();
     if (playPromise !== undefined) {
-      playPromise
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
+      playPromise.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     }
   }, [videoUrl, activeMedia?.type]);
 
@@ -383,7 +413,7 @@ function ProductPage() {
       currentVariant.title && currentVariant.title !== "Default Title"
         ? ` (${currentVariant.title})`
         : "";
-    
+
     const pendantSuffix = isRudraksha
       ? isWithPendant
         ? " (With Pure Silver Pendant Capping)"
@@ -410,7 +440,9 @@ function ProductPage() {
         slug: product.slug,
         name: `${product.name}${variantTitle}${pendantSuffix}`,
         image:
-          (isWithPendant && pendantImageIndex !== -1 ? galleryItems[pendantImageIndex]?.url : null) ||
+          (isWithPendant && pendantImageIndex !== -1
+            ? galleryItems[pendantImageIndex]?.url
+            : null) ||
           product.images?.[0] ||
           activeMedia?.preview ||
           activeMedia?.url ||
@@ -547,7 +579,7 @@ function ProductPage() {
                       }`}
                     >
                       <img
-                        src={thumbUrl || "/placeholder.jpg"}
+                        src={thumbUrl || "/placeholder.svg"}
                         alt=""
                         className="w-full h-full object-cover"
                       />
@@ -567,7 +599,9 @@ function ProductPage() {
 
           {/* Details */}
           <div>
-            <p className="text-gold tracking-[0.3em] text-xs font-semibold">{cat.name.toUpperCase()}</p>
+            <p className="text-gold tracking-[0.3em] text-xs font-semibold">
+              {cat.name.toUpperCase()}
+            </p>
             <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl text-maroon-deep mt-1 leading-snug font-semibold">
               {displayTitle}
             </h1>
@@ -889,7 +923,8 @@ function ProductPage() {
                       <span className="text-gold">✦</span> Enhances concentration and meditation
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-gold">✦</span> Bestows the wearer with peace and prosperity
+                      <span className="text-gold">✦</span> Bestows the wearer with peace and
+                      prosperity
                     </li>
                     <li className="flex gap-2">
                       <span className="text-gold">✦</span> Aligns chakras and balances energy
@@ -899,9 +934,12 @@ function ProductPage() {
               )}
 
               <div className="border-t border-gold/20 pt-4">
-                <h3 className="font-display text-lg text-maroon-deep">Authenticity & Certification</h3>
+                <h3 className="font-display text-lg text-maroon-deep">
+                  Authenticity & Certification
+                </h3>
                 <p className="mt-2 text-sm text-foreground/80 leading-relaxed">
-                  Every spiritual piece undergoes strict quality verification to ensure 100% natural origin, purity, and spiritual sanctity. Lab certification is provided on request.
+                  Every spiritual piece undergoes strict quality verification to ensure 100% natural
+                  origin, purity, and spiritual sanctity. Lab certification is provided on request.
                 </p>
               </div>
 
@@ -917,191 +955,176 @@ function ProductPage() {
         </div>
 
         {/* Frequently Bought Together Bundle Cross-Sell */}
-        {bundleAddons.length > 0 && (() => {
-          const selectedAddons = bundleAddons.filter((a) => selectedAddonSlugs.includes(a.slug));
-          const activeBundleItemsCount = 1 + selectedAddons.length;
-          const addonsTotalPrice = selectedAddons.reduce((acc, item) => acc + (item.price || 0), 0);
-          const rawBundleTotal = price + addonsTotalPrice;
-          const bundleDiscount = selectedAddons.length >= 1 ? Math.min(250, Math.round(rawBundleTotal * 0.08)) : 0;
-          const finalBundlePrice = rawBundleTotal - bundleDiscount;
-
-          const handleAddBundleToCart = () => {
-            add(
-              {
-                slug: product.slug,
-                name: `${product.name}${currentVariant.title && currentVariant.title !== "Default Title" ? ` (${currentVariant.title})` : ""}`,
-                image: product.images?.[0] || activeMedia?.preview || activeMedia?.url || "",
-                price,
-                mrp,
-                categoryName: cat.name,
-                variantId: currentVariant.id || product.shopifyId,
-              },
-              quantity,
+        {bundleAddons.length > 0 &&
+          (() => {
+            const selectedAddons = bundleAddons.filter((a) => selectedAddonSlugs.includes(a.slug));
+            const activeBundleItemsCount = 1 + selectedAddons.length;
+            const addonsTotalPrice = selectedAddons.reduce(
+              (acc, item) => acc + (item.price || 0),
+              0,
             );
+            // Honest bundle pricing: the total is exactly what Shopify will
+            // charge — no advertised discount unless one is applied at checkout.
+            const bundleTotal = price + addonsTotalPrice;
 
-            selectedAddons.forEach((addon) => {
+            const handleAddBundleToCart = () => {
               add(
                 {
-                  slug: addon.slug,
-                  name: addon.name,
-                  image: addon.image,
-                  price: addon.price,
-                  mrp: addon.mrp || addon.price,
-                  categoryName: addon.category || addon.productType || "Spiritual",
-                  variantId: addon.variantId || addon.shopifyId,
+                  slug: product.slug,
+                  name: `${product.name}${currentVariant.title && currentVariant.title !== "Default Title" ? ` (${currentVariant.title})` : ""}`,
+                  image: product.images?.[0] || activeMedia?.preview || activeMedia?.url || "",
+                  price,
+                  mrp,
+                  categoryName: cat.name,
+                  variantId: currentVariant.id || product.shopifyId,
                 },
-                1,
+                quantity,
               );
-            });
 
-            toast.success(`Added Divine Bundle (${activeBundleItemsCount} items) to your cart!`);
-            setCrossSellOpen(true);
-          };
+              selectedAddons.forEach((addon) => {
+                add(
+                  {
+                    slug: addon.slug,
+                    name: addon.name,
+                    image: addon.image,
+                    price: addon.price,
+                    mrp: addon.mrp || addon.price,
+                    categoryName: addon.category || addon.productType || "Spiritual",
+                    variantId: addon.variantId || addon.shopifyId,
+                  },
+                  1,
+                );
+              });
 
-          return (
-            <section className="mt-12 p-6 sm:p-8 bg-cream/70 border-2 border-gold/30 rounded-3xl shadow-soft relative overflow-hidden">
-              {/* Section Top Header with Prominent SAVE Feature */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 pb-4 border-b border-gold/20">
-                <div>
-                  <span className="text-gold tracking-[0.25em] text-xs font-extrabold uppercase flex items-center gap-1.5">
-                    ✦ FREQUENTLY BOUGHT TOGETHER ✦
-                  </span>
-                  <h2 className="font-display text-2xl sm:text-3xl font-bold text-maroon-deep mt-1">
-                    Recommended Divine Pairing Bundle
-                  </h2>
+              toast.success(`Added Divine Bundle (${activeBundleItemsCount} items) to your cart!`);
+              setCrossSellOpen(true);
+            };
+
+            return (
+              <section className="mt-12 p-6 sm:p-8 bg-cream/70 border-2 border-gold/30 rounded-3xl shadow-soft relative overflow-hidden">
+                {/* Section Top Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 pb-4 border-b border-gold/20">
+                  <div>
+                    <span className="text-gold tracking-[0.25em] text-xs font-extrabold uppercase flex items-center gap-1.5">
+                      ✦ FREQUENTLY BOUGHT TOGETHER ✦
+                    </span>
+                    <h2 className="font-display text-2xl sm:text-3xl font-bold text-maroon-deep mt-1">
+                      Recommended Divine Pairing Bundle
+                    </h2>
+                  </div>
                 </div>
 
-                {/* BIG PROMINENT SAVINGS BADGE */}
-                {bundleDiscount > 0 && (
-                  <div className="inline-flex items-center gap-2 bg-emerald-700 text-white px-4 py-2.5 rounded-2xl shadow-md border border-emerald-500/40 shrink-0 self-start md:self-auto">
-                    <Sparkles className="w-5 h-5 text-amber-300 fill-amber-300 animate-spin shrink-0" style={{ animationDuration: "6s" }} />
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-emerald-100 uppercase tracking-widest leading-none">
-                        Bundle Special Deal
+                {/* 3 Product Cards Row */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5 mb-6">
+                  {/* Item 1: Main Product Card */}
+                  <div className="bg-white p-4.5 rounded-2xl border-2 border-gold/40 shadow-xs flex items-start gap-3.5 relative">
+                    <div className="pt-1 shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={true}
+                        disabled={true}
+                        className="w-5 h-5 accent-gold cursor-not-allowed rounded-md"
+                      />
+                    </div>
+                    <img
+                      src={
+                        product.images?.[0] ||
+                        activeMedia?.preview ||
+                        activeMedia?.url ||
+                        "/placeholder.svg"
+                      }
+                      alt={displayTitle}
+                      className="w-18 h-18 sm:w-20 sm:h-20 object-cover rounded-xl border border-gold/25 shrink-0 bg-cream/30"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <span className="inline-block text-[10px] font-extrabold uppercase text-gold bg-gold/15 px-2 py-0.5 rounded-md tracking-wider mb-1">
+                        This Item
                       </span>
-                      <span className="text-base sm:text-lg font-extrabold tracking-wide leading-tight text-white">
-                        SAVE ₹{bundleDiscount.toLocaleString("en-IN")} INSTANTLY
-                      </span>
+                      <h4 className="text-sm font-bold text-maroon-deep line-clamp-2 leading-snug">
+                        {displayTitle}
+                      </h4>
+                      <p className="text-sm font-numeric font-extrabold text-maroon-deep mt-1.5">
+                        ₹{price.toLocaleString("en-IN")}
+                      </p>
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* 3 Product Cards Row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5 mb-6">
-                {/* Item 1: Main Product Card */}
-                <div className="bg-white p-4.5 rounded-2xl border-2 border-gold/40 shadow-xs flex items-start gap-3.5 relative">
-                  <div className="pt-1 shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={true}
-                      disabled={true}
-                      className="w-5 h-5 accent-gold cursor-not-allowed rounded-md"
-                    />
-                  </div>
-                  <img
-                    src={product.images?.[0] || activeMedia?.preview || activeMedia?.url || "/placeholder.jpg"}
-                    alt={displayTitle}
-                    className="w-18 h-18 sm:w-20 sm:h-20 object-cover rounded-xl border border-gold/25 shrink-0 bg-cream/30"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <span className="inline-block text-[10px] font-extrabold uppercase text-gold bg-gold/15 px-2 py-0.5 rounded-md tracking-wider mb-1">
-                      This Item
-                    </span>
-                    <h4 className="text-sm font-bold text-maroon-deep line-clamp-2 leading-snug">
-                      {displayTitle}
-                    </h4>
-                    <p className="text-sm font-numeric font-extrabold text-maroon-deep mt-1.5">
-                      ₹{price.toLocaleString("en-IN")}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Add-on Item Cards 2 & 3 */}
-                {bundleAddons.map((addon) => {
-                  const isChecked = selectedAddonSlugs.includes(addon.slug);
-                  const catLabel = getProductCategoryKey(addon).toUpperCase();
-                  return (
-                    <div
-                      key={addon.slug}
-                      onClick={() => toggleAddon(addon.slug)}
-                      className={`p-4.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-3.5 ${
-                        isChecked
-                          ? "bg-white border-gold/60 shadow-xs ring-2 ring-gold/20"
-                          : "bg-white/60 border-gray-200 opacity-60 hover:opacity-100"
-                      }`}
-                    >
-                      <div className="pt-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleAddon(addon.slug)}
-                          className="w-5 h-5 accent-gold cursor-pointer rounded-md"
+                  {/* Add-on Item Cards 2 & 3 */}
+                  {bundleAddons.map((addon) => {
+                    const isChecked = selectedAddonSlugs.includes(addon.slug);
+                    const catLabel = getProductCategoryKey(addon).toUpperCase();
+                    return (
+                      <div
+                        key={addon.slug}
+                        onClick={() => toggleAddon(addon.slug)}
+                        className={`p-4.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-3.5 ${
+                          isChecked
+                            ? "bg-white border-gold/60 shadow-xs ring-2 ring-gold/20"
+                            : "bg-white/60 border-gray-200 opacity-60 hover:opacity-100"
+                        }`}
+                      >
+                        <div className="pt-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleAddon(addon.slug)}
+                            className="w-5 h-5 accent-gold cursor-pointer rounded-md"
+                          />
+                        </div>
+                        <img
+                          src={addon.image}
+                          alt={addon.name}
+                          className="w-18 h-18 sm:w-20 sm:h-20 object-cover rounded-xl border border-gold/25 shrink-0 bg-cream/30"
                         />
-                      </div>
-                      <img
-                        src={addon.image}
-                        alt={addon.name}
-                        className="w-18 h-18 sm:w-20 sm:h-20 object-cover rounded-xl border border-gold/25 shrink-0 bg-cream/30"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <span className="inline-block text-[10px] font-extrabold uppercase text-amber-800 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-md tracking-wider mb-1">
-                          {catLabel}
-                        </span>
-                        <h4 className="text-sm font-bold text-maroon-deep line-clamp-2 leading-snug">
-                          {addon.name}
-                        </h4>
-                        <div className="flex items-baseline gap-2 mt-1.5">
-                          <span className="text-sm font-numeric font-extrabold text-maroon-deep">
-                            ₹{addon.price?.toLocaleString("en-IN")}
+                        <div className="min-w-0 flex-1">
+                          <span className="inline-block text-[10px] font-extrabold uppercase text-amber-800 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-md tracking-wider mb-1">
+                            {catLabel}
                           </span>
-                          {addon.mrp && addon.mrp > addon.price && (
-                            <span className="text-xs text-muted-foreground line-through font-numeric">
-                              ₹{addon.mrp?.toLocaleString("en-IN")}
+                          <h4 className="text-sm font-bold text-maroon-deep line-clamp-2 leading-snug">
+                            {addon.name}
+                          </h4>
+                          <div className="flex items-baseline gap-2 mt-1.5">
+                            <span className="text-sm font-numeric font-extrabold text-maroon-deep">
+                              ₹{addon.price?.toLocaleString("en-IN")}
                             </span>
-                          )}
+                            {addon.mrp && addon.mrp > addon.price && (
+                              <span className="text-xs text-muted-foreground line-through font-numeric">
+                                ₹{addon.mrp?.toLocaleString("en-IN")}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Clean, Un-Cluttered Bottom Summary & Multi-Item CTA Banner */}
-              <div className="bg-maroon-deep text-cream p-5 sm:p-6 rounded-2xl border-2 border-gold/30 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-4 text-center sm:text-left">
-                  <div>
-                    <p className="text-xs uppercase tracking-widest text-gold font-bold">
-                      Bundle Total ({activeBundleItemsCount} Selected Items)
-                    </p>
-                    <div className="flex items-baseline justify-center sm:justify-start gap-3 mt-1">
-                      <span className="font-numeric text-3xl sm:text-4xl font-extrabold text-gold">
-                        ₹{finalBundlePrice.toLocaleString("en-IN")}
-                      </span>
-                      {bundleDiscount > 0 && (
-                        <span className="text-base text-cream/60 line-through font-numeric">
-                          ₹{rawBundleTotal.toLocaleString("en-IN")}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {bundleDiscount > 0 && (
-                    <div className="hidden lg:flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 px-3.5 py-1.5 rounded-xl text-xs font-extrabold uppercase tracking-wide">
-                      <Sparkles className="w-4 h-4 fill-emerald-300" /> Save ₹{bundleDiscount} Discount Applied
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
 
-                <button
-                  onClick={handleAddBundleToCart}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-gold hover:bg-gold-soft text-maroon-deep font-extrabold rounded-xl text-sm uppercase tracking-wider transition-all duration-200 shadow-lg hover:scale-102 active:scale-98 flex items-center justify-center gap-2.5 shrink-0"
-                >
-                  <ShoppingBag className="w-5 h-5" /> Add Selected ({activeBundleItemsCount}) to Cart
-                </button>
-              </div>
-            </section>
-          );
-        })()}
+                {/* Clean, Un-Cluttered Bottom Summary & Multi-Item CTA Banner */}
+                <div className="bg-maroon-deep text-cream p-5 sm:p-6 rounded-2xl border-2 border-gold/30 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 text-center sm:text-left">
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-gold font-bold">
+                        Bundle Total ({activeBundleItemsCount} Selected Items)
+                      </p>
+                      <div className="flex items-baseline justify-center sm:justify-start gap-3 mt-1">
+                        <span className="font-numeric text-3xl sm:text-4xl font-extrabold text-gold">
+                          ₹{bundleTotal.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleAddBundleToCart}
+                    className="w-full sm:w-auto px-8 py-3.5 bg-gold hover:bg-gold-soft text-maroon-deep font-extrabold rounded-xl text-sm uppercase tracking-wider transition-all duration-200 shadow-lg hover:scale-102 active:scale-98 flex items-center justify-center gap-2.5 shrink-0"
+                  >
+                    <ShoppingBag className="w-5 h-5" /> Add Selected ({activeBundleItemsCount}) to
+                    Cart
+                  </button>
+                </div>
+              </section>
+            );
+          })()}
 
         {/* Recommended Divine Pairings Grid ("Devotees Also Sourced") */}
         {devoteesAlsoSourced.length > 0 && (
@@ -1161,10 +1184,7 @@ function ProductPage() {
         )}
 
         {/* Customer Reviews Section */}
-        <ProductReviews
-          productName={displayTitle}
-          categorySlug={product.category || cat.slug}
-        />
+        <ProductReviews productName={displayTitle} categorySlug={product.category || cat.slug} />
 
         {/* Post Add-To-Cart Cross-Sell Slide Drawer Modal */}
         <AddToCartCrossSellModal

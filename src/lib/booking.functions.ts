@@ -33,7 +33,7 @@ async function withTimeout<T = any>(promise: Promise<T>, ms = 2000): Promise<any
 // ---------------------------------------------------------
 
 export const getTemples = createServerFn({ method: "GET" }).handler(async () => {
-    const { supabaseAdmin } = await import("./auth/shopify-customer");
+  const { supabaseAdmin } = await import("./auth/shopify-customer");
   try {
     const query = supabaseAdmin
       .from("temples")
@@ -138,7 +138,7 @@ export const createPujaBooking = createServerFn({ method: "POST" })
     const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
-    const rateCheck = checkRateLimit(request, "payment");
+    const rateCheck = await checkRateLimit(request, "payment");
     if (!rateCheck.allowed) {
       throw new Error(`Too many booking attempts. Try again in ${rateCheck.retryAfter} seconds.`);
     }
@@ -153,11 +153,11 @@ export const createPujaBooking = createServerFn({ method: "POST" })
         .select("price")
         .eq("id", data.packageId)
         .single();
-      
+
       if (pkgError || !pkg?.price) {
         throw new Error("Package not found or price unavailable");
       }
-      
+
       const baseAmount = parseFloat(pkg.price);
       if (!baseAmount || baseAmount <= 0) throw new Error("Invalid package price");
 
@@ -183,12 +183,14 @@ export const createPujaBooking = createServerFn({ method: "POST" })
         .from("pooja_bookings")
         .select("id")
         .eq("temple_id", data.templeId)
-        .eq("preferred_date", preferredDate.toISOString().split('T')[0])
+        .eq("preferred_date", preferredDate.toISOString().split("T")[0])
         .eq("preferred_time", data.timeSlot)
-        .in("status", ["pending", "confirmed"]);
-      
+        // Status values are written inconsistently ("Confirmed" by verify/webhook,
+        // lowercase elsewhere) — match both or the slot cap never fires.
+        .in("status", ["pending", "confirmed", "Pending", "Confirmed"]);
+
       if (availError) throw new Error("Failed to check availability");
-      
+
       if (existingBookings && existingBookings.length >= 5) {
         throw new Error("This time slot is fully booked. Please select another time.");
       }
@@ -222,7 +224,10 @@ export const createPujaBooking = createServerFn({ method: "POST" })
 
       // 4. Create Razorpay Order with booking details encoded in notes
       const env = getServerEnv();
-      const rzp = new Razorpay({ key_id: env.RAZORPAY_KEY_ID, key_secret: env.RAZORPAY_KEY_SECRET });
+      const rzp = new Razorpay({
+        key_id: env.RAZORPAY_KEY_ID,
+        key_secret: env.RAZORPAY_KEY_SECRET,
+      });
       const order = await rzp.orders.create({
         amount: Math.round(totalAmount * 100), // in paise
         currency: "INR",
@@ -277,7 +282,9 @@ export const createPujaBooking = createServerFn({ method: "POST" })
 const CreateDirectBookingSchema = z.object({
   userId: z.string().optional(),
   sevaName: z.string(),
-  amount: z.number().positive(),
+  // Accepted for backwards compatibility but NEVER trusted — the price is
+  // resolved server-side from the packages table / catalog below.
+  amount: z.number().positive().optional(),
   customerName: z.string().min(1),
   phone: z.string().min(7),
   sankalpNotes: z.string().optional(),
@@ -289,7 +296,7 @@ export const createDirectPujaBooking = createServerFn({ method: "POST" })
     const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
-    const rateCheck = checkRateLimit(request, "payment");
+    const rateCheck = await checkRateLimit(request, "payment");
     if (!rateCheck.allowed) {
       throw new Error(`Too many booking attempts. Try again in ${rateCheck.retryAfter} seconds.`);
     }
@@ -298,8 +305,31 @@ export const createDirectPujaBooking = createServerFn({ method: "POST" })
     validateCSRF(request);
 
     try {
-      const baseAmount = data.amount;
-      if (!baseAmount || baseAmount <= 0) throw new Error("Invalid seva price");
+      // Resolve the price SERVER-SIDE from the packages table (or the static
+      // catalog as fallback) by matching the seva name. The client-supplied
+      // amount is never trusted — otherwise anyone could mint a ₹1 order.
+      let baseAmount: number | null = null;
+      try {
+        const { data: pkg } = await (supabaseAdmin as any)
+          .from("packages")
+          .select("price")
+          .eq("name", data.sevaName)
+          .eq("active", true)
+          .limit(1)
+          .maybeSingle();
+        if (pkg?.price) baseAmount = parseFloat(pkg.price);
+      } catch (_) {
+        // fall through to catalog lookup
+      }
+      if (!baseAmount) {
+        const catalogPkg = PUJAS_CATALOG.flatMap((p) => p.packages || []).find(
+          (pkg) => pkg.name === data.sevaName,
+        );
+        if (catalogPkg?.price) baseAmount = catalogPkg.price;
+      }
+      if (!baseAmount || baseAmount <= 0) {
+        throw new Error("Unknown seva — please select a valid service");
+      }
 
       // Fetch processing fee (fallback 2% silently)
       let feePercent = 2.0;
@@ -320,7 +350,10 @@ export const createDirectPujaBooking = createServerFn({ method: "POST" })
       const bookingNumber = `DIR-${generateUUID()}`;
 
       const env = getServerEnv();
-      const rzp = new Razorpay({ key_id: env.RAZORPAY_KEY_ID, key_secret: env.RAZORPAY_KEY_SECRET });
+      const rzp = new Razorpay({
+        key_id: env.RAZORPAY_KEY_ID,
+        key_secret: env.RAZORPAY_KEY_SECRET,
+      });
       const order = await rzp.orders.create({
         amount: Math.round(totalAmount * 100),
         currency: "INR",
@@ -392,9 +425,11 @@ export const verifyPujaPayment = createServerFn({ method: "POST" })
     const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
     const { checkRateLimit } = await import("./rate-limit");
-    const rateCheck = checkRateLimit(request, "payment");
+    const rateCheck = await checkRateLimit(request, "payment");
     if (!rateCheck.allowed) {
-      throw new Error(`Too many verification attempts. Try again in ${rateCheck.retryAfter} seconds.`);
+      throw new Error(
+        `Too many verification attempts. Try again in ${rateCheck.retryAfter} seconds.`,
+      );
     }
 
     const { validateCSRF } = await import("./csrf-protection");
@@ -436,37 +471,71 @@ export const verifyPujaPayment = createServerFn({ method: "POST" })
     // 2. Fetch payment details from Razorpay to verify amount
     const rzp = new Razorpay({ key_id: env.RAZORPAY_KEY_ID, key_secret: env.RAZORPAY_KEY_SECRET });
     const payment = await rzp.payments.fetch(data.razorpay_payment_id);
-    
+
     if (payment.status !== "captured" && payment.status !== "authorized") {
       throw new Error("Payment not successful");
     }
-    
+
+    // Bind everything to the SERVER-created order: receipt holds the booking
+    // number and the order amount was set from server-side pricing at creation.
+    const order = await rzp.orders.fetch(data.razorpay_order_id);
+    if (order.receipt && order.receipt !== data.bookingPayload.booking_number) {
+      const { logSecurityEvent } = await import("./security-monitor");
+      logSecurityEvent({
+        type: "invalid_signature",
+        severity: "high",
+        endpoint: "/api/payment/verify",
+        details: { reason: "receipt_mismatch", order_id: data.razorpay_order_id },
+      });
+      throw new Error("Payment does not belong to this booking");
+    }
+
     const paidAmount = Number(payment.amount) / 100;
-    if (Math.abs(paidAmount - data.bookingPayload.amount) > 0.01) {
+    const orderAmount = Number(order.amount) / 100;
+    if (Math.abs(paidAmount - orderAmount) > 0.01) {
       throw new Error("Payment amount mismatch");
     }
-    
+
     if (payment.currency !== "INR") {
       throw new Error("Invalid payment currency");
     }
 
+    // Rebuild the booking record from server-side truth (order notes) — the
+    // client payload is only used for optional fields not present on the order.
+    const notes = (order.notes || {}) as Record<string, string>;
+    const bookingRecord = {
+      booking_number: data.bookingPayload.booking_number,
+      user_id: data.bookingPayload.user_id ?? null,
+      devotee_name: notes.customerName || data.bookingPayload.devotee_name,
+      phone: notes.phone || data.bookingPayload.phone,
+      email: data.bookingPayload.email ?? null,
+      gotra: data.bookingPayload.gotra ?? null,
+      pooja_type: notes.pooja_type || notes.pujaId || data.bookingPayload.pooja_type,
+      preferred_date: data.bookingPayload.preferred_date ?? null,
+      sankalp: data.bookingPayload.sankalp ?? null,
+      notes: data.bookingPayload.notes ?? null,
+      // The amount actually charged, derived from the verified order
+      amount: orderAmount,
+      status: "Confirmed",
+    };
+
     // 3. Save booking with payment
-    const { data: booking, error: bookingErr } = await (supabaseAdmin as any)
-      .rpc('create_booking_with_payment', {
-        booking_data: {
-          ...data.bookingPayload,
-          status: "Confirmed",
-        },
+    const { data: booking, error: bookingErr } = await (supabaseAdmin as any).rpc(
+      "create_booking_with_payment",
+      {
+        booking_data: bookingRecord,
         payment_data: {
-          amount: data.bookingPayload.amount,
+          // Record what was actually paid (server-verified), never a client value
+          amount: paidAmount,
           currency: "INR",
           gateway: "razorpay",
           gateway_order_id: data.razorpay_order_id,
           gateway_payment_id: data.razorpay_payment_id,
           gateway_signature: data.razorpay_signature,
           status: "Captured",
-        }
-      });
+        },
+      },
+    );
 
     if (bookingErr) {
       console.error("Error inserting confirmed booking:", bookingErr);
@@ -481,11 +550,13 @@ export const verifyPujaPayment = createServerFn({ method: "POST" })
 // ---------------------------------------------------------
 
 export const getUserBookings = createServerFn({ method: "GET" })
-  .validator(z.object({ 
-    accessToken: z.string(),
-    limit: z.number().int().min(1).max(50).default(20),
-    offset: z.number().int().min(0).default(0)
-  }))
+  .validator(
+    z.object({
+      accessToken: z.string(),
+      limit: z.number().int().min(1).max(50).default(20),
+      offset: z.number().int().min(0).default(0),
+    }),
+  )
   .handler(async ({ data }) => {
     const request = getRequest();
     const { supabaseAdmin } = await import("./auth/shopify-customer");
@@ -494,15 +565,45 @@ export const getUserBookings = createServerFn({ method: "GET" })
     const customer = await verifyAccessToken(data.accessToken);
     if (!customer) throw new Error("Unauthorized");
     const userId = customer.id;
-    
-    const { data: bookings, error, count } = await supabaseAdmin
+
+    const {
+      data: bookings,
+      error,
+      count,
+    } = await supabaseAdmin
       .from("pooja_bookings")
-      .select("id, booking_number, pooja_type, amount, status, created_at, devotee_name, preferred_date", { count: 'exact' })
+      .select(
+        "id, booking_number, pooja_type, amount, status, created_at, devotee_name, preferred_date",
+        { count: "exact" },
+      )
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .range(data.offset, data.offset + data.limit - 1);
 
     if (error) throw new Error("Failed to fetch bookings");
-    
+
     return { bookings: bookings || [], total: count || 0 };
+  });
+
+/**
+ * Look up a pooja booking by booking number and phone (server-side, using the
+ * admin client — the public anon client must not be able to scan bookings).
+ */
+export const trackPujaBooking = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      bookingNumber: z.string().min(3).max(60),
+      phone: z.string().min(7).max(20),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("./auth/shopify-customer");
+    const { data: booking, error } = await supabaseAdmin
+      .from("pooja_bookings")
+      .select("*")
+      .eq("booking_number", data.bookingNumber.trim())
+      .eq("phone", data.phone.trim())
+      .maybeSingle();
+    if (error || !booking) return null;
+    return booking;
   });

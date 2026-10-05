@@ -4,7 +4,8 @@ import { z } from "zod";
 // Schema for registration
 const RegisterSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string()
+  password: z
+    .string()
     .min(12, "Password must be at least 12 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
@@ -36,15 +37,18 @@ export const registerUser = createServerFn({ method: "POST" })
     const request = getRequest();
     const { validateCSRF } = await import("./csrf-protection");
     await validateCSRF(request);
-    
+
     const { checkRateLimit } = await import("./rate-limit");
-    const rateCheck = checkRateLimit(request, "auth");
+    const rateCheck = await checkRateLimit(request, "auth");
     if (!rateCheck.allowed) {
-      throw new Error(`Too many registration attempts. Try again in ${rateCheck.retryAfter} seconds.`);
+      throw new Error(
+        `Too many registration attempts. Try again in ${rateCheck.retryAfter} seconds.`,
+      );
     }
 
     try {
-      const { createShopifyCustomer, syncShopifyCustomerToSupabase, loginShopifyCustomer } = await import("./auth/shopify-customer");
+      const { createShopifyCustomer, syncShopifyCustomerToSupabase, loginShopifyCustomer } =
+        await import("./auth/shopify-customer");
       // Create Shopify customer
       const customer = await createShopifyCustomer({
         email: data.email,
@@ -82,12 +86,12 @@ export const loginUser = createServerFn({ method: "POST" })
     const request = getRequest();
     const { validateCSRF } = await import("./csrf-protection");
     await validateCSRF(request);
-    
+
     const clientIp = request.headers.get("x-forwarded-for") || "unknown";
     const identifier = data.email;
-    
+
     const { checkRateLimit } = await import("./rate-limit");
-    const rateCheck = checkRateLimit(request, "auth");
+    const rateCheck = await checkRateLimit(request, "auth");
     if (!rateCheck.allowed) {
       const { logSecurityEvent } = await import("./security-monitor");
       logSecurityEvent({
@@ -101,8 +105,9 @@ export const loginUser = createServerFn({ method: "POST" })
     }
 
     try {
-      const { supabaseAdmin, loginShopifyCustomer, syncShopifyCustomerToSupabase } = await import("./auth/shopify-customer");
-      const bcrypt = await import("bcryptjs").then(m => m.default || m);
+      const { supabaseAdmin, loginShopifyCustomer, syncShopifyCustomerToSupabase } =
+        await import("./auth/shopify-customer");
+      const bcrypt = await import("bcryptjs").then((m) => m.default || m);
       const { signAdminToken } = await import("./admin-guard");
       const { recordFailedAttempt, resetAttempts } = await import("./brute-force-protection");
       const { logSecurityEvent } = await import("./security-monitor");
@@ -126,7 +131,7 @@ export const loginUser = createServerFn({ method: "POST" })
         if (!storedHash) {
           throw new Error("Admin login disabled: missing stored password hash");
         }
-        
+
         const ok = await bcrypt.compare(data.password, storedHash);
         if (!ok) {
           recordFailedAttempt(identifier);
@@ -139,7 +144,7 @@ export const loginUser = createServerFn({ method: "POST" })
           });
           throw new Error("Invalid email or password");
         }
-        
+
         // Successful login - reset attempts
         resetAttempts(identifier);
 
@@ -185,7 +190,8 @@ export const verifyAccessToken = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     try {
       const { isAdminToken, verifyAdminToken } = await import("./admin-guard");
-      const { supabaseAdmin, getShopifyCustomer, syncShopifyCustomerToSupabase } = await import("./auth/shopify-customer");
+      const { supabaseAdmin, getShopifyCustomer, syncShopifyCustomerToSupabase } =
+        await import("./auth/shopify-customer");
 
       // Check if this is an admin JWT token
       if (isAdminToken(data.accessToken)) {
@@ -255,27 +261,6 @@ export const logoutUser = createServerFn({ method: "POST" })
   });
 
 /**
- * Get user details from Supabase by email
- * Used for booking lookups
- */
-export const getUserByEmail = createServerFn({ method: "POST" })
-  .validator(z.object({ email: z.string().email() }))
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("./auth/shopify-customer");
-    const { data: user, error } = await supabaseAdmin
-      .from("users")
-      .select("*")
-      .eq("email", data.email)
-      .single();
-
-    if (error || !user) {
-      throw new Error("User not found");
-    }
-
-    return user;
-  });
-
-/**
  * Initiate Shopify Customer Account API OAuth flow
  * Returns authorizeUrl and PKCE verifier to client/session
  */
@@ -292,10 +277,10 @@ export const getShopifyOAuthUrl = createServerFn({ method: "POST" })
       const cookieDomain = host.includes("aasthasupports.com") ? ".aasthasupports.com" : undefined;
 
       // Combine into a single cookie to avoid Vercel multiple Set-Cookie header overwrite bug
-      const oauthSession = JSON.stringify({ 
-        verifier: authData.verifier, 
+      const oauthSession = JSON.stringify({
+        verifier: authData.verifier,
         state: authData.state,
-        nonce: authData.nonce 
+        nonce: authData.nonce,
       });
 
       setCookie("shopify_oauth_session", encodeURIComponent(oauthSession), {
@@ -368,13 +353,19 @@ export const exchangeOAuthCode = createServerFn({ method: "POST" })
 
       // Delete cookie after use (single use)
       try {
-        const host = request?.headers?.get("x-forwarded-host") || request?.headers?.get("host") || "";
-        const cookieDomain = host.includes("aasthasupports.com") ? ".aasthasupports.com" : undefined;
-        deleteCookie("shopify_oauth_session", { path: "/", ...(cookieDomain ? { domain: cookieDomain } : {}) });
+        const host =
+          request?.headers?.get("x-forwarded-host") || request?.headers?.get("host") || "";
+        const cookieDomain = host.includes("aasthasupports.com")
+          ? ".aasthasupports.com"
+          : undefined;
+        deleteCookie("shopify_oauth_session", {
+          path: "/",
+          ...(cookieDomain ? { domain: cookieDomain } : {}),
+        });
       } catch {}
 
       const tokens = await exchangeCodeForTokens(data.code, verifier, data.redirectUri);
-      
+
       // Validate nonce from ID token
       if (savedNonce && tokens.id_token) {
         const jwt = await import("jsonwebtoken");
@@ -383,7 +374,7 @@ export const exchangeOAuthCode = createServerFn({ method: "POST" })
           throw new Error("Nonce mismatch detected. Authentication aborted.");
         }
       }
-      
+
       const customerData = await fetchCustomerAccountData(tokens.access_token);
 
       const customerNode = customerData.data?.customer;

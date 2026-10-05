@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Layout } from "@/components/Layout";
-import { supabase } from "@/integrations/supabase/client";
+import { trackShopifyOrder } from "@/lib/shopify.functions";
+import { trackPujaBooking } from "@/lib/booking.functions";
 import {
   Package,
   Truck,
@@ -48,6 +50,9 @@ function TrackOrderPage() {
   const [order, setOrder] = useState<any | null>(null);
   const [items, setItems] = useState<any[]>([]);
 
+  const shopifyLookup = useServerFn(trackShopifyOrder);
+  const pujaLookup = useServerFn(trackPujaBooking);
+
   const onTrack = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -59,71 +64,83 @@ function TrackOrderPage() {
     }
     setLoading(true);
     try {
-      // 1. Try finding in pooja_bookings
-      const cleanOrderNo = orderNumber.trim();
-      const cleanPhone = phone.trim();
+      // Merchandise orders live in Shopify — the app never writes them to
+      // Supabase, so the Admin API is the only real source for tracking.
+      const shopifyOrder = await shopifyLookup({
+        data: { orderNumber: orderNumber.trim(), phone: phone.trim() },
+      });
 
-      const { data: pujaBooking } = await supabase
-        .from("pooja_bookings")
-        .select("*")
-        .eq("booking_number", cleanOrderNo)
-        .eq("phone", cleanPhone)
-        .maybeSingle();
-
-      if (pujaBooking) {
-        const pujaStatus = (pujaBooking.status || "confirmed").toLowerCase();
+      if (shopifyOrder) {
         setOrder({
-          id: pujaBooking.id,
-          order_number: pujaBooking.booking_number,
-          status: pujaStatus === "confirmed" ? "confirmed" : (pujaStatus === "completed" ? "delivered" : "pending"),
-          total_amount: pujaBooking.amount,
-          created_at: pujaBooking.created_at,
-          customer_name: pujaBooking.devotee_name,
-          customer_phone: pujaBooking.phone,
-          customer_email: pujaBooking.email,
+          order_number: shopifyOrder.order_number,
+          status: shopifyOrder.status,
+          total: shopifyOrder.total,
+          created_at: shopifyOrder.created_at,
+          payment_status: shopifyOrder.payment_status,
+          payment_method: shopifyOrder.payment_method,
+          shipping_address: "As entered at checkout",
+        });
+        setItems(
+          (shopifyOrder.items || []).map((li: any, idx: number) => {
+            const qty = Number(li.quantity) || 1;
+            const unit = li.unit_price != null ? Number(li.unit_price) : 0;
+            return {
+              id: `${shopifyOrder.order_number}-${idx}`,
+              product_name: li.product_name,
+              quantity: qty,
+              unit_price: unit,
+              subtotal: unit > 0 ? unit * qty : null,
+            };
+          }),
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Pooja bookings are recorded in Supabase (Razorpay flow)
+      const booking = await pujaLookup({
+        data: { bookingNumber: orderNumber.trim(), phone: phone.trim() },
+      });
+
+      if (booking) {
+        const pujaStatus = (booking.status || "confirmed").toLowerCase();
+        const amount = Number(booking.amount) || 0;
+        setOrder({
+          order_number: booking.booking_number,
+          status:
+            pujaStatus === "completed"
+              ? "delivered"
+              : pujaStatus === "confirmed"
+                ? "confirmed"
+                : "pending",
+          total: amount,
+          created_at: booking.created_at,
+          customer_name: booking.devotee_name,
+          customer_phone: booking.phone,
+          customer_email: booking.email,
           payment_status: "Paid",
           payment_method: "Razorpay (Online)",
-          shipping_address: pujaBooking.sankalp ? `Sankalp: ${pujaBooking.sankalp}` : "Vedic Pooja Service",
+          shipping_address: booking.sankalp ? `Sankalp: ${booking.sankalp}` : "Vedic Pooja Service",
         });
         setItems([
           {
-            id: pujaBooking.id,
-            product_name: `${pujaBooking.pooja_type} (${pujaBooking.gotra ? `Gotra: ${pujaBooking.gotra}` : 'Vedic Ritual'})`,
+            id: booking.id,
+            product_name: `${booking.pooja_type || "Vedic Pooja"}${
+              booking.gotra ? ` (Gotra: ${booking.gotra})` : " (Vedic Ritual)"
+            }`,
             quantity: 1,
-            unit_price: pujaBooking.amount,
+            unit_price: amount,
+            subtotal: amount,
           },
         ]);
         setLoading(false);
         return;
       }
 
-      // 2. Try finding in physical merchandise orders
-      const { data, error: err } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("order_number", cleanOrderNo.toUpperCase())
-        .eq("customer_phone", cleanPhone)
-        .maybeSingle();
-
-      if (err) {
-        setError("Unable to retrieve order details. Please verify your info or contact care.");
-        setLoading(false);
-        return;
-      }
-      if (!data) {
-        setError(
-          "No order or puja booking found with these details. For live assistance, contact support via WhatsApp or email.",
-        );
-        setLoading(false);
-        return;
-      }
-      setOrder(data);
-      const { data: itemRows } = await supabase
-        .from("order_items")
-        .select("*")
-        .eq("order_id", data.id);
-      setItems(itemRows ?? []);
-    } catch (e: any) {
+      setError(
+        "No order or puja booking found with these details. Use the order number from your confirmation (e.g. #1001). For live assistance, contact support via WhatsApp or email.",
+      );
+    } catch {
       setError("An error occurred while tracking. Please try again.");
     } finally {
       setLoading(false);
@@ -139,7 +156,9 @@ function TrackOrderPage() {
       <section className="bg-gradient-to-b from-maroon-deep to-maroon py-14">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gold tracking-[0.4em] text-xs">✦ ORDER TRACKING ✦</p>
-          <h1 className="font-sans font-bold text-3xl md:text-5xl text-cream mt-3 tracking-tight">Track Your Order</h1>
+          <h1 className="font-sans font-bold text-3xl md:text-5xl text-cream mt-3 tracking-tight">
+            Track Your Order
+          </h1>
           <p className="text-cream/80 mt-3 max-w-xl mx-auto text-sm">
             Enter your order number and registered phone to see live status.
           </p>
@@ -159,8 +178,8 @@ function TrackOrderPage() {
               <input
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
-                placeholder="AS-XXXXXX-XXXXXX"
-                className="mt-1 w-full px-3 py-2.5 rounded-md border border-gold/30 bg-white text-sm focus:outline-none focus:border-gold uppercase"
+                placeholder="e.g. #1001"
+                className="mt-1 w-full px-3 py-2.5 rounded-md border border-gold/30 bg-white text-sm focus:outline-none focus:border-gold"
               />
             </div>
             <div>
@@ -197,7 +216,9 @@ function TrackOrderPage() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-[11px] tracking-widest uppercase text-gold">Order</p>
-                    <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep">{order.order_number}</h2>
+                    <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep">
+                      {order.order_number}
+                    </h2>
                     <p className="text-xs text-muted-foreground mt-1">
                       Placed on {new Date(order.created_at).toLocaleString("en-IN")}
                     </p>
@@ -276,11 +297,16 @@ function TrackOrderPage() {
                       <div>
                         <div className="text-maroon-deep font-medium">{i.product_name}</div>
                         <div className="text-xs text-muted-foreground">
-                          Qty {i.quantity} × ₹{Number(i.unit_price).toLocaleString("en-IN")}
+                          Qty {i.quantity}
+                          {i.unit_price != null &&
+                            Number(i.unit_price) > 0 &&
+                            ` × ₹${Number(i.unit_price).toLocaleString("en-IN")}`}
                         </div>
                       </div>
                       <div className="font-medium text-maroon-deep">
-                        ₹{Number(i.subtotal).toLocaleString("en-IN")}
+                        {i.subtotal != null && Number(i.subtotal) > 0
+                          ? `₹${Number(i.subtotal).toLocaleString("en-IN")}`
+                          : "—"}
                       </div>
                     </div>
                   ))}

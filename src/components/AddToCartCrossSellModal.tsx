@@ -1,7 +1,10 @@
 import React from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useCart } from "@/contexts/CartContext";
-import { ShoppingBag, CheckCircle2, X, Plus, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { resolveProductVariant } from "@/lib/shopify.functions";
+import { ShoppingBag, CheckCircle2, X, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 interface CrossSellItem {
@@ -19,7 +22,8 @@ const HIGH_CONVERTING_ADDONS: CrossSellItem[] = [
     id: "natural-5-mukhi-rudraksha-mala-indonesian-origin-108-1-beads",
     name: "Natural 5 Mukhi Rudraksha Mala (108+1 Beads)",
     categoryName: "Mala",
-    image: "https://cdn.shopify.com/s/files/1/1012/2867/5360/files/ChatGPTImageJul19_2026_01_16_10AM.png?v=1785741321",
+    image:
+      "https://cdn.shopify.com/s/files/1/1012/2867/5360/files/ChatGPTImageJul19_2026_01_16_10AM.png?v=1785741321",
     price: 1299,
     mrp: 2499,
     desc: "Energised 108+1 bead mala for daily japa, meditation & peace",
@@ -28,7 +32,8 @@ const HIGH_CONVERTING_ADDONS: CrossSellItem[] = [
     id: "rudraaura-gold-plated-shree-yantra-frame-for-home-office-temple-vastu-feng-shui-spiritual-decor",
     name: "Gold Plated Shree Yantra Frame",
     categoryName: "Yantra",
-    image: "https://cdn.shopify.com/s/files/1/1012/2867/5360/files/ChatGPTImageJul20_2026_11_36_35PM.png?v=1785685669",
+    image:
+      "https://cdn.shopify.com/s/files/1/1012/2867/5360/files/ChatGPTImageJul20_2026_11_36_35PM.png?v=1785685669",
     price: 1499,
     mrp: 2999,
     desc: "Sacred 3D embossed Shree Yantra for abundance, wealth & vastu",
@@ -37,12 +42,22 @@ const HIGH_CONVERTING_ADDONS: CrossSellItem[] = [
     id: "natural-black-obsidian-crystal-healing-bracelet-for-men-women",
     name: "Natural 7 Chakra Crystal Healing Bracelet",
     categoryName: "Bracelet",
-    image: "https://cdn.shopify.com/s/files/1/1012/2867/5360/files/1_1_289550f7-db5d-4af4-afb6-a8ef846b7a81.png?v=1785734623",
+    image:
+      "https://cdn.shopify.com/s/files/1/1012/2867/5360/files/1_1_289550f7-db5d-4af4-afb6-a8ef846b7a81.png?v=1785734623",
     price: 799,
     mrp: 1499,
     desc: "Authentic gemstone beads for chakra balancing & aura protection",
   },
 ];
+
+type ResolvedAddon = {
+  variantId: string;
+  price: number;
+  mrp: number | null;
+  available: boolean;
+  name: string;
+  image: string;
+};
 
 export function AddToCartCrossSellModal({
   isOpen,
@@ -59,20 +74,43 @@ export function AddToCartCrossSellModal({
 }) {
   const { add, items } = useCart();
   const navigate = useNavigate();
+  const resolver = useServerFn(resolveProductVariant);
+
+  // Resolve real variant GIDs + live prices from Shopify. The addon ids are
+  // product handles — passing a handle as a variantId breaks checkout, and
+  // hardcoded prices can drift from the live store.
+  const { data: resolved, isLoading: resolving } = useQuery({
+    queryKey: ["cross-sell-variants", HIGH_CONVERTING_ADDONS.map((a) => a.id).join("|")],
+    queryFn: async () => {
+      const results = await Promise.all(
+        HIGH_CONVERTING_ADDONS.map(
+          (item) => resolver({ data: { handle: item.id } }) as Promise<ResolvedAddon | null>,
+        ),
+      );
+      return results;
+    },
+    enabled: isOpen,
+    staleTime: 5 * 60 * 1000,
+  });
 
   if (!isOpen) return null;
 
-  const handleAddAddon = (item: CrossSellItem) => {
+  const handleAddAddon = (item: CrossSellItem, index: number) => {
+    const live = resolved?.[index];
+    if (!live?.variantId || !live.available) {
+      toast.error("This item is currently unavailable. Please continue with your cart.");
+      return;
+    }
     add({
       slug: item.id,
-      name: item.name,
-      image: item.image,
-      price: item.price,
-      mrp: item.mrp,
+      name: live.name || item.name,
+      image: live.image || item.image,
+      price: live.price,
+      mrp: live.mrp ?? item.mrp,
       categoryName: item.categoryName,
-      variantId: item.id,
+      variantId: live.variantId,
     });
-    toast.success(`Added ${item.name} to your cart!`);
+    toast.success(`Added ${live.name || item.name} to your cart!`);
   };
 
   const handleCheckout = () => {
@@ -106,7 +144,7 @@ export function AddToCartCrossSellModal({
           {addedProduct && (
             <div className="flex items-center gap-3 bg-cream/70 p-3 rounded-lg border border-gold/25">
               <img
-                src={addedProduct.image || "/placeholder.jpg"}
+                src={addedProduct.image || "/placeholder.svg"}
                 alt=""
                 className="w-14 h-14 rounded-md object-cover border border-gold/30 shrink-0"
               />
@@ -139,7 +177,11 @@ export function AddToCartCrossSellModal({
 
           {/* Cross-Sell Product Cards */}
           <div className="space-y-2.5">
-            {HIGH_CONVERTING_ADDONS.map((item) => {
+            {HIGH_CONVERTING_ADDONS.map((item, index) => {
+              const live = resolved?.[index];
+              const price = live?.price ?? item.price;
+              const mrp = live?.mrp ?? item.mrp;
+              const unavailable = resolving ? false : !live?.variantId || !live?.available;
               const isAlreadyInCart = items.some((i) => i.slug === item.id);
               return (
                 <div
@@ -153,30 +195,43 @@ export function AddToCartCrossSellModal({
                   />
                   <div className="flex-1 min-w-0">
                     <h5 className="font-display font-bold text-xs text-maroon-deep truncate">
-                      {item.name}
+                      {live?.name || item.name}
                     </h5>
                     <p className="text-[11px] text-muted-foreground line-clamp-1">{item.desc}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="font-numeric font-bold text-xs text-maroon-deep">
-                        ₹{item.price}
+                        ₹{price.toLocaleString("en-IN")}
                       </span>
-                      <span className="text-[10px] text-muted-foreground line-through font-numeric">
-                        ₹{item.mrp}
-                      </span>
+                      {mrp && mrp > price && (
+                        <span className="text-[10px] text-muted-foreground line-through font-numeric">
+                          ₹{mrp.toLocaleString("en-IN")}
+                        </span>
+                      )}
+                      {unavailable && (
+                        <span className="text-[10px] text-rose-600 font-semibold uppercase">
+                          Out of stock
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   <button
-                    onClick={() => handleAddAddon(item)}
-                    disabled={isAlreadyInCart}
+                    onClick={() => handleAddAddon(item, index)}
+                    disabled={isAlreadyInCart || resolving || unavailable}
                     className={`px-3 py-1.5 rounded text-xs font-bold shrink-0 transition flex items-center gap-1 ${
                       isAlreadyInCart
                         ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                        : "bg-gold text-maroon-deep hover:bg-gold-soft shadow-2xs"
+                        : unavailable || resolving
+                          ? "bg-cream text-muted-foreground border border-gold/20"
+                          : "bg-gold text-maroon-deep hover:bg-gold-soft shadow-2xs"
                     }`}
                   >
                     {isAlreadyInCart ? (
                       "Added ✓"
+                    ) : unavailable ? (
+                      "Unavailable"
+                    ) : resolving ? (
+                      "…"
                     ) : (
                       <>
                         <Plus className="w-3.5 h-3.5" /> Add

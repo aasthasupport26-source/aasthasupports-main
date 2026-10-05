@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { categories, getCategory } from "@/data/catalog";
 import { getShopifyProducts, normalizeShopifyVideoUrl } from "@/lib/shopify.functions";
@@ -20,17 +20,34 @@ import {
 } from "lucide-react";
 import { DirectBookingModal } from "@/components/booking/DirectBookingModal";
 import { toast } from "sonner";
-import { getShortProductName, getProductRating, getProductCardDescription } from "@/lib/product-display";
+import { submitContactForm } from "@/lib/contact.functions";
+import {
+  getShortProductName,
+  getProductRating,
+  getProductCardDescription,
+} from "@/lib/product-display";
 import { ProductRating } from "@/components/ProductRating";
 
 export const Route = createFileRoute("/category/$slug")({
   loader: ({ params }) => {
     const slug = (params.slug || "").toLowerCase().trim();
-    const validSlugs = ["rudraksha", "mala", "bracelets", "gemstones", "yantra", "online-pooja", "pooja", "puja"];
-    const isValid = validSlugs.includes(slug) || slug === "all" || !!categories.find((c) => c.slug === slug);
+    const validSlugs = [
+      "rudraksha",
+      "mala",
+      "bracelets",
+      "gemstones",
+      "yantra",
+      "online-pooja",
+      "pooja",
+      "puja",
+    ];
+    const isValid =
+      validSlugs.includes(slug) || slug === "all" || !!categories.find((c) => c.slug === slug);
 
     if (!isValid || slug.includes("ethnic") || slug.includes("wear")) {
-      throw redirect({ to: "/" });
+      // Unknown categories get a real 404 so bad links surface instead of
+      // silently bouncing to the homepage.
+      throw notFound();
     }
 
     const cat = getCategory(params.slug);
@@ -380,12 +397,8 @@ function GemstoneProductCard({ item }: { item: any }) {
           </p>
         )}
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-gold/15">
-          <span className="text-maroon font-medium">
-            ₹{item.price.toLocaleString("en-IN")}
-          </span>
-          <span className="text-[10px] tracking-widest uppercase text-gold">
-            View
-          </span>
+          <span className="text-maroon font-medium">₹{item.price.toLocaleString("en-IN")}</span>
+          <span className="text-[10px] tracking-widest uppercase text-gold">View</span>
         </div>
       </div>
     </Link>
@@ -397,12 +410,34 @@ function GemstoneProductCard({ item }: { item: any }) {
 function OnlinePoojaPage({ cat }: { cat: any }) {
   const [notifyContact, setNotifyContact] = useState("");
   const [notified, setNotified] = useState(false);
+  const [notifying, setNotifying] = useState(false);
+  const submitContact = useServerFn(submitContactForm);
 
-  const handleNotify = (e: React.FormEvent) => {
+  const handleNotify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!notifyContact.trim()) return;
-    setNotified(true);
-    toast.success("Namaste! We will notify you as soon as Online Pooja services launch.");
+    const contact = notifyContact.trim();
+    if (!contact) return;
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
+    if (!isEmail) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    setNotifying(true);
+    try {
+      await submitContact({
+        data: {
+          name: contact.split("@")[0].slice(0, 40) || "Notify Me Lead",
+          email: contact,
+          message: `Notify-me request: please inform me when Online Pooja services launch (${cat?.name || "Online Pooja"}).`,
+        },
+      });
+      setNotified(true);
+      toast.success("Namaste! We will notify you as soon as Online Pooja services launch.");
+    } catch {
+      toast.error("Could not save your request. Please contact us on WhatsApp.");
+    } finally {
+      setNotifying(false);
+    }
   };
 
   const whatsappMsg = encodeURIComponent(
@@ -430,7 +465,9 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
               || सर्वमङ्गलमाङ्गल्ये शिवे सर्वार्थसाधिके ||
             </p>
             <p className="text-muted-foreground mt-4 text-base md:text-lg leading-relaxed">
-              Experience authentic, personalized live Vedic rituals and sankalps performed by certified Purohits from sacred tirthas — Kashi Vishwanath, Mahakaleshwar Ujjain, Haridwar, and Ayodhya — right from your home.
+              Experience authentic, personalized live Vedic rituals and sankalps performed by
+              certified Purohits from sacred tirthas — Kashi Vishwanath, Mahakaleshwar Ujjain,
+              Haridwar, and Ayodhya — right from your home.
             </p>
           </div>
 
@@ -444,7 +481,8 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                 Personalized Sankalp
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Rituals conducted with your specific Name, Gotra, and Nakshatra for maximum Vedic potency and blessings.
+                Rituals conducted with your specific Name, Gotra, and Nakshatra for maximum Vedic
+                potency and blessings.
               </p>
             </div>
 
@@ -456,7 +494,8 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                 Vedic Shastriya Vidhi
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Performed by verified temple pandits following centuries-old Vedic scriptures and pure traditional vidhi.
+                Performed by verified temple pandits following centuries-old Vedic scriptures and
+                pure traditional vidhi.
               </p>
             </div>
 
@@ -468,7 +507,8 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                 Live Video & Clips
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Watch rituals live via private streaming or receive personalized HD recorded video clips of your puja.
+                Watch rituals live via private streaming or receive personalized HD recorded video
+                clips of your puja.
               </p>
             </div>
 
@@ -480,7 +520,8 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                 Blessed Prasad Delivery
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Consecrated holy prasad, bhasma, raksha sutra, and dry fruits delivered straight to your doorstep.
+                Consecrated holy prasad, bhasma, raksha sutra, and dry fruits delivered straight to
+                your doorstep.
               </p>
             </div>
           </div>
@@ -496,7 +537,8 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                 Get Notified Upon Launch
               </h2>
               <p className="text-cream/80 text-sm leading-relaxed mb-8">
-                Join our priority blessing list to receive early access, date-reservation priority, and exclusive inauguration offers when our Live Online Pooja services commence.
+                Join our priority blessing list to receive early access, date-reservation priority,
+                and exclusive inauguration offers when our Live Online Pooja services commence.
               </p>
 
               {notified ? (
@@ -510,18 +552,22 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleNotify} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-6">
+                <form
+                  onSubmit={handleNotify}
+                  className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-6"
+                >
                   <input
-                    type="text"
+                    type="email"
                     required
                     value={notifyContact}
                     onChange={(e) => setNotifyContact(e.target.value)}
-                    placeholder="Enter Mobile Number or Email"
+                    placeholder="Enter your email"
                     className="flex-1 px-4 py-3 rounded-xl bg-white text-maroon-deep placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-gold"
                   />
                   <button
                     type="submit"
-                    className="bg-gold text-maroon-deep font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider hover:bg-gold-soft transition shadow-gold whitespace-nowrap"
+                    disabled={notifying}
+                    className="bg-gold text-maroon-deep font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider hover:bg-gold-soft transition shadow-gold whitespace-nowrap disabled:opacity-60"
                   >
                     Notify Me
                   </button>
@@ -531,7 +577,7 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
               <div className="pt-6 border-t border-cream/15 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-cream/80">
                 <span>Need urgent astrological or pooja guidance right now?</span>
                 <a
-                  href={`https://wa.me/918766343513?text=${whatsappMsg}`}
+                  href={`https://wa.me/918287670827?text=${whatsappMsg}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-lg transition"

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { performHealthCheck, getLastHealthCheck } from "./monitoring";
+import { performHealthCheck, getLastHealthCheck, startHealthPolling } from "./monitoring";
 
 /**
  * Health Check Endpoint
@@ -117,6 +117,9 @@ async function checkRazorpay(): Promise<ServiceHealth> {
  * Enhanced health check with service status
  */
 export const healthCheck = createServerFn({ method: "GET" }).handler(async () => {
+  // Kick off background polling so `lastHealthCheck` stays warm on long-lived
+  // runtimes (no-op on cold serverless isolates; lazy to stay Workers-safe)
+  startHealthPolling();
   const cached = getLastHealthCheck();
   if (cached && Date.now() - cached.timestamp < 30000) {
     return cached;

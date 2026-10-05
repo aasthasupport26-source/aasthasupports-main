@@ -20,7 +20,21 @@ const ALERT_THRESHOLDS = {
 
 const eventCounts = new Map<string, number>();
 
+// Reset alert counters periodically. Started lazily on first use: a
+// module-scope setInterval is illegal in Cloudflare Workers' global scope
+// (it 500s the whole worker at init).
+let alertResetTimer: ReturnType<typeof setInterval> | null = null;
+
+function ensureAlertResetTimer() {
+  if (alertResetTimer) return;
+  alertResetTimer = setInterval(() => {
+    eventCounts.clear();
+  }, 5 * 60 * 1000);
+  (alertResetTimer as any)?.unref?.();
+}
+
 export function logSecurityEvent(event: SecurityEvent): void {
+  ensureAlertResetTimer();
   const key = `${event.type}:${event.ip || event.userId || 'unknown'}`;
   const count = (eventCounts.get(key) || 0) + 1;
   eventCounts.set(key, count);
@@ -43,7 +57,4 @@ export function logSecurityEvent(event: SecurityEvent): void {
   }
 }
 
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-  eventCounts.clear();
-}, 5 * 60 * 1000);
+// Alert counters are reset lazily — see ensureAlertResetTimer above.

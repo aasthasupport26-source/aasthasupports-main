@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { getAdminUsers, updateUserRole } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin/users")({
   component: UsersPage,
@@ -11,24 +13,21 @@ const ROLES = ["admin", "staff", "customer"] as const;
 type Role = (typeof ROLES)[number];
 
 function UsersPage() {
+  const { accessToken } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const usersFn = useServerFn(getAdminUsers);
+  const updateRoleFn = useServerFn(updateUserRole);
+
   const load = async () => {
+    if (!accessToken) return;
     try {
       setLoading(true);
-      const { data: profs, error } = await supabase
-        .from("users")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        toast.error("Failed to load users: " + error.message);
-      } else {
-        setUsers(profs ?? []);
-      }
+      const rows = await usersFn({ data: { accessToken } });
+      setUsers(rows ?? []);
     } catch (err: any) {
-      toast.error("Error fetching users");
+      toast.error(err?.message || "Error fetching users");
     } finally {
       setLoading(false);
     }
@@ -36,21 +35,20 @@ function UsersPage() {
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken]);
 
   const toggleRole = async (userId: string, role: Role, currentRole: string) => {
     const isNewRole = currentRole !== role;
-    const targetRole = isNewRole ? role : "customer";
-    const isAdmin = targetRole === "admin";
-
-    const { error } = await supabase
-      .from("users")
-      .update({ role: targetRole, is_admin: isAdmin } as any)
-      .eq("id", userId);
-
-    if (error) return toast.error(error.message);
-    toast.success(`Role updated to ${targetRole}`);
-    load();
+    const targetRole: Role = isNewRole ? role : "customer";
+    if (!accessToken) return;
+    try {
+      await updateRoleFn({ data: { accessToken, userId, role: targetRole } });
+      toast.success(`Role updated to ${targetRole}`);
+      load();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to update role");
+    }
   };
 
   return (
@@ -74,7 +72,7 @@ function UsersPage() {
           </thead>
           <tbody>
             {users.map((u) => {
-              const currentRole = u.is_admin ? "admin" : (u.role || "customer");
+              const currentRole = u.is_admin ? "admin" : u.role || "customer";
               return (
                 <tr key={u.id} className="border-t">
                   <td className="p-3 font-medium">{u.full_name || "—"}</td>
@@ -106,6 +104,9 @@ function UsersPage() {
             })}
           </tbody>
         </table>
+        {!loading && users.length === 0 && (
+          <div className="text-center text-sm text-muted-foreground py-12">No users found.</div>
+        )}
       </div>
     </div>
   );

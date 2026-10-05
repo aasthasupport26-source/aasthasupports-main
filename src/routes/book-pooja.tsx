@@ -3,6 +3,8 @@ import { Layout } from "@/components/Layout";
 import { Sparkles, Flame, ArrowRight, ShieldCheck, Video, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { submitContactForm } from "@/lib/contact.functions";
 
 export const Route = createFileRoute("/book-pooja")({
   head: () => ({
@@ -30,12 +32,34 @@ export const Route = createFileRoute("/book-pooja")({
 function BookPoojaPage() {
   const [notifyContact, setNotifyContact] = useState("");
   const [notified, setNotified] = useState(false);
+  const [notifying, setNotifying] = useState(false);
+  const submitContact = useServerFn(submitContactForm);
 
-  const handleNotify = (e: React.FormEvent) => {
+  const handleNotify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!notifyContact.trim()) return;
-    setNotified(true);
-    toast.success("Dhanyavaad! We will notify you as soon as bookings open.");
+    const contact = notifyContact.trim();
+    if (!contact) return;
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
+    if (!isEmail) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    setNotifying(true);
+    try {
+      await submitContact({
+        data: {
+          name: contact.split("@")[0].slice(0, 40) || "Notify Me Lead",
+          email: contact,
+          message: "Notify-me request: please inform me when Pooja bookings open.",
+        },
+      });
+      setNotified(true);
+      toast.success("Dhanyavaad! We will notify you as soon as bookings open.");
+    } catch {
+      toast.error("Could not save your request. Please contact us on WhatsApp.");
+    } finally {
+      setNotifying(false);
+    }
   };
 
   const whatsappMsg = encodeURIComponent(
@@ -60,7 +84,9 @@ function BookPoojaPage() {
                 || ॐ नमः शिवाय ||
               </p>
               <p className="text-cream/80 text-sm md:text-base max-w-2xl mx-auto mt-4 leading-relaxed">
-                We are currently expanding our network of authentic shrine affiliations across Kashi Vishwanath, Mahakaleshwar Ujjain, and Haridwar. Direct online pooja bookings with live video darshan and consecrated prasad dispatch will go live shortly.
+                We are currently expanding our network of authentic shrine affiliations across Kashi
+                Vishwanath, Mahakaleshwar Ujjain, and Haridwar. Direct online pooja bookings with
+                live video darshan and consecrated prasad dispatch will go live shortly.
               </p>
             </div>
 
@@ -110,7 +136,8 @@ function BookPoojaPage() {
                   Be Notified Upon Booking Launch
                 </h4>
                 <p className="text-xs text-muted-foreground mb-5">
-                  Enter your mobile or email to get priority booking access and inaugural blessing discounts.
+                  Enter your mobile or email to get priority booking access and inaugural blessing
+                  discounts.
                 </p>
 
                 {notified ? (
@@ -121,18 +148,22 @@ function BookPoojaPage() {
                     </p>
                   </div>
                 ) : (
-                  <form onSubmit={handleNotify} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+                  <form
+                    onSubmit={handleNotify}
+                    className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto"
+                  >
                     <input
-                      type="text"
+                      type="email"
                       required
                       value={notifyContact}
                       onChange={(e) => setNotifyContact(e.target.value)}
-                      placeholder="Mobile or Email"
+                      placeholder="Enter your email"
                       className="flex-1 px-4 py-2.5 rounded-xl bg-white text-maroon-deep text-xs border border-gold/30 focus:outline-none focus:ring-2 focus:ring-gold"
                     />
                     <button
                       type="submit"
-                      className="bg-maroon-deep text-cream hover:bg-maroon font-semibold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition"
+                      disabled={notifying}
+                      className="bg-maroon-deep text-cream hover:bg-maroon font-semibold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition disabled:opacity-60"
                     >
                       Notify Me
                     </button>
@@ -150,7 +181,7 @@ function BookPoojaPage() {
                   View Upcoming Pooja Details <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
                 <a
-                  href={`https://wa.me/918766343513?text=${whatsappMsg}`}
+                  href={`https://wa.me/918287670827?text=${whatsappMsg}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition flex items-center gap-2"

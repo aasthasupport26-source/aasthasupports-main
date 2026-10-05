@@ -16,30 +16,35 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.location.replace("/");
-    }
-  }, []);
-
+  // Render a real 404 instead of redirecting home — a redirect hides broken
+  // links from customers and produces soft-404s for search engines.
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-4">
       <div className="max-w-md text-center">
         <p className="text-gold tracking-[0.3em] text-xs">|| ॐ ||</p>
-        <h1 className="font-display text-4xl text-maroon-deep mt-4">Redirecting...</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Returning to home...
+        <h1 className="font-display text-5xl text-maroon-deep mt-4">404</h1>
+        <p className="font-display text-2xl text-maroon-deep mt-2">Page Not Found</p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          The page you are looking for doesn't exist or has been moved.
         </p>
+        <Link
+          to="/"
+          className="inline-flex mt-6 bg-royal text-cream px-6 py-3 rounded-md text-xs tracking-widest uppercase hover:opacity-90 transition shadow-royal"
+        >
+          Return to Home
+        </Link>
       </div>
     </div>
   );
 }
 
-function ErrorComponent({ error }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // Auto-recover only from stale-deploy chunk load failures; every other
+      // error gets the error UI below instead of silently bouncing home.
       const msg = error?.message || String(error) || "";
       if (
         msg.includes("Failed to fetch dynamically imported module") ||
@@ -52,17 +57,33 @@ function ErrorComponent({ error }: { error: Error; reset: () => void }) {
           const newUrl = new URL(window.location.href);
           newUrl.searchParams.set("v", Date.now().toString());
           window.location.href = newUrl.toString();
-          return;
         }
       }
-      window.location.replace("/");
     }
   }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-2xl text-maroon-deep">Redirecting to Home...</h1>
+        <p className="text-gold tracking-[0.3em] text-xs">|| ॐ ||</p>
+        <h1 className="font-display text-3xl text-maroon-deep mt-4">Something went wrong</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          An unexpected error occurred while loading this page. Please try again.
+        </p>
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <button
+            onClick={() => reset()}
+            className="inline-flex bg-royal text-cream px-6 py-3 rounded-md text-xs tracking-widest uppercase hover:opacity-90 transition shadow-royal"
+          >
+            Try Again
+          </button>
+          <Link
+            to="/"
+            className="inline-flex border border-gold/40 text-maroon-deep px-6 py-3 rounded-md text-xs tracking-widest uppercase hover:bg-cream transition"
+          >
+            Go to Home
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -140,18 +161,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              var __errs = [];
-              var __errDiv = null;
-              function __showErr(msg) {
-                __errs.push(msg);
-                if (!__errDiv) {
-                  __errDiv = document.createElement('div');
-                  __errDiv.id = '__agy_err';
-                  __errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#7f1d1d;color:#fff;font-family:monospace;font-size:13px;padding:16px;z-index:99999;white-space:pre-wrap;max-height:50vh;overflow:auto;';
-                  document.body.appendChild(__errDiv);
-                }
-                __errDiv.textContent = '❌ JS ERROR (open DevTools → Console for full trace):\\n\\n' + __errs.join('\\n\\n---\\n\\n');
-              }
+              // Chunk-reload recovery for stale deploys. Errors are NOT rendered
+              // into the page — raw messages/stacks must never be shown to
+              // visitors; they go to the console (and Sentry when configured).
               window.onerror = function(msg, url, line, col, err) {
                 var fullMsg = msg + (err ? err.message : '');
                 if (fullMsg.includes('Failed to fetch dynamically imported module') || fullMsg.includes('Importing a module script failed')) {
@@ -164,8 +176,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
                     return true;
                   }
                 }
-                __showErr(msg + '\\n  at ' + url + ':' + line + ':' + col + (err ? '\\n  ' + err.stack : ''));
-                console.error('Client Error:', msg, err);
+                console.error('Client Error:', msg, url, line, col, err);
                 return false;
               };
               window.onunhandledrejection = function(e) {
@@ -181,7 +192,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
                     return true;
                   }
                 }
-                __showErr('Unhandled Promise: ' + (r && r.stack ? r.stack : String(r)));
                 console.error('Promise Rejection:', r);
               };
             `,

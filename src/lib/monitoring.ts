@@ -61,6 +61,15 @@ export function getLastHealthCheck(): HealthCheck | null {
   return lastHealthCheck;
 }
 
-setInterval(() => {
-  performHealthCheck().catch(e => captureError(e, { context: "health-check-interval" }));
-}, 5 * 60 * 1000);
+// Background health polling, started lazily on first use: a module-scope
+// setInterval is illegal in Cloudflare Workers' global scope (it 500s the
+// whole worker at init).
+let healthTimer: ReturnType<typeof setInterval> | null = null;
+
+export function startHealthPolling(): void {
+  if (healthTimer) return;
+  healthTimer = setInterval(() => {
+    performHealthCheck().catch(e => captureError(e, { context: "health-check-interval" }));
+  }, 5 * 60 * 1000);
+  (healthTimer as any)?.unref?.();
+}
