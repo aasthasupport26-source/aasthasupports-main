@@ -21,9 +21,9 @@ export function Header() {
       <div className="bg-maroon-deep text-gold-soft text-xs tracking-widest overflow-hidden">
         <div className="container mx-auto px-4 py-2 flex items-center justify-between gap-3">
           <span className="hidden sm:inline truncate">
-            ✦ AUTHENTIC · CERTIFIED · ENERGISED BY VEDIC PANDITS ✦
+            ✦ AUTHENTIC · VERIFIED ORIGIN · ENERGISED BY VEDIC PANDITS ✦
           </span>
-          <span className="sm:hidden truncate">✦ AUTHENTIC ✦</span>
+          <span className="sm:hidden truncate">✦ AUTHENTIC · VERIFIED ORIGIN ✦</span>
           <div className="flex items-center gap-4">
             <Link to="/track-order" className="hidden sm:inline hover:text-gold transition">
               Track Order

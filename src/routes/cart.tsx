@@ -28,9 +28,10 @@ function CartPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/cart" }) as any;
 
-  const shipping = subtotal > 0 && subtotal < 1500 ? 99 : 0;
+  const shipping = subtotal > 0 && subtotal < 999 ? 99 : 0;
   const total = subtotal + shipping;
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const checkout = useServerFn(createShopifyCheckout);
 
   // Clear cart when returning from Shopify order confirmation
@@ -48,6 +49,10 @@ function CartPage() {
   const handleCheckout = async () => {
     if (items.length === 0) return;
     if (authLoading) return;
+    if (!agreedToTerms) {
+      toast.error("Please agree to the Terms of Service and Privacy Policy before proceeding.");
+      return;
+    }
     if (!customer) {
       toast.error("Please sign in before checkout");
       navigate({ to: "/auth" });
@@ -96,7 +101,7 @@ function CartPage() {
           <div className="mt-16 text-center py-16 border border-gold/20 rounded-xl bg-cream">
             <ShoppingBag className="w-12 h-12 mx-auto text-gold" />
             <p className="font-display text-2xl text-maroon-deep mt-4">Your cart is empty</p>
-            <p className="text-sm text-muted-foreground mt-2">Discover certified sacred items.</p>
+            <p className="text-sm text-muted-foreground mt-2">Discover authentic sacred items.</p>
             <Link
               to="/"
               className="inline-flex mt-6 bg-royal text-cream px-6 py-3 rounded-md text-xs tracking-widest uppercase hover:opacity-90 transition shadow-royal"
@@ -193,16 +198,38 @@ function CartPage() {
                   <span>{shipping === 0 ? "FREE" : `₹${shipping}`}</span>
                 </div>
                 {shipping > 0 && (
-                  <p className="text-[11px] text-muted-foreground">Free shipping over ₹1,500</p>
+                  <p className="text-[11px] text-muted-foreground">Free shipping over ₹999</p>
                 )}
               </div>
               <div className="border-t border-gold/30 mt-4 pt-4 flex justify-between font-display text-xl text-maroon-deep">
                 <span>Total</span>
                 <span>₹{total.toLocaleString("en-IN")}</span>
               </div>
+
+              {/* Consent checkbox (D-07) */}
+              <div className="mt-4 pt-3 border-t border-gold/20 flex items-start gap-2.5">
+                <input
+                  type="checkbox"
+                  id="checkoutConsent"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-gold/40 text-maroon focus:ring-gold"
+                />
+                <label htmlFor="checkoutConsent" className="text-xs text-muted-foreground leading-snug cursor-pointer">
+                  I agree to the{" "}
+                  <Link to="/terms-of-service" target="_blank" className="underline text-maroon font-medium hover:text-gold">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link to="/privacy-policy" target="_blank" className="underline text-maroon font-medium hover:text-gold">
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
+
               <button
                 onClick={handleCheckout}
-                disabled={loading || authLoading}
+                disabled={loading || authLoading || !agreedToTerms}
                 className="mt-5 w-full inline-flex items-center justify-center bg-gold text-maroon-deep px-6 py-3.5 rounded-md text-xs tracking-widest uppercase font-medium hover:bg-gold-soft transition shadow-gold disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}

@@ -22,6 +22,7 @@ export const Route = createFileRoute("/contact")({
         content: "Speak to our Vedic astrologers and customer care team.",
       },
       { property: "og:url", content: "https://www.aasthasupports.com/contact" },
+      { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://www.aasthasupports.com/contact" }],
     scripts: [
@@ -41,7 +42,7 @@ export const Route = createFileRoute("/contact")({
             addressLocality: "Lucknow",
             addressRegion: "Uttar Pradesh",
             postalCode: "226201",
-            addressCountry: "IN",
+            addressCountry: "India",
           },
           openingHours: "Mo-Sa 09:00-20:00",
         }),
@@ -54,10 +55,15 @@ export const Route = createFileRoute("/contact")({
 function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const submitForm = useServerFn(submitContactForm);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!agreedToPrivacy) {
+      toast.error("Please agree to the Privacy Policy to submit.");
+      return;
+    }
     setLoading(true);
     
     const formData = new FormData(e.currentTarget);
@@ -71,6 +77,7 @@ function ContactPage() {
     try {
       await submitForm({ data });
       setSubmitted(true);
+      toast.success("Thank you! Your message has been sent.");
     } catch (error: any) {
       toast.error(error.message || "Failed to submit form");
     } finally {
@@ -85,7 +92,7 @@ function ContactPage() {
           <p className="text-gold tracking-[0.4em] text-xs">✦ संपर्क ✦</p>
           <h1 className="font-sans font-bold text-4xl md:text-6xl mt-3 tracking-tight">Get in Touch</h1>
           <p className="mt-4 text-cream/80 max-w-xl mx-auto">
-            Speak to our Vedic astrologers for free guidance, or reach our care team for any query.
+            Speak to our Vedic astrologers for guidance, or reach our dedicated care team for any order or product inquiry.
           </p>
         </div>
       </section>
@@ -112,48 +119,72 @@ function ContactPage() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs tracking-widest uppercase text-maroon-deep">
-                      Name
+                      Name *
                     </label>
                     <input
                       required
                       name="name"
                       type="text"
+                      placeholder="Your full name"
                       className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
                     />
                   </div>
                   <div>
                     <label className="text-xs tracking-widest uppercase text-maroon-deep">
-                      Phone
+                      Phone *
                     </label>
                     <input
                       required
                       name="phone"
                       type="tel"
+                      pattern="[0-9+ -]{10,15}"
+                      title="Please enter a valid 10-digit phone number"
+                      placeholder="+91 98765 43210"
                       className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
                     />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs tracking-widest uppercase text-maroon-deep">
-                    Email
+                    Email *
                   </label>
                   <input
                     required
                     name="email"
                     type="email"
+                    placeholder="name@example.com"
                     className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
                   />
                 </div>
                 <div>
                   <label className="text-xs tracking-widest uppercase text-maroon-deep">
-                    How can we help?
+                    How can we help? *
                   </label>
                   <textarea
                     required
                     name="message"
                     rows={5}
+                    placeholder="Tell us about your question or requirement..."
                     className="mt-1.5 w-full rounded-md border border-gold/30 bg-cream px-4 py-3 text-sm focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold resize-none"
                   />
+                </div>
+                <div className="flex items-start gap-2.5 pt-1">
+                  <input
+                    type="checkbox"
+                    id="privacyConsent"
+                    name="privacyConsent"
+                    required
+                    checked={agreedToPrivacy}
+                    onChange={(e) => setAgreedToPrivacy(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gold/40 text-maroon focus:ring-gold"
+                  />
+                  <label htmlFor="privacyConsent" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                    I agree to the{" "}
+                    <a href="/privacy-policy" className="underline text-maroon font-medium hover:text-gold">
+                      Privacy Policy
+                    </a>{" "}
+                    and consent to having Aastha Supports contact me regarding this inquiry.
+                  </label>
                 </div>
                 <button
                   type="submit"
@@ -167,7 +198,7 @@ function ContactPage() {
           </div>
 
           {/* Info */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {[
               {
                 icon: Phone,
@@ -180,7 +211,7 @@ function ContactPage() {
                 icon: WhatsAppIcon,
                 title: "WhatsApp",
                 v1: "+91 82876 70827",
-                v2: "Instant replies · Direct chat",
+                v2: "Quick replies · Direct support",
                 href: "https://wa.me/918287670827?text=Namaste!%20I%20have%20an%20inquiry%20regarding%20Aastha%20Supports.",
                 isPopup: true,
               },
@@ -193,15 +224,15 @@ function ContactPage() {
               },
               {
                 icon: MapPin,
-                title: "Visit Us",
+                title: "Registered Address",
                 v1: "Mampur bana, Lucknow",
-                v2: "Uttar Pradesh, Bharat 226201",
+                v2: "Uttar Pradesh 226201, India",
                 href: undefined,
               },
             ].map((c) => {
               const Content = (
                 <div
-                  className={`bg-white rounded-xl p-6 border border-gold/20 shadow-soft flex gap-5 transition ${
+                  className={`bg-white rounded-xl p-5 border border-gold/20 shadow-soft flex gap-5 transition ${
                     c.href ? "hover:border-gold/50 hover:shadow-md cursor-pointer" : ""
                   }`}
                 >
@@ -244,6 +275,22 @@ function ContactPage() {
 
               return <div key={c.title}>{Content}</div>;
             })}
+
+            {/* Grievance Officer Block (D-05) */}
+            <div className="bg-white/80 rounded-xl p-5 border border-gold/30 shadow-soft">
+              <h3 className="font-sans font-bold text-base text-maroon-deep">Grievance Redressal Officer</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                In accordance with Information Technology Act 2000 and Consumer Protection (E-Commerce) Rules 2020:
+              </p>
+              <div className="mt-2 text-xs space-y-1 text-foreground/80">
+                <p><span className="font-semibold text-maroon-deep">Officer:</span> Grievance Officer, Aastha Supports</p>
+                <p><span className="font-semibold text-maroon-deep">Email:</span> grievance@aasthasupports.com / hello@aasthasupports.com</p>
+                <p><span className="font-semibold text-maroon-deep">Phone:</span> +91 82876 70827 (Mon–Sat, 9am–8pm IST)</p>
+                <p className="text-[11px] text-muted-foreground pt-1">
+                  Complaints acknowledged within 48 hours and resolved within 30 days.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -246,7 +246,7 @@ CREATE POLICY "Admins can view audit logs" ON admin_audit_log
    npm run build
 
    # Start with PM2
-   pm2 start npm --name "aastha-support" -- start
+   pm2 start npm --name "aastha-supports" -- start
    pm2 save
    pm2 startup
    ```
@@ -326,7 +326,7 @@ vercel logs
 # Check dashboard → Analytics → Logs
 
 # Self-hosted
-pm2 logs aastha-support
+pm2 logs aastha-supports
 ```
 
 ### 4. Set Up Monitoring
@@ -415,11 +415,11 @@ vercel rollback
 # Use dashboard → Deployments → Rollback to previous
 
 # Self-hosted
-pm2 stop aastha-support
+pm2 stop aastha-supports
 git checkout <previous-commit>
 npm install
 npm run build
-pm2 restart aastha-support
+pm2 restart aastha-supports
 ```
 
 ## Support

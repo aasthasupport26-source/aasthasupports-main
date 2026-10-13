@@ -466,7 +466,7 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
             </p>
             <p className="text-muted-foreground mt-4 text-base md:text-lg leading-relaxed">
               Experience authentic, personalized live Vedic rituals and sankalps performed by
-              certified Purohits from sacred tirthas — Kashi Vishwanath, Mahakaleshwar Ujjain,
+              learned Purohits from sacred tirthas — Kashi Vishwanath, Mahakaleshwar Ujjain,
               Haridwar, and Ayodhya — right from your home.
             </p>
           </div>
@@ -591,7 +591,7 @@ function OnlinePoojaPage({ cat }: { cat: any }) {
           {/* Explore Other Energized Products CTA */}
           <div className="text-center">
             <p className="text-xs tracking-[0.25em] text-gold uppercase font-semibold mb-2">
-              DISCOVER CERTIFIED SACRED ITEMS
+              DISCOVER AUTHENTIC SACRED ITEMS
             </p>
             <h3 className="font-display text-2xl md:text-3xl text-maroon-deep mb-6">
               Shop 100% Authentic Vedic Products

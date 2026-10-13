@@ -18,6 +18,7 @@ export const Route = createFileRoute("/about")({
         content: "Our story, pandits, and commitment to authentic Sanatan tradition.",
       },
       { property: "og:url", content: "https://www.aasthasupports.com/about" },
+      { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://www.aasthasupports.com/about" }],
   }),
@@ -62,13 +63,13 @@ function AboutPage() {
             <p>
               From the sacred ghats of Haridwar and Kashi to the rudraksha forests of Nepal and
               Indonesia, we travel to the source. Every bead, every gemstone, every yantra is
-              hand-picked, verified, certified, and then energised through traditional Vedic
-              abhimantran by our learned pandits.
+              hand-picked, verified, and then energised through traditional Vedic abhimantran by
+              our learned pandits. Lab certification is available on request.
             </p>
             <p>
-              Our online pooja services let you participate live in rituals performed by Vedic
-              scholars at the most sacred temples of Bharat. From Mahamrityunjay Jaap to Kaal Sarp
-              Nivaran — the divine reaches you, wherever you are.
+              Our online pooja services are launching soon. You will be able to participate live in
+              rituals performed by Vedic scholars at the most sacred temples of Bharat — from
+              Mahamrityunjay Jaap to Kaal Sarp Nivaran, bringing divine blessings wherever you are.
             </p>
           </div>
         </div>
@@ -77,12 +78,11 @@ function AboutPage() {
       <section className="py-20 bg-maroon-deep text-cream">
         <div className="container mx-auto px-4">
           <h2 className="font-sans font-bold text-3xl md:text-4xl text-center mb-12 tracking-tight">Our Sacred Promise</h2>
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
               { icon: Award, num: "12,000+", label: "Happy Devotees" },
-              { icon: Sparkles, num: "100%", label: "Authentic Products" },
+              { icon: Sparkles, num: "100%", label: "Authentic Sourcing" },
               { icon: Users, num: "25+", label: "Vedic Pandits" },
-              { icon: Heart, num: "500+", label: "Poojas Monthly" },
             ].map((s) => (
               <div
                 key={s.label}

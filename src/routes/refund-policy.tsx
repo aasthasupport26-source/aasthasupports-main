@@ -6,9 +6,14 @@ export const Route = createFileRoute("/refund-policy")({
   head: () => ({
     meta: [
       { title: "Refund Policy — Aastha Supports" },
-      { name: "description", content: "Refund and cancellation policy for Aastha Supports." },
+      { name: "description", content: "Refund and cancellation policy for Aastha Supports. 7-day easy returns on physical products." },
+      { property: "og:title", content: "Refund Policy — Aastha Supports" },
+      { property: "og:description", content: "Refund and cancellation policy for Aastha Supports. 7-day easy returns on physical products." },
+      { property: "og:url", content: "https://www.aasthasupports.com/refund-policy" },
+      { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
       { name: "robots", content: "index, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://www.aasthasupports.com/refund-policy" }],
   }),
 });
 
@@ -16,49 +21,46 @@ function RefundPolicy() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12 max-w-4xl text-page font-sans">
-        <h1 className="font-sans font-bold text-3xl md:text-4xl text-maroon-deep mb-2 tracking-tight">Refund Policy</h1>
+        <h1 className="font-sans font-bold text-3xl md:text-4xl text-maroon-deep mb-2 tracking-tight">Refund & Return Policy</h1>
         <p className="text-sm text-muted-foreground mb-8">Last Updated: August 17, 2026</p>
 
         <div className="prose prose-stone max-w-none space-y-6">
           <section>
-            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Refund Eligibility</h2>
-            <p>Refunds are available under the following conditions:</p>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">7-Day Easy Returns Eligibility</h2>
+            <p>We accept returns within 7 days of delivery for physical products (rudraksha, malas, bracelets, gemstones, yantras) under the following conditions:</p>
             <ul className="list-disc pl-6 space-y-1">
-              <li>Product received is damaged or defective</li>
-              <li>Wrong product delivered</li>
-              <li>Product does not match description</li>
-              <li>Pooja booking cancelled 24+ hours before scheduled time</li>
+              <li>Item is unused, unworn, and in original packaging</li>
+              <li>All tags, boxes, and certificates (if provided) are intact</li>
+              <li>Product received is damaged, defective, or incorrect</li>
             </ul>
           </section>
 
           <section>
             <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Non-Refundable Items</h2>
             <ul className="list-disc pl-6 space-y-1">
-              <li>Energized products (unless defective)</li>
-              <li>Customized or personalized items</li>
-              <li>Pooja bookings cancelled less than 24 hours before scheduled time</li>
-              <li>Digital products (e-books, recorded poojas)</li>
+              <li>Customized, name-inscribed, or personalized items</li>
+              <li>Prasad items after dispatch</li>
+              <li>Online pooja services that have already commenced (applicable once the Online Pooja service launches)</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Refund Process</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Refund Process & Pickup</h2>
             <ol className="list-decimal pl-6 space-y-2">
-              <li>Contact our support team within 7 days of delivery</li>
-              <li>Provide order number and reason for refund</li>
-              <li>Submit photos if claiming damage or wrong product</li>
-              <li>Our team will review and approve eligible refunds within 2-3 business days</li>
-              <li>Refund will be processed to original payment method within 7-10 business days</li>
+              <li>Contact our support team within 7 days of delivery via WhatsApp or email hello@aasthasupports.com with your order ID</li>
+              <li>We will arrange a free reverse pickup from your address (where serviceable)</li>
+              <li>Once the product is received and inspected at our facility, your refund is approved within 48 hours</li>
+              <li>Refund will be credited to your original payment method (or UPI/bank transfer for COD orders) within 5–7 business days</li>
             </ol>
           </section>
 
           <section>
-            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Pooja Booking Refunds</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Pooja Booking Cancellations</h2>
+            <p className="text-xs text-gold font-medium mb-2">✦ Applicable once the Online Pooja service launches</p>
             <ul className="list-disc pl-6 space-y-1">
-              <li><strong>24+ hours before:</strong> 100% refund</li>
-              <li><strong>12-24 hours before:</strong> 50% refund</li>
-              <li><strong>Less than 12 hours:</strong> No refund</li>
-              <li>Rescheduling is free if done 24+ hours in advance</li>
+              <li><strong>24+ hours before muhurat:</strong> 100% full refund</li>
+              <li><strong>Within 24 hours of muhurat:</strong> 50% partial refund</li>
+              <li><strong>After ritual has commenced:</strong> Non-refundable</li>
             </ul>
           </section>
 

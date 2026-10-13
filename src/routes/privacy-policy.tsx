@@ -7,8 +7,13 @@ export const Route = createFileRoute("/privacy-policy")({
     meta: [
       { title: "Privacy Policy — Aastha Supports" },
       { name: "description", content: "Privacy policy for Aastha Supports. Learn how we collect, use, and protect your personal information." },
+      { property: "og:title", content: "Privacy Policy — Aastha Supports" },
+      { property: "og:description", content: "Privacy policy for Aastha Supports. Learn how we collect, use, and protect your personal information." },
+      { property: "og:url", content: "https://www.aasthasupports.com/privacy-policy" },
+      { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
       { name: "robots", content: "index, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://www.aasthasupports.com/privacy-policy" }],
   }),
 });
 
@@ -61,7 +66,7 @@ function PrivacyPolicy() {
             <p>We do not sell your personal information. We share data only with:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li>Payment processors (Razorpay)</li>
-              <li>Shipping partners</li>
+              <li>Logistics and delivery partners (Blue Dart, Delhivery, India Post)</li>
               <li>Service providers who assist our operations</li>
               <li>Legal authorities when required by law</li>
             </ul>
@@ -108,12 +113,14 @@ function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Contact Us</h2>
-            <p>For privacy concerns or requests, contact us at:</p>
-            <ul className="list-none space-y-1">
-              <li>Email: hello@aasthasupports.com</li>
-              <li>Phone: +91-82876-70827</li>
-              <li>Address: Mampur bana, Lucknow, Uttar Pradesh 226201, India</li>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Contact Us & Grievance Redressal</h2>
+            <p>For privacy inquiries, data requests, or complaints, contact our Grievance Officer:</p>
+            <ul className="list-none space-y-1 mt-2">
+              <li><span className="font-semibold text-maroon-deep">Officer:</span> Grievance Redressal Officer, Aastha Supports</li>
+              <li><span className="font-semibold text-maroon-deep">Email:</span> grievance@aasthasupports.com / hello@aasthasupports.com</li>
+              <li><span className="font-semibold text-maroon-deep">Phone:</span> +91-82876-70827 (Mon–Sat, 9am–8pm IST)</li>
+              <li><span className="font-semibold text-maroon-deep">Address:</span> Mampur bana, Lucknow, Uttar Pradesh 226201, India</li>
+              <li className="text-xs text-muted-foreground pt-1">Complaints are acknowledged within 48 hours and resolved within 30 days as per IT Act 2000.</li>
             </ul>
           </section>
         </div>

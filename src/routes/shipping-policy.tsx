@@ -6,9 +6,14 @@ export const Route = createFileRoute("/shipping-policy")({
   head: () => ({
     meta: [
       { title: "Shipping Policy — Aastha Supports" },
-      { name: "description", content: "Shipping and delivery information for Aastha Supports orders." },
+      { name: "description", content: "Shipping and delivery information for Aastha Supports orders across India. Free shipping above ₹999." },
+      { property: "og:title", content: "Shipping Policy — Aastha Supports" },
+      { property: "og:description", content: "Shipping and delivery information for Aastha Supports orders across India. Free shipping above ₹999." },
+      { property: "og:url", content: "https://www.aasthasupports.com/shipping-policy" },
+      { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
       { name: "robots", content: "index, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://www.aasthasupports.com/shipping-policy" }],
   }),
 });
 
@@ -21,9 +26,9 @@ function ShippingPolicy() {
 
         <div className="prose prose-stone max-w-none space-y-6">
           <section>
-            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Shipping Coverage</h2>
+            <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Shipping Coverage & Partners</h2>
             <p>
-              We ship to all locations across India. International shipping is available on request for select products.
+              We ship to serviceable locations across India in partnership with reputable logistics carriers including Blue Dart, Delhivery, and India Post.
             </p>
           </section>
 
@@ -31,21 +36,19 @@ function ShippingPolicy() {
             <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Delivery Timeline</h2>
             <ul className="list-disc pl-6 space-y-1">
               <li><strong>Metro Cities:</strong> 3-5 business days</li>
-              <li><strong>Other Cities:</strong> 5-7 business days</li>
+              <li><strong>Tier-2 & Tier-3 Cities:</strong> 5-7 business days</li>
               <li><strong>Remote Areas:</strong> 7-10 business days</li>
-              <li><strong>International:</strong> 10-15 business days</li>
             </ul>
             <p className="mt-3 text-sm text-muted-foreground">
-              Note: Delivery times are estimates and may vary due to courier delays, weather conditions, or other unforeseen circumstances.
+              Note: Delivery times are estimates from the date of dispatch and may vary slightly due to local transit factors or weather conditions.
             </p>
           </section>
 
           <section>
             <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Shipping Charges</h2>
             <ul className="list-disc pl-6 space-y-1">
-              <li>Orders above ₹999: <strong>Free Shipping</strong></li>
-              <li>Orders below ₹999: ₹50-150 based on weight and location</li>
-              <li>Express delivery available at additional cost</li>
+              <li>Orders of ₹999 or more: <strong>FREE Pan-India Shipping</strong></li>
+              <li>Orders below ₹999: Flat fee of <strong>₹99</strong></li>
             </ul>
           </section>
 

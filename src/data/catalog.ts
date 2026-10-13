@@ -36,7 +36,7 @@ export const categories: Category[] = [
     slug: "rudraksha",
     name: "Rudraksha",
     tagline:
-      "Certified Nepali & Indonesian rudraksha — premium collector beads energised by Vedic pandits.",
+      "Nepali & Indonesian rudraksha — certification available on request, energised by Vedic pandits.",
     hero: rudrakshaBanner,
     sections: [
       {
@@ -151,7 +151,7 @@ export const categories: Category[] = [
   {
     slug: "bracelets",
     name: "Bracelets",
-    tagline: "Energised crystal & rudraksha bracelets for healing and protection.",
+    tagline: "Energised crystal & rudraksha bracelets for spiritual support and protection.",
     hero: braceletBanner,
     sections: [
       {
@@ -200,7 +200,7 @@ export const categories: Category[] = [
   {
     slug: "gemstones",
     name: "Gemstones",
-    tagline: "Lab-certified Navratna gemstones with astrological consultation.",
+    tagline: "Navratna gemstones with certification on request and astrological consultation.",
     hero: gemstonesBanner,
     sections: [
       {
@@ -287,7 +287,7 @@ export const categories: Category[] = [
   {
     slug: "online-pooja",
     name: "Online Pooja",
-    tagline: "Sacred rituals performed by Vedic pandits — live from Kashi, Ujjain & Haridwar.",
+    tagline: "Sacred rituals by Vedic pandits — launching soon.",
     hero: poojaImg,
     sections: [
       {

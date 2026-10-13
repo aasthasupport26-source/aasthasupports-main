@@ -30,15 +30,18 @@ export const Route = createFileRoute("/shop")({
   head: () => {
     const title = "Shop All — Rudraksha, Mala, Gemstones | Aastha Supports";
     const desc =
-      "Browse all certified rudraksha, malas, bracelets, gemstones & yantras. Energised by Vedic pandits.";
+      "Browse rudraksha, malas, bracelets, gemstones & yantras. Certification available on request. Energised by Vedic pandits.";
     const url = "https://www.aasthasupports.com/shop";
     return {
       meta: [
         { title },
         { name: "description", content: desc },
+        { name: "author", content: "Aastha Supports" },
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
+        { property: "og:site_name", content: "Aastha Supports" },
         { property: "og:url", content: url },
+        { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
       ],
       links: [{ rel: "canonical", href: url }],
     };

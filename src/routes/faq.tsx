@@ -24,6 +24,7 @@ export const Route = createFileRoute("/faq")({
           "Answers on rudraksha, gemstones, online pooja, shipping, returns and Vedic certification.",
       },
       { property: "og:url", content: "https://www.aasthasupports.com/faq" },
+      { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://www.aasthasupports.com/faq" }],
     scripts: [
@@ -52,15 +53,15 @@ const faqCategories = [
     items: [
       {
         q: "How do I place an order on Aastha Supports?",
-        a: "Simply browse our categories, select your desired product or pooja service, add to cart, and proceed to checkout. We accept UPI, Credit/Debit cards, Net Banking, and Cash on Delivery for orders above ₹999.",
+        a: "Simply browse our categories, select your desired product, add to cart, and proceed to checkout. We accept UPI, Credit/Debit cards, Net Banking, and Cash on Delivery for orders above ₹999.",
       },
       {
         q: "Is Cash on Delivery available?",
-        a: "Yes, COD is available for orders above ₹999 across most pin codes in India. For spiritual services like Online Pooja, full advance payment is required to confirm the booking.",
+        a: "Yes, COD is available for physical product orders above ₹999 across most pin codes in India.",
       },
       {
         q: "Can I modify or cancel my order after placing it?",
-        a: "Orders can be modified or cancelled within 2 hours of placement, provided they haven't been dispatched or the pooja hasn't started. Contact our care team immediately at hello@aasthasupports.com or WhatsApp us.",
+        a: "Orders can be modified or cancelled within 2 hours of placement, provided they haven't been dispatched. Contact our care team immediately at hello@aasthasupports.com or WhatsApp us.",
       },
     ],
   },
@@ -69,19 +70,19 @@ const faqCategories = [
     items: [
       {
         q: "How do I know my rudraksha is authentic?",
-        a: "Every rudraksha comes with a Lab Testing Certificate (IGL & GJSPC Certified — on request). We also provide X-ray verification on request showing the internal chamber (mukhi) count. Additionally, each bead is energised through traditional Vedic rituals.",
+        a: "Every rudraksha comes with authenticity assurance. Lab Testing Certification (IGL / GJSPC) and X-ray verification are available on request to verify the internal chamber (mukhi) count. Additionally, each bead is energised through traditional Vedic rituals.",
       },
       {
         q: "What is the difference between Indonesian and Nepali rudraksha?",
-        a: "Nepali rudraksha are generally larger, have deeper grooves (mukhi lines), and are considered more potent for spiritual practices. Indonesian rudraksha are smaller, lighter, and more affordable while still being authentic. Both are lab-certified by us.",
+        a: "Nepali rudraksha are generally larger, have deeper grooves (mukhi lines), and are considered more potent for spiritual practices. Indonesian rudraksha are smaller, lighter, and more affordable while still being authentic. Certification is available on request for both varieties.",
       },
       {
         q: "How do I choose the right gemstone for myself?",
-        a: "We offer a free astrological consultation with our in-house Vedic astrologers. Share your birth details (date, time, place) and our experts will recommend the most suitable Navratna gemstone based on your kundali and planetary positions.",
+        a: "We offer astrological guidance with our in-house Vedic astrologers. Share your birth details (date, time, place) and our experts will suggest the most suitable Navratna gemstone based on your kundali and planetary positions.",
       },
       {
         q: "Do gemstones come with a lab certificate?",
-        a: "Yes, every gemstone (Manik, Moti, Moonga, Panna, Pukhraj, Neelam, Gomed, Lehsunia) comes with a certificate of authenticity from a recognized gemological laboratory. Certificate details are mentioned on the product page.",
+        a: "Lab testing certification is available on request from recognized gemological laboratories for every gemstone. Every gem is verified for natural origin and purity before dispatch.",
       },
     ],
   },
@@ -90,15 +91,15 @@ const faqCategories = [
     items: [
       {
         q: "How does Online Pooja work?",
-        a: "Once you book a pooja, our learned pandits perform the sacred ritual on the auspicious date you choose. You receive a live video link, photos, and a sankalpa video recording. Prasad is shipped to your address within 7 days.",
+        a: "This service is launching soon. Once live, learned pandits will perform sacred rituals on auspicious muhurats. You will receive a live video link, sankalpa darshan, and sanctified prasad delivered to your home.",
       },
       {
         q: "Can I choose the date and time for my pooja?",
-        a: "Absolutely. During checkout, you can select your preferred muhurat. Our astrologer team also suggests the most auspicious date based on your nakshatra if you need guidance.",
+        a: "This service is launching soon. Once available, you will be able to select your preferred auspicious date and time, with personalized guidance from our Vedic pandits.",
       },
       {
         q: "What is included in the pooja package?",
-        a: "Every online pooja includes: live video darshan, sankalpa with your name and gotra, complete ritual performance by learned pandits, prasad dispatch, and a digital certificate of completion. Some premium packages include additional havan and daan.",
+        a: "This service is launching soon. Each pooja package will include live sankalpa with your name and gotra, complete mantra chanting, rituals by Vedic scholars, and prasad dispatch.",
       },
     ],
   },
@@ -107,7 +108,7 @@ const faqCategories = [
     items: [
       {
         q: "How long does delivery take?",
-        a: "We dispatch within 24–48 hours of order confirmation. Delivery time is 3–5 business days for metro cities and 5–7 days for tier-2/3 locations. Online pooja prasad ships within 7 days after ritual completion.",
+        a: "We dispatch within 24–48 hours of order confirmation. Delivery time is 3–5 business days for metro cities and 5–7 days for tier-2/3 locations.",
       },
       {
         q: "Is shipping free?",
@@ -115,7 +116,7 @@ const faqCategories = [
       },
       {
         q: "How are spiritual products packed?",
-        a: "Products are packed in sacred, tamper-proof packaging with cushioned interiors. Rudraksha and gemstones come in a velvet box with the certificate. The package is blessed with Ganga jal before dispatch.",
+        a: "Products are packed in sacred, tamper-proof packaging with cushioned interiors. Rudraksha and gemstones come in a secure velvet pouch or box, treated with respect and purity before dispatch.",
       },
     ],
   },
@@ -124,32 +125,32 @@ const faqCategories = [
     items: [
       {
         q: "What is your return policy?",
-        a: "We offer a 7-day no-questions-asked return policy for all physical products. Items must be unused and in original packaging with the certificate intact. Online pooja services are non-refundable once the ritual has begun, but can be rescheduled.",
+        a: "We offer a 7-day easy return policy for all physical products. Items must be unused, in original packaging, with all tags and certificates intact. (Online pooja policies apply once the service launches.)",
       },
       {
         q: "How do I initiate a return?",
-        a: "Contact our support team via WhatsApp or email hello@aasthasupports.com with your order ID. We will arrange a reverse pickup within 48 hours. Refunds are processed to your original payment method within 5–7 business days after product receipt.",
+        a: "Contact our support team via WhatsApp or email hello@aasthasupports.com with your order ID. We will arrange a reverse pickup from your address (where serviceable). Refunds are processed to your original payment method within 5–7 business days after product receipt.",
       },
       {
         q: "What if I receive a damaged or wrong product?",
-        a: "In the rare case of damage or incorrect delivery, we offer instant replacement or full refund — your choice. Please share photos within 24 hours of delivery for faster resolution.",
+        a: "In the rare case of damage or incorrect delivery, we offer an immediate replacement or full refund — your choice. Please share photos within 24 hours of delivery for faster resolution.",
       },
     ],
   },
   {
-    title: "Vedic Certification & Energisation",
+    title: "Vedic Consecration & Energisation",
     items: [
       {
         q: "What does 'Vedic Energised' mean?",
-        a: "Vedic Energised means the product has been abhimantrit (ritually consecrated) by learned pandits through specific mantras and havan. This process is believed to activate the spiritual energy of the item, making it more effective for the wearer.",
+        a: "Vedic Energised means the product has been abhimantrit (ritually consecrated) by learned pandits through specific mantras and traditional rituals. This process invokes divine blessings and positive spiritual energy before dispatch.",
       },
       {
         q: "Can I get my own rudraksha energised by Aastha Supports?",
-        a: "Yes, we offer a standalone Vedic Energisation service. Our pandits will perform traditional Vedic rituals and return it with a completion certificate.",
+        a: "Yes, we offer Vedic Energisation assistance. Our pandits perform traditional Vedic rituals with devotion and reverence.",
       },
       {
         q: "Are your pandits qualified?",
-        a: "All our pandits are verified scholars with degrees in Shastri/Acharya from recognized Vedic universities like Sampurnanand Sanskrit Vishwavidyalaya. They have years of experience in performing Vedic rituals.",
+        a: "All our pandits are verified scholars with degrees in Shastri/Acharya from recognized Vedic institutions. They have years of experience in performing authentic Vedic rituals.",
       },
     ],
   },

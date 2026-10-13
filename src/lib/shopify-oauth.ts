@@ -36,7 +36,7 @@ export function isAllowedRedirectUri(uri: string): boolean {
         parsed.hostname.endsWith(".vercel.app") ||
         parsed.hostname === "localhost" ||
         parsed.hostname === "127.0.0.1" ||
-        parsed.hostname.includes("aasthasupport")
+        parsed.hostname.includes("aasthasupports")
       ) {
         return true;
       }

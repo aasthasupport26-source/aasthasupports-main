@@ -15,7 +15,7 @@ import {
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 const trustItems = [
-  { icon: ShieldCheck, title: "100% Authentic", desc: "Lab certified products" },
+  { icon: ShieldCheck, title: "100% Authentic", desc: "Certification on request" },
   { icon: Flame, title: "Vedic Energised", desc: "By learned pandits" },
   { icon: Truck, title: "Pan India Delivery", desc: "Free above ₹999" },
   { icon: RotateCcw, title: "7 Day Returns", desc: "Easy refund policy" },
@@ -46,7 +46,7 @@ export function Footer() {
           <div className="md:col-span-4">
             <Logo variant="light" />
             <p className="mt-5 text-sm leading-relaxed text-cream/80 max-w-sm">
-              Aastha Supports brings you authentic, energised spiritual products and live Vedic
+              Aastha Supports brings you authentic, energised spiritual products and, soon, live Vedic
               rituals — honouring the divine traditions of Sanatan Dharma. Every product is chosen,
               blessed and delivered with shraddha.
             </p>
@@ -161,6 +161,16 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link to="/shipping-policy" className="hover:text-gold">
+                  Shipping Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/refund-policy" className="hover:text-gold">
+                  Refund & Cancellation
+                </Link>
+              </li>
+              <li>
                 <Link to="/privacy-policy" className="hover:text-gold">
                   Privacy Policy
                 </Link>
@@ -198,7 +208,7 @@ export function Footer() {
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-gold shrink-0" />
                 <a href="tel:+918287670827" className="hover:text-gold">
-                  +91 82876 70827
+                  +91 82876 70827 (Mon–Sat 9am–8pm IST)
                 </a>
               </li>
               <li className="flex items-center gap-2">
@@ -227,14 +237,29 @@ export function Footer() {
                   hello@aasthasupports.com
                 </a>
               </li>
+              <li className="pt-2 text-xs text-cream/70 border-t border-gold/15">
+                <p className="font-medium text-cream">Grievance Officer:</p>
+                <p>Nodal Grievance Desk, Aastha Supports</p>
+                <a href="mailto:grievance@aasthasupports.com" className="text-gold hover:underline">
+                  grievance@aasthasupports.com
+                </a>
+              </li>
             </ul>
           </div>
+        </div>
+
+        {/* Product Disclaimer */}
+        <div className="mt-10 pt-6 border-t border-gold/15 text-xs text-cream/60 text-center max-w-3xl mx-auto leading-relaxed">
+          <p>
+            Disclaimer: Spiritual products are for faith and wellness support, not a substitute for
+            medical diagnosis or professional treatment. Individual spiritual experiences may vary.
+          </p>
         </div>
       </div>
 
       <div className="border-t border-gold/20">
         <div className="container mx-auto px-4 py-5 flex flex-col md:flex-row items-center justify-between text-xs text-cream/60 gap-2">
-          <p>© {new Date().getFullYear()} Aastha Supports · सर्व अधिकार सुरक्षित</p>
+          <p>© {new Date().getFullYear()} Aastha Supports · सर्वाधिकार सुरक्षित</p>
           <p className="font-devanagari text-gold-soft">|| ॐ नमः शिवाय ||</p>
         </div>
       </div>

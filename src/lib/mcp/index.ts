@@ -4,7 +4,7 @@ import { listProducts } from "./tools/list-products";
 import { getProduct } from "./tools/get-product";
 
 export default defineMcp({
-  name: "aastha-support-mcp",
+  name: "aastha-supports-mcp",
   title: "Aastha Supports MCP",
   version: "0.1.0",
   instructions:

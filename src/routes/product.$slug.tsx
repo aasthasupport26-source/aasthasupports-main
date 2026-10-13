@@ -49,7 +49,7 @@ export const Route = createFileRoute("/product/$slug")({
     const product = loaderData?.product;
     const title = product ? `${product.name} — Aastha Supports` : `Product — Aastha Supports`;
     const description =
-      product?.description?.slice(0, 160) || "Authentic certified spiritual products";
+      product?.description?.slice(0, 160) || "Authentic Vedic spiritual products. Certification available on request.";
     const url = `https://www.aasthasupports.com/product/${loaderData?.slug}`;
     const image = product?.images?.[0] || "https://www.aasthasupports.com/og-image.jpg";
 
@@ -79,6 +79,10 @@ export const Route = createFileRoute("/product/$slug")({
                 name: product.name,
                 description: product.description,
                 image: product.images,
+                brand: {
+                  "@type": "Brand",
+                  name: "Aastha Supports",
+                },
                 offers: {
                   "@type": "Offer",
                   price: product.price,
@@ -86,6 +90,10 @@ export const Route = createFileRoute("/product/$slug")({
                   availability: product.variants?.[0]?.available
                     ? "https://schema.org/InStock"
                     : "https://schema.org/OutOfStock",
+                  seller: {
+                    "@type": "Organization",
+                    name: "Aastha Supports",
+                  },
                 },
               }),
             },
@@ -712,6 +720,7 @@ function ProductPage() {
                 </span>
               )}
             </div>
+            <p className="text-[11px] text-muted-foreground mt-0.5">MRP (inclusive of all taxes) · Free shipping above ₹999</p>
 
             {/* Variant selector if multiple variants exist */}
             {product.variants && product.variants.length > 1 && (
@@ -949,6 +958,40 @@ function ProductPage() {
                   We provide the complete energisation and usage guide with every order. Follow the
                   included instructions for maximum spiritual benefits.
                 </p>
+              </div>
+
+              {/* Product Specifications & Regulatory Details (D-06) */}
+              <div className="border-t border-gold/20 pt-4">
+                <h3 className="font-display text-lg text-maroon-deep">Product Details & Specifications</h3>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                  <div className="p-2.5 rounded-lg bg-cream/60 border border-gold/20">
+                    <span className="text-muted-foreground block text-[10px] uppercase tracking-wider">Country of Origin</span>
+                    <span className="font-semibold text-maroon-deep">
+                      {product.name?.toLowerCase().includes("nepal") ? "Nepal" : product.name?.toLowerCase().includes("indonesia") ? "Indonesia" : "India"}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-cream/60 border border-gold/20">
+                    <span className="text-muted-foreground block text-[10px] uppercase tracking-wider">Vedic Certification</span>
+                    <span className="font-semibold text-maroon-deep">Available on Request</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-cream/60 border border-gold/20">
+                    <span className="text-muted-foreground block text-[10px] uppercase tracking-wider">Consecration (Pran Pratishtha)</span>
+                    <span className="font-semibold text-maroon-deep">Energised by Vedic Pandits</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-cream/60 border border-gold/20">
+                    <span className="text-muted-foreground block text-[10px] uppercase tracking-wider">Package Contents</span>
+                    <span className="font-semibold text-maroon-deep">Sacred Item, Storage Pouch, Consecration Guide</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Spiritual / Medical Disclaimer (C-29) */}
+              <div className="border-t border-gold/20 pt-4">
+                <div className="p-3 bg-amber-50/70 border border-gold/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    <strong className="text-maroon-deep font-semibold">Spiritual Disclaimer:</strong> Spiritual products are for faith and wellness support, not a substitute for medical treatment. Results vary based on individual belief and practice.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

@@ -17,6 +17,7 @@ export const Route = createFileRoute("/returns-policy")({
         content: "7-day easy returns. Free shipping above ₹999. Read our complete policies.",
       },
       { property: "og:url", content: "https://www.aasthasupports.com/returns-policy" },
+      { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://www.aasthasupports.com/returns-policy" }],
   }),
@@ -30,12 +31,12 @@ const policySections = [
     title: "Return & Refund Policy",
     content: [
       {
-        heading: "7-Day No-Questions-Asked Returns",
+        heading: "7-Day Easy Returns",
         text: "We accept returns within 7 days of delivery for all physical products (rudraksha, malas, bracelets, gemstones, yantras). The product must be unused, in original packaging, and include all certificates and tags.",
       },
       {
         heading: "How to Return",
-        text: "Contact us via WhatsApp or email hello@aasthasupports.com with your order ID. We will arrange a free reverse pickup from your address. Once the product is received and inspected, your refund is initiated within 48 hours.",
+        text: "Contact us via WhatsApp or email hello@aasthasupports.com with your order ID. We will arrange a free reverse pickup from your address (where serviceable). Once the product is received and inspected, your refund is initiated within 48 hours.",
       },
       {
         heading: "Refund Timeline",
@@ -43,7 +44,7 @@ const policySections = [
       },
       {
         heading: "Non-Returnable Items",
-        text: "Online pooja services that have already commenced, prasad after dispatch, personalised/energised items where the customer name has been inscribed, and items damaged due to customer misuse.",
+        text: "Online pooja services that have already commenced (applicable once the Online Pooja service launches), prasad after dispatch, personalised/energised items where the customer name has been inscribed, and items damaged due to customer misuse.",
       },
     ],
   },
@@ -81,7 +82,7 @@ const policySections = [
       },
       {
         heading: "Pooja Booking Cancellation",
-        text: "Online pooja bookings can be cancelled up to 24 hours before the scheduled muhurat for a full refund. Cancellations within 24 hours receive a 50% refund. No refund if the ritual has already begun.",
+        text: "Online pooja bookings can be cancelled up to 24 hours before the scheduled muhurat for a full refund. Cancellations within 24 hours receive a 50% refund. No refund if the ritual has already begun. (Applicable once the Online Pooja service launches.)",
       },
       {
         heading: "Failed Delivery",
@@ -108,7 +109,7 @@ const policySections = [
       },
       {
         heading: "Third Parties",
-        text: "We do not sell or rent your personal data. We only share delivery details with our logistics partners (Blue Dart, Delhivery) and payment data with Razorpay.",
+        text: "We do not sell or rent your personal data. We only share delivery details with our logistics partners (Blue Dart, Delhivery, India Post) and payment data with Razorpay.",
       },
     ],
   },
@@ -123,7 +124,7 @@ const policySections = [
       },
       {
         heading: "Authenticity Guarantee",
-        text: "Every product is sourced from verified origins and lab-tested. In the rare case of a discrepancy, we offer immediate replacement or full refund.",
+        text: "Every product is sourced from verified origins. Lab testing and certification are available on request. In the rare case of a discrepancy, we offer immediate replacement or full refund.",
       },
       {
         heading: "Intellectual Property",
@@ -139,9 +140,9 @@ const policySections = [
 
 const trustHighlights = [
   { icon: ShieldCheck, title: "Secure Checkout", desc: "SSL encrypted payments" },
-  { icon: PackageCheck, title: "Insured Delivery", desc: "Every package insured" },
-  { icon: Clock, title: "24/7 Support", desc: "WhatsApp & call support" },
-  { icon: RotateCcw, title: "7-Day Returns", desc: "No questions asked" },
+  { icon: PackageCheck, title: "Secure Packaging", desc: "Tracked delivery" },
+  { icon: Clock, title: "Dedicated Support", desc: "Mon–Sat 9am–8pm IST" },
+  { icon: RotateCcw, title: "7-Day Returns", desc: "Easy returns on unused items" },
 ];
 
 function ReturnsPolicyPage() {
@@ -217,8 +218,7 @@ function ReturnsPolicyPage() {
         <div className="container mx-auto px-4 text-center max-w-2xl">
           <h2 className="font-sans font-bold text-2xl md:text-3xl tracking-tight">Need help with an order?</h2>
           <p className="mt-4 text-cream/80">
-            Our support team is available 24/7. Reach out via WhatsApp, email, or phone — we
-            typically respond within minutes.
+            Support: Mon–Sat, 9am–8pm IST (WhatsApp, call, email). WhatsApp replies are quick; email replies within 24 hours.
           </p>
           <div className="mt-8 flex flex-wrap gap-3 justify-center">
             <a

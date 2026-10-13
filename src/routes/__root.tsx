@@ -27,12 +27,20 @@ function NotFoundComponent() {
         <p className="mt-3 text-sm text-muted-foreground">
           The page you are looking for doesn't exist or has been moved.
         </p>
-        <Link
-          to="/"
-          className="inline-flex mt-6 bg-royal text-cream px-6 py-3 rounded-md text-xs tracking-widest uppercase hover:opacity-90 transition shadow-royal"
-        >
-          Return to Home
-        </Link>
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <Link
+            to="/"
+            className="inline-flex bg-royal text-cream px-6 py-3 rounded-md text-xs tracking-widest uppercase hover:opacity-90 transition shadow-royal"
+          >
+            Return to Home
+          </Link>
+          <Link
+            to="/shop"
+            className="inline-flex border border-gold/40 text-maroon-deep px-6 py-3 rounded-md text-xs tracking-widest uppercase hover:bg-cream transition"
+          >
+            Explore Shop
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -94,11 +102,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Aastha Supports — Rudraksha, Gemstones & Online Pooja" },
+      { title: "Aastha Supports — Rudraksha, Gemstones & Spiritual Collections" },
       {
         name: "description",
         content:
-          "Certified rudraksha, gemstones, malas, bracelets, yantras and live Vedic poojas — energised by learned pandits. Pan India delivery.",
+          "Authentic rudraksha, gemstones, malas, bracelets, and yantras — energised by learned Vedic pandits. Certification available on request. Pan India delivery.",
       },
       { name: "author", content: "Aastha Supports" },
       { property: "og:site_name", content: "Aastha Supports" },
@@ -108,6 +116,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "manifest", href: "/manifest.json" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://checkout.razorpay.com" },
@@ -127,14 +136,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           url: "https://www.aasthasupports.com",
           logo: "https://www.aasthasupports.com/logo.png",
           description:
-            "Authentic, certified, Vedic-energised rudraksha, gemstones, malas, bracelets, yantras and live online poojas.",
+            "Authentic, Vedic-energised rudraksha, gemstones, malas, bracelets, and yantras. Certification available on request.",
           address: {
             "@type": "PostalAddress",
             streetAddress: "Mampur bana",
             addressLocality: "Lucknow",
             addressRegion: "Uttar Pradesh",
             postalCode: "226201",
-            addressCountry: "IN",
+            addressCountry: "India",
           },
           contactPoint: {
             "@type": "ContactPoint",

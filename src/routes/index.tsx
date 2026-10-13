@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Certified rudraksha, gems, malas, bracelets and yantras — energised through traditional Vedic rituals.",
+          "Rudraksha, gems, malas, bracelets and yantras — certification available on request, energised through traditional Vedic rituals.",
       },
       { property: "og:url", content: "https://www.aasthasupports.com/" },
       { property: "og:image", content: "https://www.aasthasupports.com/og-image.jpg" },
@@ -73,8 +73,8 @@ function HomePage() {
             </h1>
             <p className="font-devanagari text-gold-soft text-2xl mt-4">|| असतो मा सद्गमय ||</p>
             <p className="mt-6 text-cream/85 text-lg max-w-xl leading-relaxed">
-              Authentic, certified, and Vedic-energised spiritual products — rudraksha, gemstones,
-              malas, bracelets and yantras.
+              Authentic and Vedic-energised spiritual products — rudraksha, gemstones,
+              malas, bracelets and yantras. Certification available on request.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -114,8 +114,8 @@ function HomePage() {
             </h2>
             <div className="divider-gold w-32 mx-auto mt-5" />
             <p className="mt-5 text-muted-foreground">
-              Each product is hand-picked, lab-certified, and energised through Vedic rituals before
-              reaching you.
+              Each product is hand-picked and energised through Vedic rituals before
+              reaching you. Certification available on request.
             </p>
           </div>
 
@@ -138,6 +138,11 @@ function HomePage() {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                 </div>
+                {cat.slug === "online-pooja" && (
+                  <span className="absolute top-4 right-4 bg-maroon-deep/90 text-gold text-xs px-3 py-1 rounded-full border border-gold/40 font-medium tracking-wider uppercase backdrop-blur-sm z-10">
+                    Coming Soon
+                  </span>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-maroon-deep via-maroon-deep/50 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
                   <p className="text-gold text-[10px] tracking-[0.35em] uppercase">Collection</p>
@@ -171,12 +176,12 @@ function HomePage() {
             {[
               {
                 title: "Vedic Authenticity",
-                desc: "Every product includes available origin and certification details so you can make an informed choice.",
+                desc: "Every product is sourced from verified origins. Quality-checked and certification available on request.",
                 num: "01",
               },
               {
                 title: "Energised by Pandits",
-                desc: "Energised Through Traditional Vedic Rituals by learned pandits before dispatch.",
+                desc: "Energised through traditional Vedic rituals by learned pandits before dispatch.",
                 num: "02",
               },
               {
