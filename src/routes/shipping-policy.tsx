@@ -5,8 +5,8 @@ export const Route = createFileRoute("/shipping-policy")({
   component: ShippingPolicy,
   head: () => ({
     meta: [
-      { title: "Shipping Policy — Aastha Support" },
-      { name: "description", content: "Shipping and delivery information for Aastha Support orders." },
+      { title: "Shipping Policy — Aastha Supports" },
+      { name: "description", content: "Shipping and delivery information for Aastha Supports orders." },
       { name: "robots", content: "index, follow" },
     ],
   }),

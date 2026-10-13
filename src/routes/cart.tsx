@@ -14,7 +14,7 @@ export const Route = createFileRoute("/cart")({
   }),
   head: () => ({
     meta: [
-      { title: "Your Cart — Aastha Support" },
+      { title: "Your Cart — Aastha Supports" },
       { name: "description", content: "Review your sacred items before checkout." },
       { name: "robots", content: "noindex" },
     ],

@@ -273,7 +273,7 @@ Completed with input: const routes=['/product/rudraksha','/product/mala','/produ
 
 5. **Incorrect Open Graph image domain**
    - Broken requests target:
-     `https://aasthasupport.com/og-image.jpg`
+    `https://aasthasupports.com/og-image.jpg`
    - The live site uses `aasthasupports.com`; the missing `s` causes `ERR_NAME_NOT_RESOLVED`.
 
 ### Passed Checks

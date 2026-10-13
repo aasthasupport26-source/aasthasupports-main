@@ -11,13 +11,13 @@ import { HelpCircle } from "lucide-react";
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "FAQ — Aastha Support" },
+      { title: "FAQ — Aastha Supports" },
       {
         name: "description",
         content:
-          "Find answers to frequently asked questions about rudraksha, gemstones, online pooja, shipping, returns and Vedic certification at Aastha Support.",
+          "Find answers to frequently asked questions about rudraksha, gemstones, online pooja, shipping, returns and Vedic certification at Aastha Supports.",
       },
-      { property: "og:title", content: "FAQ — Aastha Support" },
+      { property: "og:title", content: "FAQ — Aastha Supports" },
       {
         property: "og:description",
         content:
@@ -51,7 +51,7 @@ const faqCategories = [
     title: "Orders & Payments",
     items: [
       {
-        q: "How do I place an order on Aastha Support?",
+        q: "How do I place an order on Aastha Supports?",
         a: "Simply browse our categories, select your desired product or pooja service, add to cart, and proceed to checkout. We accept UPI, Credit/Debit cards, Net Banking, and Cash on Delivery for orders above ₹999.",
       },
       {
@@ -144,7 +144,7 @@ const faqCategories = [
         a: "Vedic Energised means the product has been abhimantrit (ritually consecrated) by learned pandits through specific mantras and havan. This process is believed to activate the spiritual energy of the item, making it more effective for the wearer.",
       },
       {
-        q: "Can I get my own rudraksha energised by Aastha Support?",
+        q: "Can I get my own rudraksha energised by Aastha Supports?",
         a: "Yes, we offer a standalone Vedic Energisation service. Our pandits will perform traditional Vedic rituals and return it with a completion certificate.",
       },
       {

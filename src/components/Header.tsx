@@ -57,23 +57,23 @@ export function Header() {
               {categories
                 .filter((cat) => cat.slug !== "online-pooja")
                 .map((cat) => (
-                <div
-                  key={cat.slug}
-                  className="relative h-full flex items-center cursor-pointer"
-                  onMouseEnter={() => setUi((prev) => ({ ...prev, openSlug: cat.slug }))}
-                >
-                  <Link
-                    to="/category/$slug"
-                    params={{ slug: cat.slug }}
-                    className="px-2.5 xl:px-3 py-2.5 text-[12px] xl:text-[13px] tracking-widest uppercase text-cream/95 hover:text-gold transition-colors font-medium relative whitespace-nowrap flex items-center gap-1.5"
+                  <div
+                    key={cat.slug}
+                    className="relative h-full flex items-center cursor-pointer"
+                    onMouseEnter={() => setUi((prev) => ({ ...prev, openSlug: cat.slug }))}
                   >
-                    <span>{cat.name}</span>
-                    {ui.openSlug === cat.slug && (
-                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gold" />
-                    )}
-                  </Link>
-                </div>
-              ))}
+                    <Link
+                      to="/category/$slug"
+                      params={{ slug: cat.slug }}
+                      className="px-2.5 xl:px-3 py-2.5 text-[12px] xl:text-[13px] tracking-widest uppercase text-cream/95 hover:text-gold transition-colors font-medium relative whitespace-nowrap flex items-center gap-1.5"
+                    >
+                      <span>{cat.name}</span>
+                      {ui.openSlug === cat.slug && (
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gold" />
+                      )}
+                    </Link>
+                  </div>
+                ))}
             </nav>
 
             <div className="lg:absolute lg:right-0 flex items-center gap-3 flex-shrink-0">
@@ -136,21 +136,16 @@ export function Header() {
             {categories
               .filter((cat) => cat.slug !== "online-pooja")
               .map((cat) => (
-              <Link
-                key={cat.slug}
-                to="/category/$slug"
-                params={{ slug: cat.slug }}
-                onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
-                className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center justify-between"
-              >
-                <span>{cat.name}</span>
-                {cat.slug === "online-pooja" && (
-                  <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider bg-gold/20 text-maroon-deep border border-gold/40 rounded-full uppercase leading-none">
-                    Coming Soon
-                  </span>
-                )}
-              </Link>
-            ))}
+                <Link
+                  key={cat.slug}
+                  to="/category/$slug"
+                  params={{ slug: cat.slug }}
+                  onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
+                  className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center justify-between"
+                >
+                  <span>{cat.name}</span>
+                </Link>
+              ))}
             <Link
               to="/shop"
               onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}

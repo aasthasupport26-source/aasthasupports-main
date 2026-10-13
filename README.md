@@ -1,4 +1,4 @@
-# 🕉️ Aastha Support
+# 🕉️ Aastha Supports
 
 > Authentic, certified, and Vedic-energised spiritual products — rudraksha, gemstones, malas, bracelets, yantras and live online poojas performed by learned pandits.
 
@@ -250,6 +250,6 @@ This project is proprietary and confidential.
 
 ---
 
-**Made with 🙏 and 💻 by Aastha Support Engineering Team**
+**Made with 🙏 and 💻 by Aastha Supports Engineering Team**
 
 **Status:** ✅ Production Ready | **Version:** 1.0.0 | **Tests:** 202 passing

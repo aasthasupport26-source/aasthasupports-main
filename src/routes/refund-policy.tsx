@@ -5,8 +5,8 @@ export const Route = createFileRoute("/refund-policy")({
   component: RefundPolicy,
   head: () => ({
     meta: [
-      { title: "Refund Policy — Aastha Support" },
-      { name: "description", content: "Refund and cancellation policy for Aastha Support." },
+      { title: "Refund Policy — Aastha Supports" },
+      { name: "description", content: "Refund and cancellation policy for Aastha Supports." },
       { name: "robots", content: "index, follow" },
     ],
   }),

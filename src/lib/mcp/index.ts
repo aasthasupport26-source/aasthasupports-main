@@ -5,9 +5,9 @@ import { getProduct } from "./tools/get-product";
 
 export default defineMcp({
   name: "aastha-support-mcp",
-  title: "Aastha Support MCP",
+  title: "Aastha Supports MCP",
   version: "0.1.0",
   instructions:
-    "Public read-only tools for the Aastha Support spiritual store (rudraksha, malas, bracelets, gemstones, yantras, online pooja). Use `list_categories` to see product categories, `list_products` to browse or search the catalog, and `get_product` to fetch full details for a specific product by slug.",
+    "Public read-only tools for the Aastha Supports spiritual store (rudraksha, malas, bracelets, gemstones, yantras, online pooja). Use `list_categories` to see product categories, `list_products` to browse or search the catalog, and `get_product` to fetch full details for a specific product by slug.",
   tools: [listCategories, listProducts, getProduct],
 });

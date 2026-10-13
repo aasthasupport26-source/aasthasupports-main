@@ -18,8 +18,6 @@ function getStoreDomain(): string {
 export function getAllowedRedirectUris(): string[] {
   return [
     process.env.VITE_SHOPIFY_REDIRECT_URI,
-    "https://aasthasupport.com/auth/callback",
-    "https://www.aasthasupport.com/auth/callback",
     "https://aasthasupports.com/auth/callback",
     "https://www.aasthasupports.com/auth/callback",
     "http://localhost:3000/auth/callback",
@@ -53,7 +51,7 @@ export function getOAuthRedirectUri(): string {
     if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
       return `${origin}/auth/callback`;
     }
-    if (origin.includes("aasthasupports.com") || origin.includes("aasthasupport.com")) {
+    if (origin.includes("aasthasupports.com")) {
       return `${origin}/auth/callback`;
     }
     if (import.meta.env.VITE_SHOPIFY_REDIRECT_URI) {

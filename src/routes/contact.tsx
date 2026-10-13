@@ -10,13 +10,13 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — Aastha Support" },
+      { title: "Contact — Aastha Supports" },
       {
         name: "description",
         content:
           "Speak to our Vedic astrologers and customer care team — phone, WhatsApp, email or visit our Lucknow office.",
       },
-      { property: "og:title", content: "Contact — Aastha Support" },
+      { property: "og:title", content: "Contact — Aastha Supports" },
       {
         property: "og:description",
         content: "Speak to our Vedic astrologers and customer care team.",
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/contact")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
-          name: "Aastha Support",
+          name: "Aastha Supports",
           image: "https://www.aasthasupports.com/og-image.jpg",
           url: "https://www.aasthasupports.com/contact",
           telephone: "+91-82876-70827",

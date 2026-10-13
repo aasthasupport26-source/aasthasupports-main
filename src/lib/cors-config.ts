@@ -4,8 +4,6 @@
  */
 
 const ALLOWED_ORIGINS = [
-  'https://www.aasthasupport.com',
-  'https://aasthasupport.com',
   'https://www.aasthasupports.com',
   'https://aasthasupports.com',
   process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : null,

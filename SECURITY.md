@@ -187,4 +187,4 @@ We aim to respond within 48 hours.
 ---
 
 **Last Updated:** 2026-08-31  
-**Maintained By:** Aastha Support Engineering Team
+**Maintained By:** Aastha Supports Engineering Team

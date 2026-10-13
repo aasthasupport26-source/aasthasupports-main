@@ -13,8 +13,8 @@ import { useAuth } from "@/contexts/AuthContext";
 export const Route = createFileRoute("/auth/")({
   head: () => ({
     meta: [
-      { title: "Sign In — Aastha Support" },
-      { name: "description", content: "Sign in to access your Aastha Support account." },
+      { title: "Sign In — Aastha Supports" },
+      { name: "description", content: "Sign in to access your Aastha Supports account." },
     ],
   }),
   validateSearch: (search: Record<string, unknown>): { email?: string } => {

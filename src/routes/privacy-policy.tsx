@@ -5,8 +5,8 @@ export const Route = createFileRoute("/privacy-policy")({
   component: PrivacyPolicy,
   head: () => ({
     meta: [
-      { title: "Privacy Policy — Aastha Support" },
-      { name: "description", content: "Privacy policy for Aastha Support. Learn how we collect, use, and protect your personal information." },
+      { title: "Privacy Policy — Aastha Supports" },
+      { name: "description", content: "Privacy policy for Aastha Supports. Learn how we collect, use, and protect your personal information." },
       { name: "robots", content: "index, follow" },
     ],
   }),
@@ -23,7 +23,7 @@ function PrivacyPolicy() {
           <section>
             <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Introduction</h2>
             <p>
-              Aastha Support ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you use our website and services.
+              Aastha Supports ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you use our website and services.
             </p>
           </section>
 

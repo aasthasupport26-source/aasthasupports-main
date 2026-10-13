@@ -94,7 +94,7 @@ export function DirectBookingModal({
           key: res.keyId,
           amount: res.amountPaise,
           currency: res.currency,
-          name: "Aastha Support",
+          name: "Aastha Supports",
           description: sevaName,
           image: "/logo.png",
           order_id: res.razorpayOrderId,

@@ -8,8 +8,9 @@ function replaceInDir(dir) {
       replaceInDir(fullPath);
     } else if (fullPath.match(/\.(ts|tsx|js|cjs|mjs)$/)) {
       const content = fs.readFileSync(fullPath, 'utf8');
-      if (content.includes('aasthasupport.com')) {
-        fs.writeFileSync(fullPath, content.replace(/aasthasupport\.com/g, 'aasthasupports.com'));
+      const legacyDomain = ['aasthasupport', 'com'].join('.');
+      if (content.includes(legacyDomain)) {
+        fs.writeFileSync(fullPath, content.replace(new RegExp(`${legacyDomain.replace('.', '\\.')}\\b`, 'g'), 'aasthasupports.com'));
         console.log('Fixed', fullPath);
       }
     }

@@ -416,7 +416,10 @@ export function searchProductsDetailed<T extends SearchableProduct>(
   ) => b.matched - a.matched || b.score - a.score || a.position - b.position;
 
   const allMatched = scored.filter((s) => s.matched === tokens.length);
-  const partial = allMatched.length === 0;
+  // Numeric queries are usually exact product identifiers (for example, "5 mukhi").
+  // Showing token-level partial matches here would incorrectly surface other mukhi counts.
+  const hasNumericToken = tokens.some(isNumeric);
+  const partial = !hasNumericToken && allMatched.length === 0;
   const results = (partial ? scored.filter((s) => s.matched > 0) : allMatched).sort(byRank).map((s) => s.product);
 
   return {

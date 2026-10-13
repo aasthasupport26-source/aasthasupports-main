@@ -27,7 +27,7 @@ export function WhatsAppWidget() {
           </button>
           <div className="flex items-center gap-1.5 mb-1 text-emerald-700 font-semibold">
             <WhatsAppIcon className="w-4 h-4 shrink-0" />
-            <span>Aastha Support</span>
+            <span>Aastha Supports</span>
           </div>
           <p className="text-gray-600 leading-relaxed text-[11px]">
             Need Vedic astrological or pooja guidance? Connect with us on WhatsApp!

@@ -1,4 +1,4 @@
-# 🚀 Deployment Guide - Aastha Support
+# 🚀 Deployment Guide - Aastha Supports
 
 ## Pre-Deployment Checklist
 

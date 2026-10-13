@@ -5,13 +5,13 @@ import { ShieldCheck, Truck, RotateCcw, Clock, PackageCheck, Ban, Lock, Globe } 
 export const Route = createFileRoute("/returns-policy")({
   head: () => ({
     meta: [
-      { title: "Returns, Shipping & Policies — Aastha Support" },
+      { title: "Returns, Shipping & Policies — Aastha Supports" },
       {
         name: "description",
         content:
-          "Read Aastha Support's returns, shipping, cancellation, privacy policy and terms of service. 7-day easy returns. Free shipping above ₹999.",
+          "Read Aastha Supports' returns, shipping, cancellation, privacy policy and terms of service. 7-day easy returns. Free shipping above ₹999.",
       },
-      { property: "og:title", content: "Returns, Shipping & Policies — Aastha Support" },
+      { property: "og:title", content: "Returns, Shipping & Policies — Aastha Supports" },
       {
         property: "og:description",
         content: "7-day easy returns. Free shipping above ₹999. Read our complete policies.",
@@ -127,7 +127,7 @@ const policySections = [
       },
       {
         heading: "Intellectual Property",
-        text: "All content, images, and branding on aasthasupports.com are the property of Aastha Support. Unauthorised reproduction is strictly prohibited.",
+        text: "All content, images, and branding on aasthasupports.com are the property of Aastha Supports. Unauthorised reproduction is strictly prohibited.",
       },
       {
         heading: "Governing Law",

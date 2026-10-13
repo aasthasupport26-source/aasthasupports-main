@@ -28,7 +28,7 @@ export const Route = createFileRoute("/shop")({
     };
   },
   head: () => {
-    const title = "Shop All — Rudraksha, Mala, Gemstones | Aastha Support";
+    const title = "Shop All — Rudraksha, Mala, Gemstones | Aastha Supports";
     const desc =
       "Browse all certified rudraksha, malas, bracelets, gemstones & yantras. Energised by Vedic pandits.";
     const url = "https://www.aasthasupports.com/shop";

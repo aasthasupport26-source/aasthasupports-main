@@ -36,7 +36,7 @@ import { Input } from "@/components/ui/input";
 export const Route = createFileRoute("/my-account")({
   head: () => ({
     meta: [
-      { title: "My Profile — Aastha Support" },
+      { title: "My Profile — Aastha Supports" },
       { name: "description", content: "View your profile, bookings, and order history." },
     ],
   }),

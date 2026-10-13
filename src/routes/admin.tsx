@@ -17,7 +17,7 @@ import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
-    meta: [{ title: "Admin — Aastha Support" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Admin — Aastha Supports" }, { name: "robots", content: "noindex" }],
   }),
   component: AdminLayout,
 });

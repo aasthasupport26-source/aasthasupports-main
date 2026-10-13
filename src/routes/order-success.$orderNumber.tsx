@@ -6,7 +6,7 @@ import { useEffect } from "react";
 
 export const Route = createFileRoute("/order-success/$orderNumber")({
   head: () => ({
-    meta: [{ title: "Order Confirmed — Aastha Support" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Order Confirmed — Aastha Supports" }, { name: "robots", content: "noindex" }],
   }),
   component: OrderSuccess,
 });

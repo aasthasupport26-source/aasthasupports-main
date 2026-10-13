@@ -54,8 +54,6 @@ function loadRazorpayScript(): Promise<void> {
     }
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.integrity = "sha384-FYKibI0i7LlLkP0rVALJJqvlvZvbKvNqLqXqKqKqKqKqKqKqKqKqKqKqKqKqKqKq";
-    script.crossOrigin = "anonymous";
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Razorpay SDK failed to load"));
     document.body.appendChild(script);
@@ -200,7 +198,7 @@ export function BookingForm({
           key: res.keyId,
           amount: res.amountPaise,
           currency: res.currency,
-          name: "Aastha Support",
+          name: "Aastha Supports",
           description: `${templeName} — ${pujaName} (${pkg.name})`,
           image: "/logo.png",
           order_id: res.razorpayOrderId,

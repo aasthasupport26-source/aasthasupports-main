@@ -38,14 +38,14 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   console.error(error);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       // Auto-recover only from stale-deploy chunk load failures; every other
       // error gets the error UI below instead of silently bouncing home.
-      const msg = error?.message || String(error) || "";
+      const msg = error instanceof Error ? error.message : String(error);
       if (
         msg.includes("Failed to fetch dynamically imported module") ||
         msg.includes("Importing a module script failed") ||
@@ -94,14 +94,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Aastha Support — Rudraksha, Gemstones & Online Pooja" },
+      { title: "Aastha Supports — Rudraksha, Gemstones & Online Pooja" },
       {
         name: "description",
         content:
           "Certified rudraksha, gemstones, malas, bracelets, yantras and live Vedic poojas — energised by learned pandits. Pan India delivery.",
       },
-      { name: "author", content: "Aastha Support" },
-      { property: "og:site_name", content: "Aastha Support" },
+      { name: "author", content: "Aastha Supports" },
+      { property: "og:site_name", content: "Aastha Supports" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -123,7 +123,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "Aastha Support",
+          name: "Aastha Supports",
           url: "https://www.aasthasupports.com",
           logo: "https://www.aasthasupports.com/logo.png",
           description:

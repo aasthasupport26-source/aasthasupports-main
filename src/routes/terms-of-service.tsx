@@ -5,8 +5,8 @@ export const Route = createFileRoute("/terms-of-service")({
   component: TermsOfService,
   head: () => ({
     meta: [
-      { title: "Terms of Service — Aastha Support" },
-      { name: "description", content: "Terms and conditions for using Aastha Support services." },
+      { title: "Terms of Service — Aastha Supports" },
+      { name: "description", content: "Terms and conditions for using Aastha Supports services." },
       { name: "robots", content: "index, follow" },
     ],
   }),
@@ -23,13 +23,13 @@ function TermsOfService() {
           <section>
             <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Acceptance of Terms</h2>
             <p>
-              By accessing and using Aastha Support's website and services, you accept and agree to be bound by these Terms of Service. If you do not agree, please do not use our services.
+              By accessing and using Aastha Supports' website and services, you accept and agree to be bound by these Terms of Service. If you do not agree, please do not use our services.
             </p>
           </section>
 
           <section>
             <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Services</h2>
-            <p>Aastha Support provides:</p>
+            <p>Aastha Supports provides:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li>Sale of certified spiritual products (rudraksha, gemstones, malas, yantras)</li>
               <li>Online pooja booking and live streaming services</li>
@@ -93,14 +93,14 @@ function TermsOfService() {
           <section>
             <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Intellectual Property</h2>
             <p>
-              All content on this website, including text, images, logos, and designs, is the property of Aastha Support and protected by copyright laws.
+              All content on this website, including text, images, logos, and designs, is the property of Aastha Supports and protected by copyright laws.
             </p>
           </section>
 
           <section>
             <h2 className="font-sans font-bold text-xl md:text-2xl text-maroon-deep mb-3 tracking-tight">Limitation of Liability</h2>
             <p>
-              Aastha Support is not liable for any indirect, incidental, or consequential damages arising from the use of our products or services. Spiritual products are sold for faith-based purposes.
+              Aastha Supports is not liable for any indirect, incidental, or consequential damages arising from the use of our products or services. Spiritual products are sold for faith-based purposes.
             </p>
           </section>
 

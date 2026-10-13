@@ -18,8 +18,8 @@ import {
 
 export const Route = createFileRoute("/track-order")({
   head: () => {
-    const title = "Track Your Order — Aastha Support";
-    const desc = "Track your Aastha Support order with your order number and registered phone.";
+    const title = "Track Your Order — Aastha Supports";
+    const desc = "Track your Aastha Supports order with your order number and registered phone.";
     const url = "https://www.aasthasupports.com/track-order";
     return {
       meta: [

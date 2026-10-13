@@ -47,7 +47,7 @@ export const Route = createFileRoute("/product/$slug")({
   },
   head: ({ loaderData }) => {
     const product = loaderData?.product;
-    const title = product ? `${product.name} — Aastha Support` : `Product — Aastha Support`;
+    const title = product ? `${product.name} — Aastha Supports` : `Product — Aastha Supports`;
     const description =
       product?.description?.slice(0, 160) || "Authentic certified spiritual products";
     const url = `https://www.aasthasupports.com/product/${loaderData?.slug}`;

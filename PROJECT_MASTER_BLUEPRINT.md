@@ -1,7 +1,7 @@
-# 🕉️ AASTHA SUPPORT — COMPLETE ARCHITECTURAL MASTER BLUEPRINT & FUNCTION DICTIONARY
+# 🕉️ AASTHA SUPPORTS — COMPLETE ARCHITECTURAL MASTER BLUEPRINT & FUNCTION DICTIONARY
 
 > **Document Version:** 1.0.0  
-> **Target Project:** Aastha Support (`aasthasupports-main`)  
+> **Target Project:** Aastha Supports (`aasthasupports-main`)
 > **Author:** Antigravity AI Engineering & Architecture Team  
 > **Purpose:** Comprehensive memory bank, function dictionary, and verification roadmap. Every module, context, route, API, model, and logic flow is cataloged here in exhaustive detail to guide step-by-step verification.
 
@@ -352,7 +352,7 @@ The database is built on PostgreSQL with Row Level Security (RLS) enabled.
 | **BUG-05** | **`track-order.tsx` Queries Non-Existent Supabase Tables** | [`src/routes/track-order.tsx:62`](file:///Users/shubham/.gemini/antigravity-ide/scratch/aasthasupports-main/src/routes/track-order.tsx#L62) | Queries `supabase.from("orders")`, but shop orders exist solely on Shopify. | Order tracking will always return *"No order found"* for any Shopify purchase. |
 | **BUG-06** | **`admin.users.tsx` Queries Missing `user_roles` Table** | [`src/routes/admin.users.tsx:22`](file:///Users/shubham/.gemini/antigravity-ide/scratch/aasthasupports-main/src/routes/admin.users.tsx#L22) | Queries `user_roles` table, which is absent from `schema.sql`. | Admin users page fails to load user roles. |
 | **BUG-07** | **Puja Creation Column Mismatch in `admin.functions.ts`** | [`src/lib/admin.functions.ts:323`](file:///Users/shubham/.gemini/antigravity-ide/scratch/aasthasupports-main/src/lib/admin.functions.ts#L323) | `createPuja` inserts `{ is_active, duration }`, but `schema.sql` defines `{ active, duration_minutes, base_price }`. | Creating a puja via Admin fails with a database schema error. |
-| **BUG-08** | **Inconsistent Contact Emails Across the UI** | Header, Footer, Contact, Terms | Placeholder emails (`care@aasthasupport.com`, `support@aasthasupport.com`) instead of `aastha.support.26@gmail.com`. | Customer support requests fail to reach the business email. |
+| **BUG-08** | **Inconsistent Contact Emails Across the UI** | Header, Footer, Contact, Terms | Placeholder emails (`care@aasthasupports.com`, `support@aasthasupports.com`) instead of `aastha.support.26@gmail.com`. | Customer support requests fail to reach the business email. |
 
 ---
 
@@ -399,7 +399,7 @@ graph TD
   - **Automated Validation:** Schema validation and DB tests passed across [`tests/db-validator.test.ts`](file:///Users/shubham/.gemini/antigravity-ide/scratch/aasthasupports-main/tests/db-validator.test.ts) and [`tests/admin.functions.test.ts`](file:///Users/shubham/.gemini/antigravity-ide/scratch/aasthasupports-main/tests/admin.functions.test.ts).
 
 - **Step 7: Order Tracking, Contact Form & Email Unification** — ✅ **VERIFIED & UNIFIED**
-  - **Identified Issue:** `track-order.tsx` failed to look up pooja bookings. Scattered placeholder emails (`care@aasthasupport.com`, `support@aasthasupport.com`) were hardcoded across the app.
+  - **Identified Issue:** `track-order.tsx` failed to look up pooja bookings. Scattered placeholder emails (`care@aasthasupports.com`, `support@aasthasupports.com`) were hardcoded across the app.
   - **Implemented Fix:** Upgraded `track-order.tsx` to search `pooja_bookings` (by booking number and phone) as well as merchandise orders. Replaced all placeholder emails with `aastha.support.26@gmail.com` across Header, Footer, Contact, Root Schema, FAQ, Terms of Service, Privacy Policy, Returns, Refunds, and Shipping policies.
   - **Automated Validation:** Full test suite execution: **30 test suites, 201 tests passed (100% success rate)**.
 

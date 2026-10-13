@@ -6,13 +6,13 @@ import { Award, Users, Heart, Sparkles } from "lucide-react";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About Us — Aastha Support" },
+      { title: "About Us — Aastha Supports" },
       {
         name: "description",
         content:
           "Our story, our pandits, and our commitment to authentic Sanatan tradition — sourcing rudraksha and gemstones from origin.",
       },
-      { property: "og:title", content: "About Us — Aastha Support" },
+      { property: "og:title", content: "About Us — Aastha Supports" },
       {
         property: "og:description",
         content: "Our story, pandits, and commitment to authentic Sanatan tradition.",
@@ -39,7 +39,7 @@ function AboutPage() {
         <div className="container relative mx-auto px-4 z-10">
           <p className="text-gold tracking-[0.4em] text-xs">✦ हमारी कहानी ✦</p>
           <h1 className="font-sans font-bold text-4xl md:text-6xl text-cream mt-3 tracking-tight">
-            About Aastha Support
+            About Aastha Supports
           </h1>
         </div>
       </section>
@@ -55,7 +55,7 @@ function AboutPage() {
           <div className="divider-gold w-32 mx-auto my-8" />
           <div className="space-y-5 text-foreground/85 leading-relaxed">
             <p>
-              Aastha Support was born from a single conviction — that every devotee, regardless of
+              Aastha Supports was born from a single conviction — that every devotee, regardless of
               where they live, deserves access to authentic spiritual products and Vedic rituals
               performed in their true tradition.
             </p>

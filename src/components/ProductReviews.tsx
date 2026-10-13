@@ -40,7 +40,7 @@ const DEFAULT_REVIEWS: Record<string, Review[]> = {
       date: "1 week ago",
       title: "Lab tested locally — 100% genuine Elaeocarpus ganitrus",
       comment:
-        "Got the bead re-verified at a local gemological institute in Pune. Density and surface morphology matched genuine Nepali origin exactly as certified by Aastha Support. Divine packaging!",
+        "Got the bead re-verified at a local gemological institute in Pune. Density and surface morphology matched genuine Nepali origin exactly as certified by Aastha Supports. Divine packaging!",
       verifiedBuyer: true,
       verifiedLab: true,
       helpfulCount: 31,
