@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { loginUser, getShopifyOAuthUrl } from "@/lib/auth.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { sanitizeRedirect } from "@/lib/redirect-validator";
 
 export const Route = createFileRoute("/auth/")({
   head: () => ({
@@ -17,9 +18,16 @@ export const Route = createFileRoute("/auth/")({
       { name: "description", content: "Sign in to access your Aastha Supports account." },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>): { email?: string } => {
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { email?: string; redirect?: string; returnTo?: string } => {
+    const rawRedirect =
+      (typeof search.redirect === "string" ? search.redirect : undefined) ||
+      (typeof search.returnTo === "string" ? search.returnTo : undefined);
     return {
-      email: search.email as string | undefined,
+      email: typeof search.email === "string" ? search.email : undefined,
+      redirect: rawRedirect,
+      returnTo: rawRedirect,
     };
   },
   component: AuthPage,
@@ -29,12 +37,21 @@ function AuthPage() {
   const navigate = useNavigate();
   const login = useServerFn(loginUser);
   const getOAuthUrl = useServerFn(getShopifyOAuthUrl);
-  const { login: setAuthLogin } = useAuth();
+  const { login: setAuthLogin, customer, loading: authLoading } = useAuth();
   const search = Route.useSearch();
+  const rawTarget = search.redirect || search.returnTo;
 
   const [email, setEmail] = useState(search.email || "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // If already authenticated, redirect to destination or account
+  useEffect(() => {
+    if (!authLoading && customer) {
+      const target = rawTarget ? sanitizeRedirect(rawTarget, "/my-account") : "/my-account";
+      navigate({ to: target as any });
+    }
+  }, [customer, authLoading, navigate, rawTarget]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -53,10 +70,18 @@ function AuthPage() {
                 state: res.state,
                 nonce: res.nonce,
                 redirectUri,
+                redirect: rawTarget || undefined,
               }),
             );
           } catch (storageErr) {
             console.warn("sessionStorage unavailable:", storageErr);
+          }
+          if (rawTarget) {
+            try {
+              localStorage.setItem("aastha_auth_redirect", rawTarget);
+            } catch (localErr) {
+              console.warn("localStorage unavailable:", localErr);
+            }
           }
         }
         window.location.href = res.authorizeUrl;
@@ -89,11 +114,9 @@ function AuthPage() {
       const isAdminUser = await setAuthLogin(result.customer, result.accessToken, result.expiresAt);
 
       toast.success(isAdminUser ? "Welcome, Admin!" : "Welcome back!");
-      if (isAdminUser) {
-        navigate({ to: "/admin" });
-      } else {
-        navigate({ to: "/my-account" });
-      }
+      const fallback = isAdminUser ? "/admin" : "/my-account";
+      const target = rawTarget ? sanitizeRedirect(rawTarget, fallback) : fallback;
+      navigate({ to: target as any });
     } catch (err: any) {
       toast.error(err?.message || "Invalid email or password");
     } finally {

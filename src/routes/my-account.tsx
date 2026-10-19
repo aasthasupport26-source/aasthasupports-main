@@ -95,7 +95,7 @@ function ProfilePage() {
   const logoutFn = useServerFn(logoutUser);
 
   useEffect(() => {
-    if (!authLoading && !customer) navigate({ to: "/auth", search: {} as any });
+    if (!authLoading && !customer) navigate({ to: "/auth", search: { redirect: "/my-account" } as any });
   }, [authLoading, customer, navigate]);
 
   const { clear } = useCart();
@@ -116,11 +116,13 @@ function ProfilePage() {
           if (loadedOrders.length > 0) {
             try {
               const rawPending = localStorage.getItem("aastha_pending_checkout");
-              const latestOrderTime = new Date(loadedOrders[0].processedAt).getTime();
-              const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
-              if (rawPending || latestOrderTime > twoHoursAgo) {
-                clear();
-                localStorage.removeItem("aastha_pending_checkout");
+              if (rawPending) {
+                const parsed = JSON.parse(rawPending);
+                const latestOrderTime = new Date(loadedOrders[0].processedAt).getTime();
+                if (parsed.timestamp && latestOrderTime >= parsed.timestamp - 60000) {
+                  clear();
+                  localStorage.removeItem("aastha_pending_checkout");
+                }
               }
             } catch {}
           }

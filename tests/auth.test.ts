@@ -47,4 +47,14 @@ describe("Shopify OAuth & PKCE Flow", () => {
     const uri = getOAuthRedirectUri();
     expect(uri).toContain("/auth/callback");
   });
+
+  it("preserves /cart and product redirect destinations while sanitizing external open redirects", async () => {
+    const { sanitizeRedirect } = await import("../src/lib/redirect-validator");
+    expect(sanitizeRedirect("/cart", "/my-account")).toBe("/cart");
+    expect(sanitizeRedirect("/product/1-mukhi-rudraksha", "/my-account")).toBe("/product/1-mukhi-rudraksha");
+    expect(sanitizeRedirect("https://evil.com/phish", "/my-account")).toBe("/my-account");
+    expect(sanitizeRedirect("//evil.com", "/my-account")).toBe("/my-account");
+    expect(sanitizeRedirect("javascript:alert(1)", "/my-account")).toBe("/my-account");
+    expect(sanitizeRedirect("", "/my-account")).toBe("/my-account");
+  });
 });

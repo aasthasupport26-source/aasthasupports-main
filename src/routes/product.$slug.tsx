@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound, redirect, useNavigate } from "@tanstac
 import { Layout } from "@/components/Layout";
 import { getCategory } from "@/data/catalog";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   getShopifyProduct,
   getShopifyProducts,
@@ -107,6 +108,7 @@ export const Route = createFileRoute("/product/$slug")({
 function ProductPage() {
   const { slug, product: initialProduct } = Route.useLoaderData();
   const { add } = useCart();
+  const { customer, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -471,6 +473,11 @@ function ProductPage() {
 
   const buyNow = () => {
     addToCart();
+    if (!customer && !authLoading) {
+      toast.info("Please sign in to proceed with your order");
+      navigate({ to: "/auth", search: { redirect: "/cart" } });
+      return;
+    }
     navigate({ to: "/cart", search: { cleared: undefined } });
   };
 

@@ -6,6 +6,7 @@ import { exchangeOAuthCode } from "@/lib/auth.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { sanitizeRedirect } from "@/lib/redirect-validator";
 
 export const Route = createFileRoute("/auth/callback")({
   component: AuthCallbackPage,
@@ -34,6 +35,7 @@ function AuthCallbackPage() {
 
         let clientVerifier: string | undefined;
         let clientNonce: string | undefined;
+        let returnUrl: string | undefined;
 
         if (typeof window !== "undefined") {
           try {
@@ -45,10 +47,22 @@ function AuthCallbackPage() {
               }
               clientVerifier = parsed.verifier;
               clientNonce = parsed.nonce;
+              if (parsed.redirect) {
+                returnUrl = parsed.redirect;
+              }
             }
           } catch (e: any) {
             if (e.message?.includes("State mismatch")) throw e;
             console.warn("Could not read oauth session from sessionStorage:", e);
+          }
+
+          if (!returnUrl) {
+            try {
+              const localRedirect = localStorage.getItem("aastha_auth_redirect");
+              if (localRedirect) {
+                returnUrl = localRedirect;
+              }
+            } catch {}
           }
         }
 
@@ -68,6 +82,7 @@ function AuthCallbackPage() {
         if (typeof window !== "undefined") {
           try {
             sessionStorage.removeItem("shopify_oauth_session");
+            localStorage.removeItem("aastha_auth_redirect");
           } catch {}
         }
 
@@ -77,8 +92,11 @@ function AuthCallbackPage() {
         setStatus("success");
         toast.success(isAdmin ? "Welcome, Admin!" : "Successfully signed in!");
 
+        const fallback = isAdmin ? "/admin" : "/my-account";
+        const target = returnUrl ? sanitizeRedirect(returnUrl, fallback) : fallback;
+
         setTimeout(() => {
-          navigate({ to: isAdmin ? "/admin" : "/my-account" });
+          navigate({ to: target as any });
         }, 1000);
       } catch (error: any) {
         console.error("Auth callback error:", error);

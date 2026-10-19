@@ -6,6 +6,17 @@ import { Loader2 } from "lucide-react";
 import { Layout } from "@/components/Layout";
 
 export const Route = createFileRoute("/auth/login")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { redirect?: string; returnTo?: string } => {
+    const rawRedirect =
+      (typeof search.redirect === "string" ? search.redirect : undefined) ||
+      (typeof search.returnTo === "string" ? search.returnTo : undefined);
+    return {
+      redirect: rawRedirect,
+      returnTo: rawRedirect,
+    };
+  },
   component: AuthLoginPage,
 });
 
@@ -13,6 +24,8 @@ function AuthLoginPage() {
   const getOAuthUrl = useServerFn(getShopifyOAuthUrl);
   const [error, setError] = useState<string | null>(null);
   const called = useRef(false);
+  const search = Route.useSearch();
+  const rawTarget = search.redirect || search.returnTo;
 
   useEffect(() => {
     if (called.current) return;
@@ -34,10 +47,16 @@ function AuthLoginPage() {
                   state: res.state,
                   nonce: res.nonce,
                   redirectUri,
+                  redirect: rawTarget || undefined,
                 }),
               );
             } catch (storageErr) {
               console.warn("sessionStorage unavailable:", storageErr);
+            }
+            if (rawTarget) {
+              try {
+                localStorage.setItem("aastha_auth_redirect", rawTarget);
+              } catch {}
             }
           }
           window.location.href = res.authorizeUrl;
@@ -51,7 +70,7 @@ function AuthLoginPage() {
     };
 
     initOAuth();
-  }, [getOAuthUrl]);
+  }, [getOAuthUrl, rawTarget]);
 
   return (
     <Layout>

@@ -31,7 +31,7 @@ function CartPage() {
   const shipping = subtotal > 0 && subtotal < 999 ? 99 : 0;
   const total = subtotal + shipping;
   const [loading, setLoading] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(true);
   const checkout = useServerFn(createShopifyCheckout);
 
   // Clear cart when returning from Shopify order confirmation
@@ -49,13 +49,13 @@ function CartPage() {
   const handleCheckout = async () => {
     if (items.length === 0) return;
     if (authLoading) return;
-    if (!agreedToTerms) {
-      toast.error("Please agree to the Terms of Service and Privacy Policy before proceeding.");
+    if (!customer) {
+      toast.info("Please sign in to proceed with your order");
+      navigate({ to: "/auth", search: { redirect: "/cart" } });
       return;
     }
-    if (!customer) {
-      toast.error("Please sign in before checkout");
-      navigate({ to: "/auth" });
+    if (!agreedToTerms) {
+      toast.error("Please agree to the Terms of Service and Privacy Policy before proceeding.");
       return;
     }
 
@@ -229,7 +229,7 @@ function CartPage() {
 
               <button
                 onClick={handleCheckout}
-                disabled={loading || authLoading || !agreedToTerms}
+                disabled={loading || authLoading}
                 className="mt-5 w-full inline-flex items-center justify-center bg-gold text-maroon-deep px-6 py-3.5 rounded-md text-xs tracking-widest uppercase font-medium hover:bg-gold-soft transition shadow-gold disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
