@@ -1,6 +1,12 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { categories, getCategory } from "@/data/catalog";
+import {
+  NAVRATNA_GEMSTONES,
+  getGemstoneById,
+  matchGemstoneForProduct,
+  type NavratnaGemstone,
+} from "@/data/gemstones";
 import { getShopifyProducts, normalizeShopifyVideoUrl } from "@/lib/shopify.functions";
 import { getTemples, getPujasByTemple } from "@/lib/booking.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,6 +23,7 @@ import {
   ShieldCheck,
   Video,
   CheckCircle2,
+  Phone,
 } from "lucide-react";
 import { DirectBookingModal } from "@/components/booking/DirectBookingModal";
 import { toast } from "sonner";
@@ -29,6 +36,9 @@ import {
 import { ProductRating } from "@/components/ProductRating";
 
 export const Route = createFileRoute("/category/$slug")({
+  validateSearch: (search: Record<string, unknown>): { type?: string } => ({
+    type: typeof search.type === "string" ? search.type : undefined,
+  }),
   loader: ({ params }) => {
     const slug = (params.slug || "").toLowerCase().trim();
     const validSlugs = [
@@ -89,19 +99,38 @@ export const Route = createFileRoute("/category/$slug")({
 // ─── Main Component ─────────────────────────────────────────────
 function CategoryPage() {
   const { cat } = Route.useLoaderData();
+  const search = Route.useSearch();
 
   if (cat.slug === "online-pooja") {
     return <OnlinePoojaPage cat={cat} />;
   }
-  return <ShopifyProductsPage cat={cat} />;
+  return <ShopifyProductsPage cat={cat} initialType={search.type} />;
 }
 
 // ─── Shopify products page (non-pooja categories) ────────────────
-function ShopifyProductsPage({ cat }: { cat: any }) {
+function ShopifyProductsPage({ cat, initialType }: { cat: any; initialType?: string }) {
+  const navigate = useNavigate();
   const fetchProducts = useServerFn(getShopifyProducts);
   const [products, setProducts] = useState<any[]>([]);
   const [inventoryProducts, setInventoryProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedGemId, setSelectedGemId] = useState<string>(initialType || "all");
+
+  useEffect(() => {
+    if (initialType) {
+      setSelectedGemId(initialType);
+    }
+  }, [initialType]);
+
+  const handleSelectGem = (id: string) => {
+    setSelectedGemId(id);
+    navigate({
+      to: "/category/$slug",
+      params: { slug: "gemstones" },
+      search: { type: id === "all" ? undefined : id },
+      replace: true,
+    });
+  };
 
   useEffect(() => {
     const requests = [fetchProducts({ data: { category: cat.slug, limit: 250 } })];
@@ -225,75 +254,22 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
             </div>
           </div>
         </section>
+      ) : cat.slug === "gemstones" ? (
+        <NavratnaGemstoneSection
+          products={productsForDisplay}
+          selectedGemId={selectedGemId}
+          onSelectGem={handleSelectGem}
+        />
       ) : productsForDisplay.length === 0 ? (
-        cat.slug === "gemstones" && cat.sections && cat.sections.length > 0 ? (
-          <section className="py-16 bg-cream">
-            <div className="container mx-auto px-4">
-              <div className="flex items-end justify-between mb-10 flex-wrap gap-3">
-                <div>
-                  <p className="text-gold tracking-[0.3em] text-xs">{cat.name.toUpperCase()}</p>
-                  <h2 className="font-display text-3xl md:text-4xl text-maroon-deep mt-2">
-                    {cat.sections[0].title}
-                  </h2>
-                </div>
-                <div className="divider-gold flex-1 max-w-xs ml-6 mb-2" />
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                {cat.sections[0].items.map((item: any) => (
-                  <Link
-                    key={item.name}
-                    to="/contact"
-                    className="group bg-white rounded-xl overflow-hidden border border-gold/20 shadow-soft hover:shadow-royal transition flex flex-col"
-                  >
-                    <div className="aspect-square overflow-hidden bg-cream">
-                      <img
-                        src={
-                          cat.slug === "gemstones"
-                            ? gemstoneImages.get(
-                                gemstoneNames.find((name) =>
-                                  item.name.toLowerCase().includes(name),
-                                ) || "",
-                              ) || item.image
-                            : item.image
-                        }
-                        alt={item.name}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                    </div>
-                    <div className="p-4 flex flex-col flex-1">
-                      <ProductRating rating={getProductRating(item.slug || item.name)} />
-                      <h3 className="font-display text-lg font-semibold text-maroon-deep group-hover:text-maroon leading-tight">
-                        {getShortProductName(item.name, item)}
-                      </h3>
-                      {item.desc && (
-                        <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-                          {item.desc}
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between mt-auto pt-3 border-t border-gold/15">
-                        <span className="text-[10px] tracking-widest uppercase text-gold">
-                          Consult Pandit Ji
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+        <section className="py-16 bg-cream">
+          <div className="container mx-auto px-4 text-center">
+            <div className="bg-white rounded-xl border border-gold/10 p-12 shadow-sm max-w-md mx-auto">
+              <p className="text-muted-foreground">
+                No products available in this category currently.
+              </p>
             </div>
-          </section>
-        ) : (
-          <section className="py-16 bg-cream">
-            <div className="container mx-auto px-4 text-center">
-              <div className="bg-white rounded-xl border border-gold/10 p-12 shadow-sm max-w-md mx-auto">
-                <p className="text-muted-foreground">
-                  No products available in this category currently.
-                </p>
-              </div>
-            </div>
-          </section>
-        )
+          </div>
+        </section>
       ) : (
         <section className="py-16 bg-cream">
           <div className="container mx-auto px-4">
@@ -325,6 +301,339 @@ function ShopifyProductsPage({ cat }: { cat: any }) {
         </section>
       )}
     </Layout>
+  );
+}
+
+// ─── Navratna 9 Gemstones Sanctuary Section ─────────────────────
+function NavratnaGemstoneSection({
+  products,
+  selectedGemId,
+  onSelectGem,
+}: {
+  products: any[];
+  selectedGemId: string;
+  onSelectGem: (id: string) => void;
+}) {
+  const activeGem =
+    NAVRATNA_GEMSTONES.find((g) => g.id === selectedGemId) ||
+    (selectedGemId !== "all" ? getGemstoneById(selectedGemId) : null);
+
+  const filteredProducts = activeGem
+    ? products.filter((p: any) => {
+        const matched = matchGemstoneForProduct(p);
+        if (matched && matched.id === activeGem.id) return true;
+        const text = `${p.name} ${p.productType || ""} ${(p.tags || []).join(" ")}`.toLowerCase();
+        return activeGem.matchKeywords.some((kw) => text.includes(kw));
+      })
+    : products;
+
+  return (
+    <section className="py-10 md:py-16 bg-cream">
+      <div className="container mx-auto px-4">
+        {/* Navratna Sanctuary Heading */}
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gold/15 text-maroon-deep text-xs font-bold uppercase tracking-widest mb-3 border border-gold/30">
+            <Sparkles className="w-3.5 h-3.5 text-gold" />
+            <span>Navratna Astrological Sanctuary</span>
+          </div>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-maroon-deep font-bold">
+            All 9 Sacred Vedic Gemstones
+          </h2>
+          <div className="divider-gold w-28 mx-auto mt-4 mb-3" />
+          <p className="text-muted-foreground text-xs sm:text-sm md:text-base leading-relaxed">
+            According to the Vedic Garuda Purana, the Navratnas channel the cosmic energies of the
+            nine planets (Navagraha). Click any gemstone below to reveal its authentic certified
+            specimens, sacred Beej Mantra, astrological benefits, and wearing vidhi.
+          </p>
+        </div>
+
+        {/* 9 Gemstones Category Navigation Tabs */}
+        <div className="mb-10 sm:mb-14">
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 pt-1 scrollbar-none sm:grid sm:grid-cols-5 lg:grid-cols-10 sm:overflow-visible">
+            {/* All Gems tab */}
+            <button
+              type="button"
+              onClick={() => onSelectGem("all")}
+              className={`flex-shrink-0 flex sm:flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-2xl border text-xs font-semibold transition-all duration-300 text-left sm:text-center cursor-pointer ${
+                selectedGemId === "all"
+                  ? "bg-maroon-deep text-cream border-gold shadow-royal ring-2 ring-gold"
+                  : "bg-white text-maroon-deep border-gold/25 hover:border-gold hover:bg-gold/5 shadow-xs"
+              }`}
+            >
+              <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center text-base font-bold text-gold flex-shrink-0">
+                ✦
+              </div>
+              <div className="min-w-0 truncate">
+                <p className="font-bold truncate text-[11px] sm:text-xs">All 9 Gems</p>
+                <p className={`text-[10px] truncate ${selectedGemId === "all" ? "text-gold-soft" : "text-muted-foreground"}`}>
+                  Navratna
+                </p>
+              </div>
+            </button>
+
+            {/* The 9 Gemstone Buttons */}
+            {NAVRATNA_GEMSTONES.map((gem) => {
+              const isSelected = selectedGemId === gem.id;
+              return (
+                <button
+                  key={gem.id}
+                  type="button"
+                  onClick={() => onSelectGem(gem.id)}
+                  className={`flex-shrink-0 flex sm:flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-2xl border text-xs font-semibold transition-all duration-300 text-left sm:text-center group cursor-pointer ${
+                    isSelected
+                      ? "bg-maroon-deep text-cream border-gold shadow-royal ring-2 ring-gold"
+                      : "bg-white text-maroon-deep border-gold/25 hover:border-gold hover:bg-gold/5 shadow-xs"
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-gold/30 shadow-xs bg-cream">
+                    <img
+                      src={gem.image}
+                      alt={gem.name}
+                      className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="min-w-0 truncate">
+                    <p className="font-bold truncate text-[11px] sm:text-xs">
+                      {gem.name}{" "}
+                      <span className="font-devanagari text-[10px] text-gold font-normal">
+                        ({gem.hindiName})
+                      </span>
+                    </p>
+                    <p
+                      className={`text-[10px] truncate ${
+                        isSelected ? "text-gold-soft" : "text-muted-foreground"
+                      }`}
+                    >
+                      {gem.planet.split(" ")[0]}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Selected Gemstone Spotlight Banner */}
+        {activeGem ? (
+          <div className="mb-14 bg-gradient-to-br from-maroon-deep via-[#400B14] to-maroon-deep rounded-3xl p-6 sm:p-8 md:p-10 border-2 border-gold/40 shadow-royal text-cream relative overflow-hidden animate-fade-up">
+            {/* Ambient Background Glow */}
+            <div className="absolute top-0 right-0 w-80 h-80 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-maroon/30 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-center relative z-10">
+              {/* Left Column: Gemstone Image & Badges */}
+              <div className="lg:col-span-5 flex flex-col items-center">
+                <div className="relative group w-full max-w-sm aspect-square rounded-2xl overflow-hidden border-2 border-gold/50 shadow-2xl bg-cream/10">
+                  <img
+                    src={activeGem.image}
+                    alt={`${activeGem.name} (${activeGem.hindiName}) natural certified gemstone`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    width={500}
+                    height={500}
+                  />
+                  <div className="absolute top-3 left-3 bg-maroon-deep/90 text-gold text-[11px] font-bold px-3 py-1 rounded-full border border-gold/40 backdrop-blur-sm shadow-md flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-gold" />
+                    <span>100% Lab Certified Specimen</span>
+                  </div>
+                  <div className="absolute bottom-3 inset-x-3 bg-black/60 backdrop-blur-md rounded-xl p-2.5 text-center border border-white/10">
+                    <p className="text-[11px] text-cream/90 font-medium">
+                      Authentic Vedic Cut · Unheated &amp; Natural
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quick specs pill grid */}
+                <div className="grid grid-cols-2 gap-2 w-full max-w-sm mt-4 text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-white/10 border border-gold/20">
+                    <span className="text-gold block font-semibold">Ruler (Graha)</span>
+                    <span className="text-cream/90 font-medium">{activeGem.planet}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white/10 border border-gold/20">
+                    <span className="text-gold block font-semibold">Element</span>
+                    <span className="text-cream/90 font-medium">{activeGem.element}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white/10 border border-gold/20">
+                    <span className="text-gold block font-semibold">Chakra</span>
+                    <span className="text-cream/90 font-medium">{activeGem.chakra}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white/10 border border-gold/20">
+                    <span className="text-gold block font-semibold">Wear On</span>
+                    <span className="text-cream/90 font-medium">
+                      {activeGem.auspiciousDay.split(" ")[0]}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Mantra, Details, Benefits, CTAs */}
+              <div className="lg:col-span-7 space-y-5">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/20 border border-gold/30 text-gold text-xs font-semibold tracking-wider uppercase mb-3">
+                    <span>{activeGem.sanskritName}</span>
+                    <span>·</span>
+                    <span className="font-devanagari">{activeGem.planetHindi}</span>
+                  </div>
+
+                  {/* Sacred Mantra Box */}
+                  <div className="p-4 rounded-2xl bg-black/30 border border-gold/30 mb-4 backdrop-blur-xs">
+                    <p className="text-[10px] text-gold tracking-widest uppercase font-semibold">
+                      Sacred Beej Mantra for Pran Pratishtha
+                    </p>
+                    <p className="font-devanagari text-gold-soft text-xl sm:text-2xl font-bold mt-1 tracking-wide">
+                      {activeGem.mantra}
+                    </p>
+                  </div>
+
+                  <h3 className="font-display text-3xl sm:text-4xl text-cream font-bold">
+                    {activeGem.name}{" "}
+                    <span className="text-gold font-devanagari font-normal">
+                      ({activeGem.hindiName})
+                    </span>
+                  </h3>
+                  <p className="text-gold-soft text-sm sm:text-base font-medium mt-1">
+                    {activeGem.tagline}
+                  </p>
+                </div>
+
+                <p className="text-cream/85 text-xs sm:text-sm leading-relaxed">{activeGem.desc}</p>
+
+                {/* Benefits */}
+                <div className="space-y-2 pt-1">
+                  <p className="text-xs text-gold uppercase tracking-wider font-bold">
+                    Key Astrological Powers &amp; Vedic Blessings:
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-2 text-xs">
+                    {activeGem.benefits.map((benefit, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-cream/90">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-gold flex-shrink-0 mt-0.5" />
+                        <span>{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Finger & Metal Vidhi */}
+                <div className="p-3 rounded-xl bg-white/5 border border-gold/20 text-xs text-cream/80">
+                  <span className="text-gold font-bold">Vedic Wearing Guidance: </span>
+                  <span>
+                    Wear on {activeGem.finger} on {activeGem.auspiciousDay}.
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <a
+                    href="#gemstone-products"
+                    className="inline-flex items-center gap-2 bg-gold text-maroon-deep px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-gold-soft transition shadow-gold"
+                  >
+                    View Listed Products ({filteredProducts.length}){" "}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                  <a
+                    href="tel:+918287670827"
+                    className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-cream px-5 py-2.5 rounded-lg text-xs font-semibold tracking-wider uppercase border border-gold/30 transition"
+                  >
+                    <Phone className="w-3.5 h-3.5" /> Consult Pandit Ji for Kundali
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* All 9 Gems Overview Banner */
+          <div className="mb-14 bg-gradient-to-r from-maroon-deep via-[#3a0813] to-maroon-deep rounded-3xl p-6 sm:p-8 md:p-10 border border-gold/30 shadow-royal text-cream text-center relative overflow-hidden">
+            <div className="max-w-2xl mx-auto space-y-4">
+              <p className="font-devanagari text-gold-soft text-xl">
+                || ॐ नवग्रह देवताभ्यो नमः ||
+              </p>
+              <h3 className="font-display text-2xl sm:text-3xl md:text-4xl text-cream font-bold">
+                The Nine Cosmic Powers of Navratna
+              </h3>
+              <p className="text-cream/80 text-xs sm:text-sm leading-relaxed">
+                Navratnas are the nine celestial gemstones that harmonize the influence of the nine
+                astrological Grahas. Click any individual gemstone from the category bar above to
+                view its dedicated high-resolution studio specimen, ruling planetary mantra, and
+                available certified cuts.
+              </p>
+              <div className="pt-2 flex flex-wrap justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => onSelectGem("yellow-sapphire")}
+                  className="inline-flex items-center gap-1.5 bg-gold/20 hover:bg-gold/30 text-gold text-xs font-bold px-4 py-2 rounded-lg border border-gold/40 transition"
+                >
+                  Explore Pukhraj (10 Items) →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSelectGem("blue-sapphire")}
+                  className="inline-flex items-center gap-1.5 bg-gold/20 hover:bg-gold/30 text-gold text-xs font-bold px-4 py-2 rounded-lg border border-gold/40 transition"
+                >
+                  Explore Neelam (9 Items) →
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Revealed Products Section */}
+        <div id="gemstone-products" className="scroll-mt-24">
+          <div className="flex items-end justify-between mb-8 flex-wrap gap-3 pb-3 border-b border-gold/20">
+            <div>
+              <p className="text-gold tracking-[0.3em] text-xs font-bold uppercase">
+                {activeGem ? `${activeGem.name} Collection` : "All Navratna Gemstones"}
+              </p>
+              <h3 className="font-display text-2xl sm:text-3xl text-maroon-deep font-bold mt-1">
+                {activeGem
+                  ? `Certified Natural ${activeGem.name} (${activeGem.hindiName})`
+                  : "All Available Certified Gemstones"}
+              </h3>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Showing {filteredProducts.length} verified specimen
+              {filteredProducts.length === 1 ? "" : "s"}
+            </div>
+          </div>
+
+          {filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {filteredProducts.map((item: any) => (
+                <GemstoneProductCard key={item.slug} item={item} />
+              ))}
+            </div>
+          ) : (
+            /* Custom certified specimen order card if not in Shopify stock */
+            <div className="bg-white rounded-2xl border border-gold/30 p-8 sm:p-12 text-center shadow-soft max-w-2xl mx-auto">
+              <div className="w-16 h-16 rounded-full bg-gold/15 text-gold flex items-center justify-center mx-auto mb-4 text-2xl">
+                💎
+              </div>
+              <h4 className="font-display text-2xl text-maroon-deep font-bold mb-2">
+                Custom Natural {activeGem?.name || "Gemstone"} ({activeGem?.hindiName || ""})
+                Available on Request
+              </h4>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-lg mx-auto mb-6">
+                Our Vedic treasury carries unheated, natural {activeGem?.name} specimens in all
+                weights from 2.00 to 12.00+ Ratti. Every specimen is certified by government
+                gemological laboratories and energised with personal Gotra Sankalp.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <a
+                  href="tel:+918287670827"
+                  className="inline-flex items-center gap-2 bg-maroon-deep text-cream px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-maroon transition shadow-md"
+                >
+                  <Phone className="w-3.5 h-3.5" /> Call Pandit Ji (+91 82876 70827)
+                </a>
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center gap-2 bg-gold text-maroon-deep px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-gold-soft transition shadow-gold"
+                >
+                  Send Inquiry Form
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
 

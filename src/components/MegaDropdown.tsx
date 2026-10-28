@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getShopifyProducts } from "@/lib/shopify.functions";
 import type { Category } from "@/data/catalog";
+import { NAVRATNA_GEMSTONES } from "@/data/gemstones";
 import { getShortProductName } from "@/lib/product-display";
 import { Sparkles, ArrowRight } from "lucide-react";
 
@@ -289,6 +290,75 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                 </div>
               </div>
             )
+          ) : cat.slug === "gemstones" ? (
+            <div className="col-span-9">
+              <div className="flex items-center justify-between mb-4 pb-2 border-b border-gold/20">
+                <div>
+                  <h4 className="text-xs tracking-[0.25em] text-gold uppercase font-bold">
+                    Navratna — All 9 Sacred Vedic Gemstones
+                  </h4>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Click any gemstone to explore certified specimens, carats, &amp; planetary powers
+                  </p>
+                </div>
+                <Link
+                  to="/category/$slug"
+                  params={{ slug: "gemstones" }}
+                  search={{ type: "all" }}
+                  onClick={onClose}
+                  className="text-xs text-maroon font-semibold hover:text-gold transition flex items-center gap-1"
+                >
+                  View All Gemstones →
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {NAVRATNA_GEMSTONES.map((gem) => {
+                  const pukhrajCount = gem.id === "yellow-sapphire" ? 10 : 0;
+                  const neelamCount = gem.id === "blue-sapphire" ? 9 : 0;
+                  const stockBadge =
+                    pukhrajCount > 0
+                      ? `${pukhrajCount} Certified Available`
+                      : neelamCount > 0
+                        ? `${neelamCount} Certified Available`
+                        : "Certified on Request";
+
+                  return (
+                    <Link
+                      key={gem.id}
+                      to="/category/$slug"
+                      params={{ slug: "gemstones" }}
+                      search={{ type: gem.id }}
+                      onClick={onClose}
+                      className="group flex items-center gap-3 p-2.5 rounded-xl bg-white/70 hover:bg-white border border-gold/20 hover:border-gold shadow-none hover:shadow-md transition-all duration-300"
+                    >
+                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-cream border border-gold/20 shadow-xs">
+                        <img
+                          src={gem.image}
+                          alt={gem.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold text-maroon-deep group-hover:text-maroon truncate flex items-center gap-1">
+                          <span>{gem.name}</span>
+                          <span className="text-[10px] text-gold font-medium font-devanagari">
+                            ({gem.hindiName})
+                          </span>
+                        </p>
+                        <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                          {gem.planet}
+                        </p>
+                        <p className="text-[10px] text-gold font-semibold uppercase tracking-wider mt-0.5 truncate">
+                          {stockBadge}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           ) : (
             <div className="col-span-9">
               <h4 className="text-xs tracking-[0.25em] text-gold uppercase mb-4 pb-2 border-b border-gold/20 font-bold">

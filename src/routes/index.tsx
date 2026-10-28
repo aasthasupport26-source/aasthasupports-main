@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { categories } from "@/data/catalog";
+import { NAVRATNA_GEMSTONES } from "@/data/gemstones";
 import { VedicTrust } from "@/components/VedicTrust";
 import heroImg from "@/assets/hero-sage.jpg";
 import { ArrowRight, Sparkles, ShoppingBag } from "lucide-react";
@@ -84,6 +85,45 @@ function HomePage() {
               >
                 Shop Rudraksha <ArrowRight className="w-4 h-4" />
               </Link>
+              <Link
+                to="/category/$slug"
+                params={{ slug: "gemstones" }}
+                search={{ type: "all" }}
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-cream px-7 py-3.5 rounded-md font-medium tracking-widest text-xs uppercase border border-gold/40 transition shadow-soft backdrop-blur-xs"
+              >
+                Navratna Gemstones <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Quick 9 Gemstones Bar in Hero */}
+            <div className="mt-8 pt-5 border-t border-gold/20">
+              <p className="text-[11px] text-gold tracking-widest uppercase font-semibold mb-2.5 flex items-center gap-1.5">
+                <span>✦ Explore All 9 Sacred Gemstones:</span>
+              </p>
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                {NAVRATNA_GEMSTONES.map((gem) => (
+                  <Link
+                    key={gem.id}
+                    to="/category/$slug"
+                    params={{ slug: "gemstones" }}
+                    search={{ type: gem.id }}
+                    className="group flex-shrink-0 flex items-center gap-1.5 bg-black/40 hover:bg-black/75 border border-gold/30 hover:border-gold px-2.5 py-1.5 rounded-full transition-all duration-300"
+                    title={`${gem.name} (${gem.hindiName}) — ${gem.planet}`}
+                  >
+                    <img
+                      src={gem.image}
+                      alt={gem.name}
+                      className="w-5 h-5 rounded-full object-cover border border-gold/40 group-hover:scale-110 transition-transform"
+                    />
+                    <span className="text-[11px] text-cream font-medium group-hover:text-gold transition">
+                      {gem.name}
+                    </span>
+                    <span className="text-[10px] text-gold/85 font-devanagari font-normal">
+                      ({gem.hindiName})
+                    </span>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
