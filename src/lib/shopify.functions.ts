@@ -230,6 +230,23 @@ export const getShopifyProducts = createServerFn({ method: "GET" })
           if (target === "yantra") {
             return name.includes("yantra") || cat.includes("yantra") || type.includes("yantra");
           }
+          if (
+            target === "diwali-hamper" ||
+            target === "diwali" ||
+            target === "hamper" ||
+            target === "hampers"
+          ) {
+            const tags = (p.tags || []).map((tag: string) => tag.toLowerCase()).join(" ");
+            return (
+              name.includes("diwali") ||
+              name.includes("hamper") ||
+              cat.includes("diwali") ||
+              type.includes("diwali") ||
+              tags.includes("diwali") ||
+              tags.includes("hamper") ||
+              tags.includes("dhanteras")
+            );
+          }
           return false;
         });
       }

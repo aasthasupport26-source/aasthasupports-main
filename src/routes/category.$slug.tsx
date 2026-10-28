@@ -40,6 +40,8 @@ export const Route = createFileRoute("/category/$slug")({
       "online-pooja",
       "pooja",
       "puja",
+      "diwali-hamper",
+      "diwali",
     ];
     const isValid =
       validSlugs.includes(slug) || slug === "all" || !!categories.find((c) => c.slug === slug);

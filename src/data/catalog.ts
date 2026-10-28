@@ -33,6 +33,26 @@ export interface Category {
 
 export const categories: Category[] = [
   {
+    slug: "diwali-hamper",
+    name: "Diwali Hamper",
+    tagline: "Auspicious Lakshmi Ganesh Puja hampers and sacred Dhanteras essentials.",
+    hero: "https://cdn.shopify.com/s/files/1/1012/2867/5360/collections/Diwali_Special_Hamper_Prosperity_Combo.png?v=1792500707",
+    sections: [
+      {
+        title: "Diwali & Dhanteras Festive Hampers",
+        items: [
+          {
+            name: "Shri Lakshmi Ganesh Prosperity Combo",
+            slug: "diwali-special-hamper-shri-lakshmi-ganesh-prosperity-combo",
+            image:
+              "https://cdn.shopify.com/s/files/1/1012/2867/5360/files/diwali-lakshmi-ganesh-hamper-white-background.png?v=1792501849",
+            desc: "Complete Puja Kit with Ashtadhatu Set, 7 Mukhi Bracelet, Kaudi & Gomti Chakra",
+          },
+        ],
+      },
+    ],
+  },
+  {
     slug: "rudraksha",
     name: "Rudraksha",
     tagline:
@@ -377,6 +397,11 @@ export const getCategory = (slug?: string) => {
     rudraksh: "rudraksha",
     rudraksha: "rudraksha",
     rudrakshas: "rudraksha",
+    diwali: "diwali-hamper",
+    "diwali-hamper": "diwali-hamper",
+    "diwali-hampers": "diwali-hamper",
+    hamper: "diwali-hamper",
+    hampers: "diwali-hamper",
   };
 
   const targetSlug = aliasMap[s] || s;

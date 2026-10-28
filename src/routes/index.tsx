@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { categories } from "@/data/catalog";
 import { VedicTrust } from "@/components/VedicTrust";
 import heroImg from "@/assets/hero-sage.jpg";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles, ShoppingBag } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -104,6 +104,121 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Festive Diwali Spotlight Section */}
+      <section className="py-12 md:py-16 bg-gradient-to-b from-maroon-deep via-[#3a0813] to-cream relative overflow-hidden border-b border-gold/30">
+        {/* Ambient gold glow */}
+        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-gold/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="bg-gradient-to-r from-maroon-deep via-[#4A0E17] to-maroon-deep border border-gold/40 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl text-cream relative overflow-hidden">
+            <div className="absolute -top-12 -right-12 w-48 h-48 bg-gold/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              {/* Left Content */}
+              <div className="lg:col-span-7 space-y-5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gold/20 border border-gold/40 text-gold text-xs font-semibold tracking-widest uppercase">
+                  <Sparkles className="w-3.5 h-3.5 text-gold animate-pulse" />
+                  <span>Diwali &amp; Dhanteras Special 🪔</span>
+                </div>
+
+                <div>
+                  <p className="font-devanagari text-gold-soft text-lg sm:text-xl font-medium tracking-wide">
+                    || ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः ||
+                  </p>
+                  <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-cream mt-2 leading-tight">
+                    Shri Lakshmi Ganesh <span className="text-gold italic">Prosperity Hamper</span>
+                  </h2>
+                </div>
+
+                <p className="text-cream/85 text-sm sm:text-base leading-relaxed max-w-xl">
+                  Complete auspicious Vedic puja combo featuring the sacred Ashtadhatu Yantram set on a brass plate, natural 7 Mukhi Rudraksha Dhanyog bracelet, energized Safed Kaudi, and sacred Gomti Chakra for everlasting wealth, harmony, and obstacle removal.
+                </p>
+
+                {/* Key Highlights */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs text-cream/90">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gold">✦</span>
+                    <span>Ashtadhatu Kurma, Paduka &amp; Coin</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gold">✦</span>
+                    <span>7 Mukhi Mahalakshmi Rudraksha</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gold">✦</span>
+                    <span>Energised Safed Kaudi &amp; Gomti Chakra</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gold">✦</span>
+                    <span>100% Vedic Pandit Energised</span>
+                  </div>
+                </div>
+
+                {/* Price & CTA Buttons */}
+                <div className="pt-3 flex flex-wrap items-center gap-4 sm:gap-6">
+                  <div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-numeric text-3xl sm:text-4xl font-bold text-gold">₹2,999</span>
+                      <span className="text-cream/50 text-sm line-through">₹4,999</span>
+                      <span className="text-[11px] bg-gold/20 text-gold font-semibold px-2 py-0.5 rounded border border-gold/30">
+                        40% OFF
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-cream/70 tracking-wider uppercase mt-1">
+                      Free Express Shipping across India
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      to="/product/$slug"
+                      params={{ slug: "diwali-special-hamper-shri-lakshmi-ganesh-prosperity-combo" }}
+                      className="inline-flex items-center gap-2 bg-gold text-maroon-deep px-6 py-3.5 rounded-xl font-bold tracking-wider text-xs uppercase hover:bg-gold-soft transition shadow-gold"
+                    >
+                      <ShoppingBag className="w-4 h-4" /> Order Hamper Now
+                    </Link>
+                    <Link
+                      to="/category/$slug"
+                      params={{ slug: "diwali-hamper" }}
+                      className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-cream px-5 py-3.5 rounded-xl font-semibold tracking-wider text-xs uppercase border border-gold/30 transition"
+                    >
+                      View Details <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Visual Image */}
+              <div className="lg:col-span-5 flex justify-center">
+                <Link
+                  to="/product/$slug"
+                  params={{ slug: "diwali-special-hamper-shri-lakshmi-ganesh-prosperity-combo" }}
+                  className="group relative block rounded-2xl overflow-hidden border-2 border-gold/40 shadow-2xl hover:border-gold transition-all duration-500 max-w-md w-full"
+                >
+                  <img
+                    src="https://cdn.shopify.com/s/files/1/1012/2867/5360/files/premium-diwali-prosperity-combo-creative-display.png?v=1792501850"
+                    alt="Diwali Special Hamper – Shri Lakshmi Ganesh Prosperity Combo"
+                    loading="lazy"
+                    width={600}
+                    height={600}
+                    className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute top-3 left-3 bg-maroon-deep/90 text-gold text-[11px] font-bold px-3 py-1 rounded-full border border-gold/40 backdrop-blur-sm">
+                    Festive Maha Puja Kit
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-maroon-deep/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-5">
+                    <span className="text-gold text-xs font-semibold tracking-wider uppercase inline-flex items-center gap-1.5">
+                      Click to View Complete Kit Details <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Categories grid */}
       <section className="py-20 bg-cream">
         <div className="container mx-auto px-4">
@@ -138,6 +253,11 @@ function HomePage() {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                 </div>
+                {cat.slug === "diwali-hamper" && (
+                  <span className="absolute top-4 right-4 bg-gold text-maroon-deep text-xs px-3 py-1 rounded-full font-bold tracking-wider uppercase shadow-gold z-10 flex items-center gap-1">
+                    <span>🪔</span> Festive Special
+                  </span>
+                )}
                 {cat.slug === "online-pooja" && (
                   <span className="absolute top-4 right-4 bg-maroon-deep/90 text-gold text-xs px-3 py-1 rounded-full border border-gold/40 font-medium tracking-wider uppercase backdrop-blur-sm z-10">
                     Coming Soon

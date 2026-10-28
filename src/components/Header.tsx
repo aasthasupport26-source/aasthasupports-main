@@ -65,9 +65,16 @@ export function Header() {
                     <Link
                       to="/category/$slug"
                       params={{ slug: cat.slug }}
-                      className="px-2.5 xl:px-3 py-2.5 text-[12px] xl:text-[13px] tracking-widest uppercase text-cream/95 hover:text-gold transition-colors font-medium relative whitespace-nowrap flex items-center gap-1.5"
+                      className={`px-2.5 xl:px-3 py-2.5 text-[12px] xl:text-[13px] tracking-widest uppercase hover:text-gold transition-colors font-medium relative whitespace-nowrap flex items-center gap-1.5 ${
+                        cat.slug === "diwali-hamper"
+                          ? "text-gold font-bold"
+                          : "text-cream/95"
+                      }`}
                     >
                       <span>{cat.name}</span>
+                      {cat.slug === "diwali-hamper" && (
+                        <span className="text-[11px] animate-pulse">🪔</span>
+                      )}
                       {ui.openSlug === cat.slug && (
                         <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gold" />
                       )}
@@ -143,7 +150,15 @@ export function Header() {
                   onClick={() => setUi((prev) => ({ ...prev, mobileOpen: false }))}
                   className="py-3 border-b border-gold/20 text-maroon-deep tracking-wider uppercase text-sm font-medium hover:text-gold min-h-[44px] flex items-center justify-between"
                 >
-                  <span>{cat.name}</span>
+                  <span className={cat.slug === "diwali-hamper" ? "text-maroon font-bold flex items-center gap-1.5" : ""}>
+                    {cat.slug === "diwali-hamper" && <span>🪔</span>}
+                    {cat.name}
+                  </span>
+                  {cat.slug === "diwali-hamper" && (
+                    <span className="text-[10px] bg-gold/20 text-maroon font-bold px-2 py-0.5 rounded border border-gold/30">
+                      Festive Special
+                    </span>
+                  )}
                 </Link>
               ))}
             <Link
