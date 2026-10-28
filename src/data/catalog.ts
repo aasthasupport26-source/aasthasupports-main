@@ -257,7 +257,7 @@ export const categories: Category[] = [
             desc: "Brihaspati · Jupiter — Wisdom, Fortune & Matrimony",
           },
           {
-            name: "Diamond / White Sapphire (Heera · हीरा)",
+            name: "Diamond (Heera · हीरा)",
             slug: "diamond",
             image: "/gemstones/diamond.jpg",
             desc: "Shukra · Venus — Luxury, Beauty, Arts & Charisma",

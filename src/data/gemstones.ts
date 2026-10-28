@@ -142,9 +142,9 @@ export const NAVRATNA_GEMSTONES: NavratnaGemstone[] = [
   },
   {
     id: "diamond",
-    name: "Diamond / White Sapphire",
-    hindiName: "हीरा / सफेद पुखराज",
-    sanskritName: "Vajra / Shwet Pukhraj",
+    name: "Diamond",
+    hindiName: "हीरा",
+    sanskritName: "Vajra / Diamond",
     planet: "Venus (Shukra)",
     planetHindi: "शुक्र ग्रह",
     mantra: "|| ॐ द्रां द्रीं द्रौं सः शुक्राय नमः ||",
@@ -152,7 +152,7 @@ export const NAVRATNA_GEMSTONES: NavratnaGemstone[] = [
     element: "Water (Jal)",
     chakra: "Sahasrara (Crown Chakra)",
     tagline: "The Jewel of Beauty — Magnifies romantic charm, creative brilliance & opulence.",
-    desc: "Governed by Shukra Dev, natural Diamond / White Sapphire radiates luxurious magnetism, financial prosperity, and matrimonial joy.",
+    desc: "Governed by Shukra Dev, natural Diamond (with White Sapphire / Safed Pukhraj as Vedic substitute) radiates luxurious magnetism, financial prosperity, and matrimonial joy.",
     benefits: [
       "Attracts regal luxuries, vehicle acquisitions & material comforts",
       "Fosters deep romantic harmony, charisma, and aesthetic charm",

@@ -223,7 +223,7 @@ function ShopifyProductsPage({ cat, initialType }: { cat: any; initialType?: str
       <section
         className={`relative w-full overflow-hidden flex items-center ${
           cat.slug === "gemstones"
-            ? "bg-[#1a0205] aspect-[2.4/1] sm:aspect-[2.8/1] md:aspect-[3/1] max-h-[380px]"
+            ? "bg-[#1a0205] aspect-[2.4/1] sm:aspect-[2.8/1] md:aspect-[3.2/1] max-h-[380px]"
             : "bg-cream aspect-[3/1]"
         }`}
       >
@@ -234,10 +234,13 @@ function ShopifyProductsPage({ cat, initialType }: { cat: any; initialType?: str
           height={800}
           className={`absolute inset-0 w-full h-full ${
             cat.slug === "gemstones"
-              ? "object-cover sm:object-contain object-center"
+              ? "object-cover object-center"
               : "object-contain"
           }`}
         />
+        {cat.slug === "gemstones" && (
+          <div className="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-gold to-transparent" />
+        )}
       </section>
 
       {cat.slug === "gemstones" ? (
@@ -362,13 +365,14 @@ function NavratnaGemstoneSection({
         </div>
 
         {/* 9 Gemstones Category Navigation Tabs */}
-        <div className="mb-10 sm:mb-14">
-          <div className="flex items-center gap-2 overflow-x-auto pb-4 pt-1 scrollbar-none sm:grid sm:grid-cols-5 lg:grid-cols-10 sm:overflow-visible">
+        <div className="mb-10 sm:mb-14 max-w-6xl mx-auto">
+          {/* Mobile: Horizontal scrollable strip */}
+          <div className="flex sm:hidden items-center gap-2.5 overflow-x-auto pb-4 pt-1 scrollbar-none px-1">
             {/* All Gems tab */}
             <button
               type="button"
               onClick={() => onSelectGem("all")}
-              className={`flex-shrink-0 min-w-[120px] sm:min-w-0 flex sm:flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-2xl border text-xs font-semibold transition-all duration-300 text-left sm:text-center cursor-pointer ${
+              className={`flex-shrink-0 min-w-[130px] flex items-center gap-2.5 p-2.5 rounded-2xl border text-xs font-semibold transition-all duration-300 text-left cursor-pointer ${
                 selectedGemId === "all"
                   ? "bg-maroon-deep text-cream border-gold shadow-royal ring-2 ring-gold"
                   : "bg-white text-maroon-deep border-gold/25 hover:border-gold hover:bg-gold/5 shadow-xs"
@@ -377,15 +381,16 @@ function NavratnaGemstoneSection({
               <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center text-base font-bold text-gold flex-shrink-0">
                 ✦
               </div>
-              <div className="min-w-0 truncate">
-                <p className="font-bold truncate text-[11px] sm:text-xs">All 9 Gems</p>
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <p className={`font-bold truncate text-xs ${selectedGemId === "all" ? "text-cream" : "text-maroon-deep"}`}>
+                  All 9 Gems
+                </p>
                 <p className={`text-[10px] truncate ${selectedGemId === "all" ? "text-gold-soft" : "text-muted-foreground"}`}>
                   Navratna
                 </p>
               </div>
             </button>
 
-            {/* The 9 Gemstone Buttons */}
             {NAVRATNA_GEMSTONES.map((gem) => {
               const isSelected = selectedGemId === gem.id;
               return (
@@ -393,7 +398,7 @@ function NavratnaGemstoneSection({
                   key={gem.id}
                   type="button"
                   onClick={() => onSelectGem(gem.id)}
-                  className={`flex-shrink-0 min-w-[120px] sm:min-w-0 flex sm:flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-2xl border text-xs font-semibold transition-all duration-300 text-left sm:text-center group cursor-pointer ${
+                  className={`flex-shrink-0 min-w-[135px] flex items-center gap-2.5 p-2.5 rounded-2xl border text-xs font-semibold transition-all duration-300 text-left group cursor-pointer ${
                     isSelected
                       ? "bg-maroon-deep text-cream border-gold shadow-royal ring-2 ring-gold"
                       : "bg-white text-maroon-deep border-gold/25 hover:border-gold hover:bg-gold/5 shadow-xs"
@@ -406,19 +411,77 @@ function NavratnaGemstoneSection({
                       className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-500"
                     />
                   </div>
-                  <div className="min-w-0 truncate">
-                    <p className="font-bold truncate text-[11px] sm:text-xs">
-                      {gem.name}{" "}
-                      <span className="font-devanagari text-[10px] text-gold font-normal">
-                        ({gem.hindiName})
-                      </span>
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <p className={`font-bold truncate text-xs ${isSelected ? "text-cream" : "text-maroon-deep group-hover:text-maroon"}`}>
+                      {gem.name}
                     </p>
-                    <p
-                      className={`text-[10px] truncate ${
-                        isSelected ? "text-gold-soft" : "text-muted-foreground"
-                      }`}
-                    >
-                      {gem.planet.split(" ")[0]}
+                    <p className={`text-[10px] font-devanagari truncate mt-0.5 ${isSelected ? "text-gold-soft" : "text-gold"}`}>
+                      {gem.hindiName}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tablet & Desktop: 2 balanced, spacious rows of 5 cards */}
+          <div className="hidden sm:grid sm:grid-cols-5 gap-3">
+            {/* Card 1: All Gems */}
+            <button
+              type="button"
+              onClick={() => onSelectGem("all")}
+              className={`flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl border text-xs font-semibold transition-all duration-300 text-center cursor-pointer min-w-0 w-full overflow-hidden ${
+                selectedGemId === "all"
+                  ? "bg-maroon-deep text-cream border-gold shadow-royal ring-2 ring-gold scale-[1.02]"
+                  : "bg-white text-maroon-deep border-gold/25 hover:border-gold hover:bg-gold/5 shadow-xs hover:shadow-md"
+              }`}
+            >
+              <div className="w-12 h-12 rounded-xl bg-gold/20 flex items-center justify-center text-lg font-bold text-gold flex-shrink-0 shadow-xs">
+                ✦
+              </div>
+              <div className="w-full min-w-0 text-center overflow-hidden">
+                <p className={`font-bold text-xs truncate ${selectedGemId === "all" ? "text-cream" : "text-maroon-deep"}`}>
+                  All 9 Gems
+                </p>
+                <p className={`text-[11px] truncate mt-0.5 ${selectedGemId === "all" ? "text-gold-soft font-devanagari" : "text-gold font-devanagari font-medium"}`}>
+                  नवरत्न संग्रह
+                </p>
+                <p className={`text-[10px] truncate mt-0.5 ${selectedGemId === "all" ? "text-cream/80" : "text-muted-foreground"}`}>
+                  Full Treasury
+                </p>
+              </div>
+            </button>
+
+            {/* Cards 2-10: The 9 Navratna Gemstones */}
+            {NAVRATNA_GEMSTONES.map((gem) => {
+              const isSelected = selectedGemId === gem.id;
+              return (
+                <button
+                  key={gem.id}
+                  type="button"
+                  onClick={() => onSelectGem(gem.id)}
+                  className={`flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl border text-xs font-semibold transition-all duration-300 text-center group cursor-pointer min-w-0 w-full overflow-hidden ${
+                    isSelected
+                      ? "bg-maroon-deep text-cream border-gold shadow-royal ring-2 ring-gold scale-[1.02]"
+                      : "bg-white text-maroon-deep border-gold/25 hover:border-gold hover:bg-gold/5 shadow-xs hover:shadow-md"
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-gold/30 shadow-xs bg-black/30">
+                    <img
+                      src={gem.image}
+                      alt={gem.name}
+                      className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="w-full min-w-0 text-center overflow-hidden">
+                    <p className={`font-bold text-xs truncate ${isSelected ? "text-cream" : "text-maroon-deep group-hover:text-maroon"}`}>
+                      {gem.name}
+                    </p>
+                    <p className={`text-[11px] font-devanagari truncate mt-0.5 ${isSelected ? "text-gold-soft" : "text-gold font-medium"}`}>
+                      {gem.hindiName}
+                    </p>
+                    <p className={`text-[10px] truncate mt-0.5 ${isSelected ? "text-cream/80" : "text-muted-foreground"}`}>
+                      {gem.planet}
                     </p>
                   </div>
                 </button>
@@ -560,9 +623,9 @@ function NavratnaGemstoneSection({
           </div>
         ) : (
           /* All 9 Gems Overview Banner */
-          <div className="mb-14 bg-gradient-to-r from-maroon-deep via-[#3a0813] to-maroon-deep rounded-3xl p-6 sm:p-8 md:p-10 border border-gold/30 shadow-royal text-cream text-center relative overflow-hidden">
-            <div className="max-w-4xl mx-auto space-y-5">
-              <p className="font-devanagari text-gold-soft text-xl">
+          <div className="mb-14 bg-gradient-to-r from-maroon-deep via-[#3a0813] to-maroon-deep rounded-3xl p-6 sm:p-10 md:p-12 pb-8 sm:pb-12 border border-gold/30 shadow-royal text-cream text-center relative overflow-hidden">
+            <div className="max-w-5xl mx-auto space-y-5">
+              <p className="font-devanagari text-gold-soft text-xl sm:text-2xl">
                 || ॐ नवग्रह देवताभ्यो नमः ||
               </p>
               <h3 className="font-display text-2xl sm:text-3xl md:text-4xl text-cream font-bold">
@@ -576,25 +639,25 @@ function NavratnaGemstoneSection({
               </p>
 
               {/* Interactive 9 Gemstones Visual Grid inside Overview */}
-              <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2.5 pt-3">
+              <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-2.5 sm:gap-3 pt-5">
                 {NAVRATNA_GEMSTONES.map((gem) => (
                   <button
                     key={gem.id}
                     type="button"
                     onClick={() => onSelectGem(gem.id)}
-                    className="group bg-white/10 hover:bg-white/20 border border-gold/30 hover:border-gold rounded-xl p-2 transition-all duration-300 flex flex-col items-center text-center cursor-pointer"
+                    className="group bg-white/10 hover:bg-white/20 border border-gold/30 hover:border-gold rounded-xl p-2.5 transition-all duration-300 flex flex-col items-center text-center cursor-pointer min-w-0 w-full overflow-hidden"
                   >
-                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-gold/30 mb-1.5 shadow-xs">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-gold/30 mb-2 shadow-xs shrink-0">
                       <img
                         src={gem.image}
                         alt={gem.name}
                         className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-500"
                       />
                     </div>
-                    <span className="text-[11px] font-bold text-cream group-hover:text-gold transition truncate max-w-full">
+                    <span className="text-xs font-bold text-cream group-hover:text-gold transition truncate w-full block">
                       {gem.name}
                     </span>
-                    <span className="text-[10px] text-gold-soft font-devanagari">
+                    <span className="text-[11px] text-gold-soft font-devanagari truncate w-full block mt-0.5">
                       {gem.hindiName}
                     </span>
                   </button>
