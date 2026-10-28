@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "@tanstack/react-router";
 import { Search, ShoppingBag, User, Menu, X, Phone } from "lucide-react";
 import { Logo } from "./Logo";
 import { MegaDropdown } from "@/components/MegaDropdown";
@@ -14,6 +14,12 @@ export function Header() {
     searchOpen: false,
   });
   const { count } = useCart();
+  const location = useLocation();
+
+  // Automatically close mega-dropdown and mobile menu on any navigation
+  useEffect(() => {
+    setUi((prev) => ({ ...prev, openSlug: null, mobileOpen: false }));
+  }, [location.pathname, location.search]);
 
   return (
     <header className="sticky top-0 z-50">
@@ -65,6 +71,7 @@ export function Header() {
                     <Link
                       to="/category/$slug"
                       params={{ slug: cat.slug }}
+                      onClick={() => setUi((prev) => ({ ...prev, openSlug: null }))}
                       className={`px-2.5 xl:px-3 py-2.5 text-[12px] xl:text-[13px] tracking-widest uppercase hover:text-gold transition-colors font-medium relative whitespace-nowrap flex items-center gap-1.5 ${
                         cat.slug === "diwali-hamper"
                           ? "text-gold font-bold"

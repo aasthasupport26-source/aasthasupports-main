@@ -129,6 +129,7 @@ function ShopifyProductsPage({ cat, initialType }: { cat: any; initialType?: str
       params: { slug: "gemstones" },
       search: { type: id === "all" ? undefined : id },
       replace: true,
+      resetScroll: false,
     });
   };
 
@@ -219,17 +220,34 @@ function ShopifyProductsPage({ cat, initialType }: { cat: any; initialType?: str
 
   return (
     <Layout>
-      <section className="relative aspect-[3/1] w-full overflow-hidden flex items-center bg-cream">
+      <section
+        className={`relative w-full overflow-hidden flex items-center ${
+          cat.slug === "gemstones"
+            ? "bg-[#1a0205] aspect-[2.4/1] sm:aspect-[2.8/1] md:aspect-[3/1] max-h-[380px]"
+            : "bg-cream aspect-[3/1]"
+        }`}
+      >
         <img
           src={cat.hero}
           alt={cat.name}
           width={1920}
           height={800}
-          className="absolute inset-0 w-full h-full object-contain"
+          className={`absolute inset-0 w-full h-full ${
+            cat.slug === "gemstones"
+              ? "object-cover sm:object-contain object-center"
+              : "object-contain"
+          }`}
         />
       </section>
 
-      {loading ? (
+      {cat.slug === "gemstones" ? (
+        <NavratnaGemstoneSection
+          products={productsForDisplay}
+          selectedGemId={selectedGemId}
+          onSelectGem={handleSelectGem}
+          loading={loading}
+        />
+      ) : loading ? (
         <section className="py-16 bg-cream">
           <div className="container mx-auto px-4">
             <div className="flex items-end justify-between mb-10">
@@ -254,12 +272,6 @@ function ShopifyProductsPage({ cat, initialType }: { cat: any; initialType?: str
             </div>
           </div>
         </section>
-      ) : cat.slug === "gemstones" ? (
-        <NavratnaGemstoneSection
-          products={productsForDisplay}
-          selectedGemId={selectedGemId}
-          onSelectGem={handleSelectGem}
-        />
       ) : productsForDisplay.length === 0 ? (
         <section className="py-16 bg-cream">
           <div className="container mx-auto px-4 text-center">
@@ -309,10 +321,12 @@ function NavratnaGemstoneSection({
   products,
   selectedGemId,
   onSelectGem,
+  loading = false,
 }: {
   products: any[];
   selectedGemId: string;
   onSelectGem: (id: string) => void;
+  loading?: boolean;
 }) {
   const activeGem =
     NAVRATNA_GEMSTONES.find((g) => g.id === selectedGemId) ||
@@ -354,7 +368,7 @@ function NavratnaGemstoneSection({
             <button
               type="button"
               onClick={() => onSelectGem("all")}
-              className={`flex-shrink-0 flex sm:flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-2xl border text-xs font-semibold transition-all duration-300 text-left sm:text-center cursor-pointer ${
+              className={`flex-shrink-0 min-w-[120px] sm:min-w-0 flex sm:flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-2xl border text-xs font-semibold transition-all duration-300 text-left sm:text-center cursor-pointer ${
                 selectedGemId === "all"
                   ? "bg-maroon-deep text-cream border-gold shadow-royal ring-2 ring-gold"
                   : "bg-white text-maroon-deep border-gold/25 hover:border-gold hover:bg-gold/5 shadow-xs"
@@ -379,13 +393,13 @@ function NavratnaGemstoneSection({
                   key={gem.id}
                   type="button"
                   onClick={() => onSelectGem(gem.id)}
-                  className={`flex-shrink-0 flex sm:flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-2xl border text-xs font-semibold transition-all duration-300 text-left sm:text-center group cursor-pointer ${
+                  className={`flex-shrink-0 min-w-[120px] sm:min-w-0 flex sm:flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-2xl border text-xs font-semibold transition-all duration-300 text-left sm:text-center group cursor-pointer ${
                     isSelected
                       ? "bg-maroon-deep text-cream border-gold shadow-royal ring-2 ring-gold"
                       : "bg-white text-maroon-deep border-gold/25 hover:border-gold hover:bg-gold/5 shadow-xs"
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-gold/30 shadow-xs bg-cream">
+                  <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-gold/30 shadow-xs bg-black/30">
                     <img
                       src={gem.image}
                       alt={gem.name}
@@ -421,9 +435,9 @@ function NavratnaGemstoneSection({
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-maroon/30 rounded-full blur-3xl pointer-events-none" />
 
             <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-center relative z-10">
-              {/* Left Column: Gemstone Image & Badges */}
+              {/* Left Column: Gemstone Image & Badges (Clean, Unobscured) */}
               <div className="lg:col-span-5 flex flex-col items-center">
-                <div className="relative group w-full max-w-sm aspect-square rounded-2xl overflow-hidden border-2 border-gold/50 shadow-2xl bg-cream/10">
+                <div className="relative group w-full max-w-sm aspect-square rounded-2xl overflow-hidden border-2 border-gold/50 shadow-2xl bg-black/40">
                   <img
                     src={activeGem.image}
                     alt={`${activeGem.name} (${activeGem.hindiName}) natural certified gemstone`}
@@ -431,19 +445,21 @@ function NavratnaGemstoneSection({
                     width={500}
                     height={500}
                   />
-                  <div className="absolute top-3 left-3 bg-maroon-deep/90 text-gold text-[11px] font-bold px-3 py-1 rounded-full border border-gold/40 backdrop-blur-sm shadow-md flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-gold" />
-                    <span>100% Lab Certified Specimen</span>
-                  </div>
-                  <div className="absolute bottom-3 inset-x-3 bg-black/60 backdrop-blur-md rounded-xl p-2.5 text-center border border-white/10">
-                    <p className="text-[11px] text-cream/90 font-medium">
-                      Authentic Vedic Cut · Unheated &amp; Natural
-                    </p>
-                  </div>
+                </div>
+
+                {/* Badges placed below the image cleanly - NO OVERLAYS ON TOP OF GEMSTONE */}
+                <div className="w-full max-w-sm flex items-center justify-between gap-2 mt-3 text-[11px]">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/15 text-gold font-bold border border-gold/30">
+                    <ShieldCheck className="w-3.5 h-3.5 text-gold shrink-0" />
+                    <span>100% Lab Certified</span>
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/10 text-cream/90 font-medium border border-white/15">
+                    Unheated &amp; Natural
+                  </span>
                 </div>
 
                 {/* Quick specs pill grid */}
-                <div className="grid grid-cols-2 gap-2 w-full max-w-sm mt-4 text-[11px]">
+                <div className="grid grid-cols-2 gap-2 w-full max-w-sm mt-3 text-[11px]">
                   <div className="p-2.5 rounded-xl bg-white/10 border border-gold/20">
                     <span className="text-gold block font-semibold">Ruler (Graha)</span>
                     <span className="text-cream/90 font-medium">{activeGem.planet}</span>
@@ -522,13 +538,16 @@ function NavratnaGemstoneSection({
 
                 {/* Actions */}
                 <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <a
-                    href="#gemstone-products"
-                    className="inline-flex items-center gap-2 bg-gold text-maroon-deep px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-gold-soft transition shadow-gold"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      document.getElementById("gemstone-products")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="inline-flex items-center gap-2 bg-gold text-maroon-deep px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-gold-soft transition shadow-gold cursor-pointer"
                   >
                     View Listed Products ({filteredProducts.length}){" "}
                     <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
+                  </button>
                   <a
                     href="tel:+918287670827"
                     className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-cream px-5 py-2.5 rounded-lg text-xs font-semibold tracking-wider uppercase border border-gold/30 transition"
@@ -542,34 +561,44 @@ function NavratnaGemstoneSection({
         ) : (
           /* All 9 Gems Overview Banner */
           <div className="mb-14 bg-gradient-to-r from-maroon-deep via-[#3a0813] to-maroon-deep rounded-3xl p-6 sm:p-8 md:p-10 border border-gold/30 shadow-royal text-cream text-center relative overflow-hidden">
-            <div className="max-w-2xl mx-auto space-y-4">
+            <div className="max-w-4xl mx-auto space-y-5">
               <p className="font-devanagari text-gold-soft text-xl">
                 || ॐ नवग्रह देवताभ्यो नमः ||
               </p>
               <h3 className="font-display text-2xl sm:text-3xl md:text-4xl text-cream font-bold">
                 The Nine Cosmic Powers of Navratna
               </h3>
-              <p className="text-cream/80 text-xs sm:text-sm leading-relaxed">
+              <p className="text-cream/80 text-xs sm:text-sm leading-relaxed max-w-2xl mx-auto">
                 Navratnas are the nine celestial gemstones that harmonize the influence of the nine
                 astrological Grahas. Click any individual gemstone from the category bar above to
                 view its dedicated high-resolution studio specimen, ruling planetary mantra, and
                 available certified cuts.
               </p>
-              <div className="pt-2 flex flex-wrap justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => onSelectGem("yellow-sapphire")}
-                  className="inline-flex items-center gap-1.5 bg-gold/20 hover:bg-gold/30 text-gold text-xs font-bold px-4 py-2 rounded-lg border border-gold/40 transition"
-                >
-                  Explore Pukhraj (10 Items) →
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSelectGem("blue-sapphire")}
-                  className="inline-flex items-center gap-1.5 bg-gold/20 hover:bg-gold/30 text-gold text-xs font-bold px-4 py-2 rounded-lg border border-gold/40 transition"
-                >
-                  Explore Neelam (9 Items) →
-                </button>
+
+              {/* Interactive 9 Gemstones Visual Grid inside Overview */}
+              <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2.5 pt-3">
+                {NAVRATNA_GEMSTONES.map((gem) => (
+                  <button
+                    key={gem.id}
+                    type="button"
+                    onClick={() => onSelectGem(gem.id)}
+                    className="group bg-white/10 hover:bg-white/20 border border-gold/30 hover:border-gold rounded-xl p-2 transition-all duration-300 flex flex-col items-center text-center cursor-pointer"
+                  >
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-gold/30 mb-1.5 shadow-xs">
+                      <img
+                        src={gem.image}
+                        alt={gem.name}
+                        className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-500"
+                      />
+                    </div>
+                    <span className="text-[11px] font-bold text-cream group-hover:text-gold transition truncate max-w-full">
+                      {gem.name}
+                    </span>
+                    <span className="text-[10px] text-gold-soft font-devanagari">
+                      {gem.hindiName}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -589,12 +618,27 @@ function NavratnaGemstoneSection({
               </h3>
             </div>
             <div className="text-xs text-muted-foreground">
-              Showing {filteredProducts.length} verified specimen
-              {filteredProducts.length === 1 ? "" : "s"}
+              {loading
+                ? "Checking treasury inventory..."
+                : `Showing ${filteredProducts.length} verified specimen${filteredProducts.length === 1 ? "" : "s"}`}
             </div>
           </div>
 
-          {filteredProducts.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-xl border border-gold/10 p-4 animate-pulse"
+                >
+                  <div className="aspect-square bg-cream rounded-lg mb-4" />
+                  <div className="w-20 h-3 bg-gold/20 rounded mb-3" />
+                  <div className="w-full h-5 bg-maroon-deep/10 rounded mb-2" />
+                  <div className="w-16 h-5 bg-maroon-deep/20 rounded" />
+                </div>
+              ))}
+            </div>
+          ) : filteredProducts.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {filteredProducts.map((item: any) => (
                 <GemstoneProductCard key={item.slug} item={item} />

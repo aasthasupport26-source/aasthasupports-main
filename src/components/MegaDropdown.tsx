@@ -105,6 +105,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
             <Link
               to="/category/$slug"
               params={{ slug: cat.slug }}
+              onClick={onClose}
               className="inline-flex items-center justify-center gap-2 bg-maroon-deep text-cream px-5 py-2.5 rounded-lg text-xs font-semibold tracking-wider uppercase hover:bg-maroon transition shadow-md"
             >
               View all {cat.name} →
@@ -171,6 +172,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                           key={item.name}
                           to={item.slug === "gemstones" ? "/category/$slug" : "/product/$slug"}
                           params={{ slug: item.slug }}
+                          onClick={onClose}
                           className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
                         >
                           <img src={item.image} alt={item.name} loading="lazy" className="hidden" />
@@ -202,6 +204,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         key={product.slug}
                         to="/product/$slug"
                         params={{ slug: product.slug }}
+                        onClick={onClose}
                         className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
                       >
                         <img
@@ -234,6 +237,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         key={product.slug}
                         to="/product/$slug"
                         params={{ slug: product.slug }}
+                        onClick={onClose}
                         className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
                       >
                         <img
@@ -266,6 +270,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         key={product.slug}
                         to="/product/$slug"
                         params={{ slug: product.slug }}
+                        onClick={onClose}
                         className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
                       >
                         <img
@@ -371,6 +376,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         key={product.slug}
                         to="/product/$slug"
                         params={{ slug: product.slug }}
+                        onClick={onClose}
                         className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
                       >
                         <img
@@ -394,6 +400,7 @@ export function MegaDropdown({ cat, onClose }: { cat: Category; onClose: () => v
                         key={item.name}
                         to={item.slug === cat.slug ? "/category/$slug" : "/product/$slug"}
                         params={{ slug: item.slug }}
+                        onClick={onClose}
                         className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white border border-transparent hover:border-gold/30 shadow-none hover:shadow-md transition-all duration-200"
                       >
                         <img src={item.image} alt={item.name} loading="lazy" className="hidden" />
